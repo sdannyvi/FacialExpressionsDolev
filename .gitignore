@@ -1,0 +1,55 @@
+# cache 
+__pycache__/
+*.pyc
+*.npy
+*.pkl
+*.pickle
+wandb/
+
+# checkpoints 
+*.pth
+*.pt
+*.onnx
+
+# env
+venv/
+.venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+
+# data archives 
+*.zip
+*.tar.gz
+*.7z
+
+# data 
+# affectnet 
+human_annotated/
+
+# ra-db
+aligned/
+
+# Radboud
+rafd_original_set/
+rafd_images_cropped/
+not_found_face_images/
+
+# fer plus 
+**/data/fer2013/Training/
+**/data/fer2013/PublicTest/
+**/data/fer2013/PrivateTest/
+**/data/fer2013icml/icml_face_data.csv
+
+# images 
+*.png
+*.jpg
+*.jpeg
+
+# repos 
+resemotenet_rep/
+emonet_repo/
+
+
