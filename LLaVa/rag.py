@@ -63,6 +63,24 @@ test_df = pd.read_csv(test_path)
 classes_list = sorted(knowledge_base_set['true_label'].unique().tolist())
 
 
+# print conversation
+def print_conversation(conv):
+    for msg in conv:
+        print(f"\nROLE: {msg.get('role')}")
+        content = msg.get("content")
+
+        if isinstance(content, list):
+            for item in content:
+                if isinstance(item, dict) and item.get("type") == "image":
+                    print("  <IMAGE>")
+                elif isinstance(item, dict) and item.get("type") == "text":
+                    text = item.get("text", "")
+                    print("  TEXT:", text)
+                else:
+                    print("  OTHER:", item)
+        else:
+            print("  CONTENT:", content)
+
 # initialize retrival model clip and extract embeddings to train_df
 clip_model = CLIPModel.from_pretrained(clip_model_id, torch_dtype=torch.float16).to(device=device)
 clip_processor = CLIPProcessor.from_pretrained(clip_model_id)
@@ -194,7 +212,7 @@ del test_df
 # keep in mind the last batch might not contain "batch size" samples
 num_batches = (len(df) + batch_size - 1) // batch_size
 
-
+count = 0
 # looping through batch 0 to the last batch
 for curr_batch in range(num_batches):
     # initialize start batch and end batch
@@ -335,31 +353,34 @@ for curr_batch in range(num_batches):
             content.append({"type": "text", "text": user_text})
             conversation.append({"role": "user", "content": content})
 
-
-        print(f"conversation structure: {conversation}")
+        # process inputs
+        if count == 0:
+            print("conversation:")
+            print_conversation(conversation)
+            count = count + 1 
+        print(f"conversation structure:\n{conversation}")
         text_prompt = llava_processor.apply_chat_template(conversation, add_generation_prompt=True)
         inputs = llava_processor(images=images, text=text_prompt, padding=True, return_tensors="pt")
+
         device_type = next(iter(llava_model.parameters())).device
         inputs = inputs.to(device_type)
+        #input_device = llava_model.get_input_embeddings().weight.device
+        #inputs = {k: v.to(input_device) for k, v in inputs.items()}
         print(f"device_type: {device_type}")
-
+        
         # generate prediction
         with torch.no_grad():
-            output = llava_model.generate(**inputs, max_new_tokens=10, do_sample=False, temperature=1.0, num_beams=1)
-        prediction = llava_processor.decode(output[0], skip_special_tokens=True).strip()
+            output = llava_model.generate(**inputs, max_new_tokens=20, do_sample=False, temperature=1.0, num_beams=1)
+
+        prompt_len = inputs["input_ids"].shape[-1]
+        gen_ids = output[0][prompt_len:]
+        print("prompt_len:", prompt_len)
+        print("total_output_len:", output[0].shape[-1])
+        print("generated_len:", gen_ids.shape[-1])
+
+        prediction = llava_processor.decode(gen_ids, skip_special_tokens=True).strip().lower()
         print(f'prediction: {prediction}')
-
-        # pre-process prediction output
-        if llava_model_id == "llava-hf/llava-v1.6-mistral-7b-hf":
-            pred_parts = prediction.split("[/INST]")
-        elif llava_model_id == "llava-hf/llava-v1.6-34b-hf":
-            pred_parts = prediction.split("\n")
-        elif llava_model_id == "llava-hf/llava-onevision-qwen2-7b-ov-hf":
-            pred_parts = prediction.split("assistant")
-        prediction = pred_parts[-1].strip().lower()
         batch_predictions.append(prediction)
-        print(f"processed prediction: {prediction}")
-
         del inputs, output, query_image, images, query_embedding, scores, ids, faiss_ids, top_similarities, kb_row_indices, top_examples
         del top_labels, top_paths
 

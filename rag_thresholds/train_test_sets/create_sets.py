@@ -2,8 +2,7 @@ import os.path
 import sys
 import pandas as pd
 import numpy as np
-import argparse
-from Thesis.VLMs.maps import fer_plus_code
+from config import fer_plus_encode
 from itertools import product
 
 
@@ -113,7 +112,7 @@ def create_datasets(input_csv_path, save_dir, set_type, threshold, match_size_wi
             continue
 
         # get coded label and vote percentage
-        coded_true_label = fer_plus_code[true_label]
+        coded_true_label = fer_plus_encode[true_label]
         votes_percentage = round(max_vote / sum_votes, 3)
 
         # add row to output dataframe
