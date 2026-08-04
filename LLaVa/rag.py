@@ -10,6 +10,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 import argparse
 import faiss
 import numpy as np
+from config import resolve_path, validate_image_paths
 
 
 # parameters
@@ -62,6 +63,9 @@ test_df = pd.read_csv(test_path)
 # create a list of classes out of the train_set
 classes_list = sorted(knowledge_base_set['true_label'].unique().tolist())
 
+# validate image paths
+validate_image_paths(knowledge_base_set["file_path"].tolist(), knowledge_base_path)
+validate_image_paths(test_df["file_path"].tolist(), test_path)
 
 # print conversation
 def print_conversation(conv):
@@ -109,7 +113,7 @@ def get_clip_embedding(image_path, model, processor):
 # create embedding_list and store clip embeddings
 embeddings_list= []
 for kb_image_path in knowledge_base_set["file_path"]:
-    embedding = get_clip_embedding(kb_image_path, clip_model, clip_processor)
+    embedding = get_clip_embedding(resolve_path(kb_image_path), clip_model, clip_processor)
     embedding = embedding.to(dtype=torch.float32)
     embeddings_list.append(embedding)
 
@@ -233,10 +237,11 @@ for curr_batch in range(num_batches):
         baseline = torch.cuda.memory_allocated() / 1024 ** 3
         # load query
         query_path = row['file_path']
-        query_image = Image.open(query_path).convert('RGB')
+        absolute_query_path = resolve_path(query_path)
+        query_image = Image.open(absolute_query_path).convert('RGB')
 
         # extract embeddings from QUERY
-        query_embedding = get_clip_embedding(query_path, clip_model, clip_processor)
+        query_embedding = get_clip_embedding(absolute_query_path, clip_model, clip_processor)
         if dim_reduction == "lda":
             # standardize the clip embeddings
             query_embedding = scaler.transform(query_embedding.cpu().numpy().reshape(1, -1))
@@ -286,7 +291,7 @@ for curr_batch in range(num_batches):
             # loop through examples
             for _, example_row in top_examples.iterrows():
                 example_label = example_row['true_label']
-                example_image = Image.open(example_row['file_path']).convert('RGB')
+                example_image = Image.open(resolve_path(example_row['file_path'])).convert('RGB')
 
                 example_prompt_text = (f"Example: This image shows a person expressing the emotion: "
                                        f"'{example_label}'.")
@@ -335,7 +340,7 @@ for curr_batch in range(num_batches):
                 print(f"example row: {example_row}")
                 # add images to image list
                 example_label = example_row.true_label
-                example_image = Image.open(example_row.file_path).convert('RGB')
+                example_image = Image.open(resolve_path(example_row.file_path)).convert('RGB')
                 images.append(example_image)
 
                 # add user text
