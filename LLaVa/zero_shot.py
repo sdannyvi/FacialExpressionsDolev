@@ -147,7 +147,7 @@ for batch_start in range(start_row, len(test_df), batch_size):
             count = count + 1
         print(f"conversation structure:\n{conversation}")
         # processing text prompt
-        text_prompt = llava_processor.apply_chat_template(conversation, add_generation_prompt=True)
+        text_prompt = llava_processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
         # process input
         inputs = llava_processor(images=query_image, text=text_prompt, padding=True, return_tensors="pt")
 

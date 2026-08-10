@@ -87,7 +87,7 @@ def print_conversation(conv):
 
 # initialize retrival model clip and extract embeddings to train_df
 clip_model = CLIPModel.from_pretrained(clip_model_id, torch_dtype=torch.float16).to(device=device)
-clip_processor = CLIPProcessor.from_pretrained(clip_model_id)
+clip_processor = CLIPProcessor.from_pretrained(clip_model_id, use_fast=False)
 clip_model.eval()
 print(f"CLIP model dtype: {next(clip_model.parameters()).dtype}")
 all_on_gpu = all(param.device.type =="cuda" for param in clip_model.parameters())
@@ -364,7 +364,7 @@ for curr_batch in range(num_batches):
             print_conversation(conversation)
             count = count + 1 
         print(f"conversation structure:\n{conversation}")
-        text_prompt = llava_processor.apply_chat_template(conversation, add_generation_prompt=True)
+        text_prompt = llava_processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
         inputs = llava_processor(images=images, text=text_prompt, padding=True, return_tensors="pt")
 
         device_type = next(iter(llava_model.parameters())).device

@@ -15,6 +15,7 @@ wandb/
 venv/
 .venv/
 env/
+.env
 
 # IDE
 .idea/
