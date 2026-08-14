@@ -11,7 +11,7 @@ import faiss
 import numpy as np
 from config import resolve_path, validate_image_paths
 
-from ..generators import AVAILABLE_MODELS, get_model_spec, load_generator, generate
+from ..generators import AVAILABLE_MODELS, get_model_spec, load_generator, generate_prediction
 
 
 # parameters
@@ -50,7 +50,7 @@ clip_model_id = args.clip_model_id
 dim_reduction = args.dim_reduction
 prompt = args.prompt
 top_k = args.top_k
-print(f"Code running:\nLLaVA model: {generator_id},\nCLIP model: {clip_model_id},\ndim_reduction: {dim_reduction},\n"
+print(f"Code running:\nGenerator model: {generator_id},\nCLIP model: {clip_model_id},\ndim_reduction: {dim_reduction},\n"
       f"prompt: {prompt},\ntop_k: {top_k}")
 
 # validate the requested prompt structure against the chosen generator before doing any
@@ -158,10 +158,9 @@ id_map = list(knowledge_base_set.index)
 print(f"FAISS index GPU: {type(index)}, ntotal: {index.ntotal}")
 print("FAISS GPU device ID:", index.getDevice())
 
-######## UNTIL HERE
 
 # load the generator
-llava_model, llava_processor, generator_spec = load_generator(generator_id)
+generator_model, generator_processor, generator_spec = load_generator(generator_id)
 
 
 # create top K cols
@@ -201,7 +200,7 @@ del test_df
 # keep in mind the last batch might not contain "batch size" samples
 num_batches = (len(df) + batch_size - 1) // batch_size
 
-count = 0
+debug_printed = False
 # looping through batch 0 to the last batch
 for curr_batch in range(num_batches):
     # initialize start batch and end batch
@@ -344,15 +343,19 @@ for curr_batch in range(num_batches):
             conversation.append({"role": "user", "content": content})
 
         # process inputs
-        if count == 0:
+        if debug_printed == False:
             print("conversation:")
             print_conversation(conversation)
-            count = count + 1
-        print(f"conversation structure:\n{conversation}")
+            print(f"conversation structure:\n{conversation}")
 
         # generate prediction
-        prediction = generate(llava_model, llava_processor, conversation, images, generator_spec)
-        print(f'prediction: {prediction}')
+        prediction, gen_stats = generate_prediction(generator_model, generator_processor, conversation, images, generator_spec)
+
+        if debug_printed == False: 
+            print(f"gen_stats: {gen_stats}")
+            print(f'prediction: {prediction}')
+            debug_printed = True
+
         batch_predictions.append(prediction)
         del query_image, images, query_embedding, scores, ids, faiss_ids, top_similarities, kb_row_indices, top_examples
         del top_labels, top_paths

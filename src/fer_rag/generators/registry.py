@@ -1,7 +1,7 @@
 """The generator registry: one entry per supported checkpoint.
 
 This is the single place to edit when adding a generator. Add an entry here (and a
-loader in ``generators.py`` if the family is new) and the model becomes available to
+loader in ``core.py`` if the family is new) and the model becomes available to
 both pipelines automatically, including in their ``--llava_model_id`` choices.
 
 Keys per entry:
@@ -21,7 +21,7 @@ Keys per entry:
                      "multi-user-message" prompt mode.
 """
 
-from .generators import (
+from .core import (
     load_gemma3,
     load_gemma4,
     load_llava_next,

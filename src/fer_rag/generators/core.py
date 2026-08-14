@@ -4,7 +4,7 @@ This module holds everything that differs between generator checkpoints:
 
 * loaders          - how a checkpoint is instantiated
 * normalizers      - how the pipeline's neutral conversation is reshaped for a checkpoint
-* generate         - the shared inference call (template -> processor -> generate -> decode)
+* generate_prediction         - the shared inference call (template -> processor -> generate -> decode)
 * parsers          - how a raw decoded string becomes a prediction
 
 The pipelines never import from here directly; they go through the package's public
@@ -230,12 +230,16 @@ def parse_thinking(text):
 # Inference.
 # --------------------------------------------------------------------------------------
 
-def generate(model, processor, conversation, images, spec):
-    """Run one generation and return the predicted label.
+def generate_prediction(model, processor, conversation, images, spec):
+    """Run one generation and return ``(prediction, stats)``.
 
     ``conversation`` is the pipeline's neutral message list and ``images`` the PIL images
     in placeholder order. Normalization, templating, generation, slicing and decoding all
     happen here, so the pipelines never touch model-specific details.
+
+    ``stats`` holds the per-call diagnostics (device and token counts). They are returned
+    rather than printed: this is library code, so the calling pipeline decides whether and
+    how often to report them.
     """
     conversation = normalize_conversation(conversation, images, spec)
     device_type = next(iter(model.parameters())).device
@@ -255,7 +259,6 @@ def generate(model, processor, conversation, images, spec):
         )
 
     inputs = inputs.to(device_type)
-    print(f"device_type: {device_type}")
 
     max_new_tokens = spec.get("max_new_tokens", DEFAULT_MAX_NEW_TOKENS)
     with torch.no_grad():
@@ -263,9 +266,12 @@ def generate(model, processor, conversation, images, spec):
 
     prompt_len = inputs["input_ids"].shape[-1]
     gen_ids = output[0][prompt_len:]
-    print("prompt_len:", prompt_len)
-    print("total_output_len:", output[0].shape[-1])
-    print("generated_len:", gen_ids.shape[-1])
+    stats = {
+        "device": str(device_type),
+        "prompt__toeken_len": prompt_len,
+        "generated_token_len": gen_ids.shape[-1],
+        "total_token_len": output[0].shape[-1],
+    }
 
     prediction = processor.decode(gen_ids, skip_special_tokens=True)
 
@@ -273,4 +279,4 @@ def generate(model, processor, conversation, images, spec):
     if parse is not None:
         prediction = parse(prediction)
 
-    return prediction.strip().lower()
+    return prediction.strip().lower(), stats

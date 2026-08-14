@@ -6,7 +6,7 @@ import pandas as pd
 import argparse
 import sys
 
-from ..generators import AVAILABLE_MODELS, load_generator, generate
+from ..generators import AVAILABLE_MODELS, load_generator, generate_prediction
 
 parser = argparse.ArgumentParser(description="Run Retrieval-Augmented Generation.")
 parser.add_argument("--test_path", type=str, required=True,
@@ -77,7 +77,7 @@ else:
     results_df["query_file_path"] = None
     start_row = 0
 
-count = 0
+debug_printed = False
 batch_size = 100
 for batch_start in range(start_row, len(test_df), batch_size):
     batch_end = min(batch_start + batch_size, len(test_df))
@@ -113,16 +113,21 @@ for batch_start in range(start_row, len(test_df), batch_size):
                                  {"type": "text", "text": f"Classify the emotion shown in this image into one of the following emotions: {', '.join(classes_list)}.\n"
                                                           f"Respond with only one word: the emotion label."}]})
 
-
         # process inputs
-        if count == 0:
+        if debug_printed == False:
             print("conversation:")
             print_conversation(conversation)
-            count = count + 1
-        print(f"conversation structure:\n{conversation}")
+            print(f"conversation structure:\n{conversation}")
+ 
         # generate prediction
-        prediction = generate(llava_model, llava_processor, conversation, [query_image], generator_spec)
-        print(f'prediction: {prediction}')
+        prediction, gen_stats = generate_prediction(llava_model, llava_processor, conversation, [query_image], generator_spec)
+
+
+        if debug_printed == False: 
+            print(f"gen_stats: {gen_stats}")
+            print(f'prediction: {prediction}')
+            debug_printed = True
+
         batch_predictions.append(prediction)
 
         del query_image
