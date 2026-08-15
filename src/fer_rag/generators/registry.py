@@ -1,6 +1,9 @@
-"""The generator registry: one entry per supported checkpoint.
+"""The generator registry: one entry per supported checkpoint, plus the lookup over it.
 
-This is the single place to edit when adding a generator. Add an entry here (and a
+This file answers two questions: *which generators exist* (the ``MODELS`` table) and
+*how do I get one* (``get_model_spec`` / ``load_generator``).
+
+It is the single place to edit when adding a generator. Add an entry here (and a
 loader in ``core.py`` if the family is new) and the model becomes available to
 both pipelines automatically, including in their ``--llava_model_id`` choices.
 
@@ -82,3 +85,32 @@ MODELS = {
 }
 
 AVAILABLE_MODELS = sorted(MODELS)
+
+
+def get_model_spec(model_id):
+    """Return the registry entry for ``model_id`` without loading any weights.
+
+    Lets a pipeline validate a configuration (for example a prompt mode the checkpoint
+    cannot support) before paying the cost of loading a multi-billion-parameter model.
+    """
+    if model_id not in MODELS:
+        raise ValueError(
+            f"Invalid model id '{model_id}': not a supported model. "
+            f"Supported models: {', '.join(AVAILABLE_MODELS)}"
+        )
+    return MODELS[model_id]
+
+
+def load_generator(model_id):
+    """Load a generator checkpoint and return ``(model, processor, spec)``.
+
+    ``spec`` is the registry entry and must be passed back to ``generate_prediction``.
+    """
+    spec = get_model_spec(model_id)
+
+    model, processor = spec["loader"](model_id)
+    model.eval()
+    print(f"generator model dtype: {next(model.parameters()).dtype}")
+    print(f"generator device map: {model.hf_device_map}")
+
+    return model, processor, spec
