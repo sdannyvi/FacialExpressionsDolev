@@ -105,12 +105,15 @@ def load_generator(model_id):
     """Load a generator checkpoint and return ``(model, processor, spec)``.
 
     ``spec`` is the registry entry and must be passed back to ``generate_prediction``.
+
+    Deliberately silent: this is library code, so the calling pipeline decides what to
+    report. Both pipelines print the loaded model's dtype and device map right after this
+    call, tagged ``[generators.registry.load_generator]``. See
+    ``docs/use_logging_recommendation.md`` for turning those prints into proper logging.
     """
     spec = get_model_spec(model_id)
 
     model, processor = spec["loader"](model_id)
     model.eval()
-    print(f"generator model dtype: {next(model.parameters()).dtype}")
-    print(f"generator device map: {model.hf_device_map}")
 
     return model, processor, spec

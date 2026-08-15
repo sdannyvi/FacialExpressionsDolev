@@ -13,14 +13,14 @@ parser.add_argument("--test_path", type=str, required=True,
                     help="the path to the text csv (the csv that needs to be classified).")
 parser.add_argument("--results_path", type=str, required=True,
                     help="path to save results csv (including the name of the csv file).")
-parser.add_argument("--llava_model_id", type=str, default="llava-hf/llava-v1.6-34b-hf",
+parser.add_argument("--generator_id", type=str, default="llava-hf/llava-v1.6-34b-hf",
                     choices=AVAILABLE_MODELS,
                     help="The path to the Hugging Face generator model checkpoint.")
 
 args = parser.parse_args()
 test_path = args.test_path
 results_path = args.results_path
-llava_model_id = args.llava_model_id
+generator_id = args.generator_id
 
 # print conversation
 def print_conversation(conv):
@@ -41,7 +41,12 @@ def print_conversation(conv):
             print("  CONTENT:", content)
 
 # load the generator
-llava_model, llava_processor, generator_spec = load_generator(llava_model_id)
+generator_model, generator_processor, generator_spec = load_generator(generator_id)
+# check the checkpoint loaded as asked: float16 weights, layers spread over the GPUs and
+# not offloaded to CPU/disk. The tag names the function these values come from, so it maps
+# onto a logger name later (see docs/use_logging_recommendation.md).
+print(f"[generators.registry.load_generator] generator model dtype: {next(generator_model.parameters()).dtype}")
+print(f"[generators.registry.load_generator] generator device map: {generator_model.hf_device_map}")
 
 # read csv
 test_df = pd.read_csv(test_path).reset_index(drop=True)
@@ -120,7 +125,7 @@ for batch_start in range(start_row, len(test_df), batch_size):
             print(f"conversation structure:\n{conversation}")
  
         # generate prediction
-        prediction, gen_stats = generate_prediction(llava_model, llava_processor, conversation, [query_image], generator_spec)
+        prediction, gen_stats = generate_prediction(generator_model, generator_processor, conversation, [query_image], generator_spec)
 
 
         if debug_printed == False: 
