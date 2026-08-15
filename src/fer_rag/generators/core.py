@@ -2,7 +2,7 @@
 
 This module holds everything that differs between generator checkpoints:
 
-* loaders          - how a checkpoint is instantiated
+* loader           - how a checkpoint is instantiated
 * normalizers      - how the pipeline's neutral conversation is reshaped for a checkpoint
 * generate_prediction         - the shared inference call (template -> processor -> generate -> decode)
 * parsers          - how a raw decoded string becomes a prediction
@@ -17,8 +17,11 @@ functions below.
 The functions are deliberately plain functions rather than classes. Each entry in the
 registry maps one-to-one onto a future class, so moving to classes later is mechanical.
 
-Assumes ``transformers>=5``. Model classes are imported inside their loaders so that a
-checkpoint whose class is unavailable cannot break imports for the other checkpoints.
+Assumes ``transformers>=5``, where the Auto classes are the recommended way to instantiate a
+checkpoint. Resolving the concrete model and processor classes is therefore delegated to
+``AutoModelForMultimodalLM`` / ``AutoProcessor`` rather than hard-coded per family; see
+``load_multimodal_lm``. transformers is imported inside the loader so that importing this
+module stays cheap and does not depend on the library being installed.
 """
 
 import copy
@@ -29,77 +32,24 @@ from .constants import DEFAULT_MAX_NEW_TOKENS, GENERATION_ARGS
 
 
 # --------------------------------------------------------------------------------------
-# Loaders. Each returns (model, processor) and leaves .eval() to load_generator().
+# Loader. Returns (model, processor) and leaves .eval() to load_generator().
 # --------------------------------------------------------------------------------------
 
-def load_llava_next(model_id):
-    """LLaVA-NeXT / v1.6 checkpoints."""
-    from transformers import LlavaNextForConditionalGeneration, LlavaNextProcessor
+def load_multimodal_lm(model_id):
+    """Default loader: the concrete classes come from the checkpoint's own config.
 
-    model = LlavaNextForConditionalGeneration.from_pretrained(
-        pretrained_model_name_or_path=model_id,
-        torch_dtype=torch.float16,
-        device_map="balanced"
-    )
-    processor = LlavaNextProcessor.from_pretrained(
-        pretrained_model_name_or_path=model_id,
-        use_fast=True)
-    return model, processor
+    ``AutoModelForMultimodalLM`` and ``AutoProcessor`` resolve to exactly the classes the
+    per-family loaders used to import — verified against the transformers>=5 mapping for
+    LLaVA-NeXT, LLaVA-OneVision, Gemma 3/4 and Qwen3-VL — so every registered checkpoint
+    loads the same objects it always did.
 
-
-def load_llava_onevision(model_id):
-    """LLaVA-OneVision checkpoints."""
-    from transformers import AutoProcessor, LlavaOnevisionForConditionalGeneration
-
-    model = LlavaOnevisionForConditionalGeneration.from_pretrained(
-        pretrained_model_name_or_path=model_id,
-        torch_dtype=torch.float16,
-        device_map="balanced",
-    )
-    processor = AutoProcessor.from_pretrained(
-        pretrained_model_name_or_path=model_id,
-        use_fast=True
-    )
-    return model, processor
-
-
-def load_gemma3(model_id):
-    """Gemma 3 instruction-tuned multimodal checkpoints."""
-    from transformers import AutoProcessor, Gemma3ForConditionalGeneration
-
-    model = Gemma3ForConditionalGeneration.from_pretrained(
-        pretrained_model_name_or_path=model_id,
-        torch_dtype=torch.float16,
-        device_map="balanced",
-    )
-    processor = AutoProcessor.from_pretrained(
-        pretrained_model_name_or_path=model_id,
-        use_fast=True
-    )
-    return model, processor
-
-
-def load_gemma4(model_id):
-    """Gemma 4 instruction-tuned multimodal checkpoints."""
+    Two cases fall outside the mapping and need an explicit ``loader`` in the registry entry:
+    a checkpoint requiring ``trust_remote_code=True``, and a text-only Gemma 3
+    (``model_type: gemma3_text`` -> ``Gemma3TextConfig``), which is not a multimodal config.
+    """
     from transformers import AutoModelForMultimodalLM, AutoProcessor
 
     model = AutoModelForMultimodalLM.from_pretrained(
-        pretrained_model_name_or_path=model_id,
-        torch_dtype=torch.float16,
-        device_map="balanced",
-    )
-    processor = AutoProcessor.from_pretrained(
-        pretrained_model_name_or_path=model_id,
-        use_fast=True
-    )
-    return model, processor
-
-
-def load_qwen3_vl(model_id):
-    """Qwen3-VL checkpoints (both Instruct and Thinking variants)."""
-    from transformers import AutoProcessor, Qwen3VLForConditionalGeneration
-
-    model = Qwen3VLForConditionalGeneration.from_pretrained(
         pretrained_model_name_or_path=model_id,
         torch_dtype=torch.float16,
         device_map="balanced",
@@ -260,7 +210,7 @@ def generate_prediction(model, processor, conversation, images, spec):
     gen_ids = output[0][prompt_len:]
     stats = {
         "device": str(device_type),
-        "prompt__toeken_len": prompt_len,
+        "prompt_toeken_len": prompt_len,
         "generated_token_len": gen_ids.shape[-1],
         "total_token_len": output[0].shape[-1],
     }

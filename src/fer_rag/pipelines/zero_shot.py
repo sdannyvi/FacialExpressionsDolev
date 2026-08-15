@@ -42,9 +42,13 @@ def print_conversation(conv):
 
 # load the generator
 generator_model, generator_processor, generator_spec = load_generator(generator_id)
-# check the checkpoint loaded as asked: float16 weights, layers spread over the GPUs and
-# not offloaded to CPU/disk. The tag names the function these values come from, so it maps
-# onto a logger name later (see docs/use_logging_recommendation.md).
+# check the checkpoint loaded as asked: the classes the Auto loader resolved to, float16
+# weights, layers spread over the GPUs and not offloaded to CPU/disk. The classes are printed
+# rather than hard-coded in the loader, so the run log records the architecture that actually
+# ran. The tag names the function these values come from, so it maps onto a logger name later
+# (see docs/use_logging_recommendation.md).
+print(f"[generators.registry.load_generator] generator classes: "
+      f"{type(generator_model).__name__} / {type(generator_processor).__name__}")
 print(f"[generators.registry.load_generator] generator model dtype: {next(generator_model.parameters()).dtype}")
 print(f"[generators.registry.load_generator] generator device map: {generator_model.hf_device_map}")
 
