@@ -1,22 +1,7 @@
 
 ####################################################################################################
-# CHAT TEMPLATE
+# APPLY_CHAT_TEMPLATE
 ####################################################################################################
-
-python signature, shared by every checkpoint (ProcessorMixin.apply_chat_template):
-    conversation                     = <required>
-    chat_template                    = None
-    tools                            = None
-    documents                        = None
-    add_generation_prompt            = False
-    continue_final_message           = False
-    return_assistant_tokens_mask     = False
-    tokenize                         = False
-    return_tensors                   = None
-    return_dict                      = False
-    load_audio_from_video            = False
-    processor_kwargs                 = None
-    kwargs                           = (bucket: collects the arguments resolved per checkpoint below)
 
 ====================================================================================================
 llava-hf/llava-v1.6-34b-hf
@@ -24,13 +9,35 @@ llava-hf/llava-v1.6-34b-hf
 processor class: LlavaNextProcessor
 chat template: 451 chars
 
-  lines that declare a default:
-      (none found)
+  [1] named parameters of ProcessorMixin.apply_chat_template
+      conversation                       = <required: supplied by the caller>          
+      chat_template                      = None                                         -> falls back to this checkpoint's own template
+      tools                              = None                                        
+      documents                          = None                                        
+      add_generation_prompt              = False                                       
+      continue_final_message             = False                                       
+      return_assistant_tokens_mask       = False                                       
+      tokenize                           = False                                        -> no tokenizing, so no processor kwargs are consulted
+      return_tensors                     = None                                        
+      return_dict                        = False                                       
+      load_audio_from_video              = False                                       
+      processor_kwargs                   = None                                        
+      kwargs                             = (bucket: collects the arguments resolved per checkpoint below)
 
-  what happens when the argument is omitted:
-      (the template reads no optional arguments)
+  [2] variables this checkpoint's Jinja template reads, and their value when nothing is passed
+      add_generation_prompt              = False                                        named parameter above
+      messages                           = <the conversation>                           the argument you pass
 
-  prompt rendered with nothing declared:
+  [3] processor kwargs defaults on this class (only reached when tokenize=True)
+      images_kwargs:
+          do_pad                         = True
+      text_kwargs:
+          padding                        = False
+          return_mm_token_type_ids       = False
+
+  [4] prompt produced when only the conversation is passed
+      '<|im_start|>user\nhi<|im_end|>\n'
+      with add_generation_prompt=True (what the pipelines pass):
       '<|im_start|>user\nhi<|im_end|>\n<|im_start|>assistant\n'
 
 ====================================================================================================
@@ -39,13 +46,34 @@ llava-hf/llava-v1.6-mistral-7b-hf
 processor class: LlavaNextProcessor
 chat template: 663 chars
 
-  lines that declare a default:
-      (none found)
+  [1] named parameters of ProcessorMixin.apply_chat_template
+      conversation                       = <required: supplied by the caller>          
+      chat_template                      = None                                         -> falls back to this checkpoint's own template
+      tools                              = None                                        
+      documents                          = None                                        
+      add_generation_prompt              = False                                       
+      continue_final_message             = False                                       
+      return_assistant_tokens_mask       = False                                       
+      tokenize                           = False                                        -> no tokenizing, so no processor kwargs are consulted
+      return_tensors                     = None                                        
+      return_dict                        = False                                       
+      load_audio_from_video              = False                                       
+      processor_kwargs                   = None                                        
+      kwargs                             = (bucket: collects the arguments resolved per checkpoint below)
 
-  what happens when the argument is omitted:
-      (the template reads no optional arguments)
+  [2] variables this checkpoint's Jinja template reads, and their value when nothing is passed
+      messages                           = <the conversation>                           the argument you pass
 
-  prompt rendered with nothing declared:
+  [3] processor kwargs defaults on this class (only reached when tokenize=True)
+      images_kwargs:
+          do_pad                         = True
+      text_kwargs:
+          padding                        = False
+          return_mm_token_type_ids       = False
+
+  [4] prompt produced when only the conversation is passed
+      '[INST] hi [/INST]'
+      with add_generation_prompt=True (what the pipelines pass):
       '[INST] hi [/INST]'
 
 ====================================================================================================
@@ -54,13 +82,33 @@ llava-hf/llava-onevision-qwen2-7b-ov-hf
 processor class: LlavaOnevisionProcessor
 chat template: 797 chars
 
-  lines that declare a default:
-      (none found)
+  [1] named parameters of ProcessorMixin.apply_chat_template
+      conversation                       = <required: supplied by the caller>          
+      chat_template                      = None                                         -> falls back to this checkpoint's own template
+      tools                              = None                                        
+      documents                          = None                                        
+      add_generation_prompt              = False                                       
+      continue_final_message             = False                                       
+      return_assistant_tokens_mask       = False                                       
+      tokenize                           = False                                        -> no tokenizing, so no processor kwargs are consulted
+      return_tensors                     = None                                        
+      return_dict                        = False                                       
+      load_audio_from_video              = False                                       
+      processor_kwargs                   = None                                        
+      kwargs                             = (bucket: collects the arguments resolved per checkpoint below)
 
-  what happens when the argument is omitted:
-      (the template reads no optional arguments)
+  [2] variables this checkpoint's Jinja template reads, and their value when nothing is passed
+      add_generation_prompt              = False                                        named parameter above
+      messages                           = <the conversation>                           the argument you pass
 
-  prompt rendered with nothing declared:
+  [3] processor kwargs defaults on this class (only reached when tokenize=True)
+      text_kwargs:
+          padding                        = False
+          return_mm_token_type_ids       = False
+
+  [4] prompt produced when only the conversation is passed
+      '<|im_start|>user \nhi<|im_end|>'
+      with add_generation_prompt=True (what the pipelines pass):
       '<|im_start|>user \nhi<|im_end|><|im_start|>assistant\n'
 
 ====================================================================================================
@@ -69,19 +117,43 @@ google/gemma-3-27b-it
 processor class: Gemma3Processor
 chat template: 1532 chars
 
-  lines that declare a default:
-      {%- set first_user_prefix = messages[0]['content'] + '
-      {%- set first_user_prefix = messages[0]['content'][0]['text'] + '
-      {%- set loop_messages = messages[1:] -%}
-      {%- set first_user_prefix = "" -%}
-      {%- set loop_messages = messages -%}
-      {%- set role = "model" -%}
-      {%- set role = message['role'] -%}
+  [1] named parameters of ProcessorMixin.apply_chat_template
+      conversation                       = <required: supplied by the caller>          
+      chat_template                      = None                                         -> falls back to this checkpoint's own template
+      tools                              = None                                        
+      documents                          = None                                        
+      add_generation_prompt              = False                                       
+      continue_final_message             = False                                       
+      return_assistant_tokens_mask       = False                                       
+      tokenize                           = False                                        -> no tokenizing, so no processor kwargs are consulted
+      return_tensors                     = None                                        
+      return_dict                        = False                                       
+      load_audio_from_video              = False                                       
+      processor_kwargs                   = None                                        
+      kwargs                             = (bucket: collects the arguments resolved per checkpoint below)
 
-  what happens when the argument is omitted:
-      (the template reads no optional arguments)
+  [2] variables this checkpoint's Jinja template reads, and their value when nothing is passed
+      add_generation_prompt              = False                                        named parameter above
+      bos_token                          = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); omitting it renders unlike both True and False
+      first_user_prefix                  = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      loop_messages                      = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      messages                           = <the conversation>                           the argument you pass
+      role                               = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
 
-  prompt rendered with nothing declared:
+  [3] processor kwargs defaults on this class (only reached when tokenize=True)
+      images_kwargs:
+          do_convert_rgb                 = True
+          do_pan_and_scan                = False
+          pan_and_scan_max_num_crops     = 4
+          pan_and_scan_min_crop_size     = 256
+          pan_and_scan_min_ratio_to_activate = 1.2
+      text_kwargs:
+          padding                        = False
+          return_mm_token_type_ids       = True
+
+  [4] prompt produced when only the conversation is passed
+      '<bos><start_of_turn>user\nhi<end_of_turn>\n'
+      with add_generation_prompt=True (what the pipelines pass):
       '<bos><start_of_turn>user\nhi<end_of_turn>\n<start_of_turn>model\n'
 
 ====================================================================================================
@@ -90,68 +162,59 @@ google/gemma-4-31B-it
 processor class: Gemma4Processor
 chat template: 18681 chars
 
-  lines that declare a default:
-      {%- set standard_keys = ['description', 'type', 'properties', 'required', 'nullable'] -%}
-      {%- set ns = namespace(found_first=false) -%}
-      {%- set add_comma = false -%}
-      {%- set ns.found_first = true -%}
-      {%- set add_comma = true -%}
-      {%- if add_comma %},{%- else -%} {%- set add_comma = true -%} {% endif -%}
-      {%- set ns_items = namespace(found_first=false) -%}
-      {%- set ns_items.found_first = true -%}
-      {{- format_parameters(item_value, value['items']['required'] | default([])) -}}
-      {%- if value['properties'] is defined and value['properties'] is mapping -%}
-      {{- format_parameters(value['properties'], value['required'] | default([])) -}}
-      {{- format_parameters(value, value['required'] | default([]), filter_keys=true) -}}
-      {%- for item in value['required'] | default([]) -%}
-      {%- set params = tool_data['function']['parameters'] -%}
-      {%- set response_declaration = tool_data['function']['response'] -%}
-      {%- set ns = namespace(result='') -%}
-      {%- set ns.result = ns.result + part.split('<|channel>')[0] -%}
-      {%- set ns.result = ns.result + part -%}
-      {%- set ns = namespace(prev_message_type=None, prev_non_tool_role=None) -%}
-      {%- set loop_messages = messages -%}
-      {%- set enable_thinking = enable_thinking | default(false) -%}
-      {%- set preserve_thinking = preserve_thinking | default(false) -%}
-      {%- set ns.prev_message_type = 'think' -%}
-      {%- set loop_messages = messages[1:] -%}
-      {%- set ns.prev_message_type = 'tool' -%}
-      {%- set ns_turn = namespace(last_user_idx=-1) -%}
-      {%- set ns_turn.last_user_idx = i -%}
-      {%- set ns.prev_message_type = None -%}
-      {%- set role = 'model' if message['role'] == 'assistant' else message['role'] -%}
-      {%- set continue_same_model_turn = (role == 'model' and ns.prev_non_tool_role == 'assistant') -%}
-      {%- set thinking_text = message.get('reasoning') or message.get('reasoning_content') -%}
-      {%- set thinking_gate = (loop.index0 > ns_turn.last_user_idx) or (preserve_thinking and message.get('tool_calls')) -%}
-      {%- set function = tool_call['function'] -%}
-      {%- set ns_args = namespace(found_first=false) -%}
-      {%- set ns_args.found_first = true -%}
-      {%- set ns.prev_message_type = 'tool_call' -%}
-      {%- set ns_tr_out = namespace(flag=false) -%}
-      {{- format_tool_response_block(tool_response['name'] | default('unknown', true), tool_response['response']) -}}
-      {%- set ns_tr_out.flag = true -%}
-      {%- set ns.prev_message_type = 'tool_response' -%}
-      {%- set ns_tool_scan = namespace(stopped=false) -%}
-      {%- set ns_tool_scan.stopped = true -%}
-      {%- set follow = loop_messages[k] -%}
-      {%- set ns_tname = namespace(name=follow.get('name') or 'unknown') -%}
-      {%- set ns_tname.name = tc['function']['name'] -%}
-      {%- set tool_body = follow.get('content') -%}
-      {%- set ns_txt = namespace(s='') -%}
-      {%- set ns_txt.s = ns_txt.s + (part.get('text') | default('')) -%}
-      {%- set captured_content -%}
-      {%- set has_content = captured_content | trim | length > 0 -%}
-      {%- set next_nt = namespace(role=None, found=false) -%}
-      {%- set next_nt.role = loop_messages[j]['role'] -%}
-      {%- set next_nt.found = true -%}
-      {%- set continues_into_next = (
-      {%- set ns.prev_non_tool_role = message['role'] -%}
+  [1] named parameters of ProcessorMixin.apply_chat_template
+      conversation                       = <required: supplied by the caller>          
+      chat_template                      = None                                         -> falls back to this checkpoint's own template
+      tools                              = None                                        
+      documents                          = None                                        
+      add_generation_prompt              = False                                       
+      continue_final_message             = False                                       
+      return_assistant_tokens_mask       = False                                       
+      tokenize                           = False                                        -> no tokenizing, so no processor kwargs are consulted
+      return_tensors                     = None                                        
+      return_dict                        = False                                       
+      load_audio_from_video              = False                                       
+      processor_kwargs                   = None                                        
+      kwargs                             = (bucket: collects the arguments resolved per checkpoint below)
 
-  what happens when the argument is omitted:
-      enable_thinking          -> False
-      preserve_thinking        -> no visible effect on this conversation (True and False render the same)
+  [2] variables this checkpoint's Jinja template reads, and their value when nothing is passed
+      add_generation_prompt              = False                                        named parameter above
+      bos_token                          = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); omitting it renders unlike both True and False
+      captured_content                   = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      continue_same_model_turn           = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      continues_into_next                = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      enable_thinking                    = false                                        template kwarg, default() in the template; omitting it behaves like False
+      follow                             = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      has_content                        = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      messages                           = <the conversation>                           the argument you pass
+      next_nt                            = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      ns_args                            = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      ns_items                           = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      ns_tname                           = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      ns_tool_scan                       = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      ns_tr_out                          = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      ns_txt                             = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      preserve_thinking                  = false                                        template kwarg, default() in the template; no visible effect on a plain text conversation
+      response_declaration               = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      role                               = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      thinking_gate                      = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      thinking_text                      = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      tool_body                          = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      tools                              = None                                         named parameter above
 
-  prompt rendered with nothing declared:
+  [3] processor kwargs defaults on this class (only reached when tokenize=True)
+      audio_kwargs:
+      images_kwargs:
+          do_convert_rgb                 = True
+      text_kwargs:
+          padding                        = True
+          return_mm_token_type_ids       = True
+      videos_kwargs:
+          return_metadata                = True
+
+  [4] prompt produced when only the conversation is passed
+      '<bos><|turn>user\nhi<turn|>\n'
+      with add_generation_prompt=True (what the pipelines pass):
       '<bos><|turn>user\nhi<turn|>\n<|turn>model\n<|channel>thought\n<channel|>'
 
 ====================================================================================================
@@ -160,17 +223,38 @@ Qwen/Qwen3-VL-32B-Instruct
 processor class: Qwen3VLProcessor
 chat template: 5292 chars
 
-  lines that declare a default:
-      {%- set image_count = namespace(value=0) %}
-      {%- set video_count = namespace(value=0) %}
-      {%- set image_count.value = image_count.value + 1 %}
-      {%- set video_count.value = video_count.value + 1 %}
-      {%- set tool_call = tool_call.function %}
+  [1] named parameters of ProcessorMixin.apply_chat_template
+      conversation                       = <required: supplied by the caller>          
+      chat_template                      = None                                         -> falls back to this checkpoint's own template
+      tools                              = None                                        
+      documents                          = None                                        
+      add_generation_prompt              = False                                       
+      continue_final_message             = False                                       
+      return_assistant_tokens_mask       = False                                       
+      tokenize                           = False                                        -> no tokenizing, so no processor kwargs are consulted
+      return_tensors                     = None                                        
+      return_dict                        = False                                       
+      load_audio_from_video              = False                                       
+      processor_kwargs                   = None                                        
+      kwargs                             = (bucket: collects the arguments resolved per checkpoint below)
 
-  what happens when the argument is omitted:
-      (the template reads no optional arguments)
+  [2] variables this checkpoint's Jinja template reads, and their value when nothing is passed
+      add_generation_prompt              = False                                        named parameter above
+      add_vision_id                      = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      messages                           = <the conversation>                           the argument you pass
+      tools                              = None                                         named parameter above
 
-  prompt rendered with nothing declared:
+  [3] processor kwargs defaults on this class (only reached when tokenize=True)
+      text_kwargs:
+          padding                        = False
+          return_mm_token_type_ids       = True
+          return_token_type_ids          = False
+      videos_kwargs:
+          return_metadata                = True
+
+  [4] prompt produced when only the conversation is passed
+      '<|im_start|>user\nhi<|im_end|>\n'
+      with add_generation_prompt=True (what the pipelines pass):
       '<|im_start|>user\nhi<|im_end|>\n<|im_start|>assistant\n'
 
 ====================================================================================================
@@ -179,27 +263,40 @@ Qwen/Qwen3-VL-32B-Thinking
 processor class: Qwen3VLProcessor
 chat template: 5199 chars
 
-  lines that declare a default:
-      {%- set image_count = namespace(value=0) %}
-      {%- set video_count = namespace(value=0) %}
-      {%- set image_count.value = image_count.value + 1 %}
-      {%- set video_count.value = video_count.value + 1 %}
-      {%- set ns = namespace(multi_step_tool=true, last_query_index=messages|length - 1) %}
-      {%- set index = (messages|length - 1) - loop.index0 %}
-      {%- set content = render_content(message.content, false) %}
-      {%- set ns.multi_step_tool = false %}
-      {%- set ns.last_query_index = index %}
-      {%- set content = render_content(message.content, True) %}
-      {%- set reasoning_content = '' %}
-      {%- set reasoning_content = message.reasoning_content %}
-      {%- set reasoning_content = content.split('</think>')[0].rstrip('\n').split('<think>')[-1].lstrip('\n') %}
-      {%- set content = content.split('</think>')[-1].lstrip('\n') %}
-      {%- set tool_call = tool_call.function %}
+  [1] named parameters of ProcessorMixin.apply_chat_template
+      conversation                       = <required: supplied by the caller>          
+      chat_template                      = None                                         -> falls back to this checkpoint's own template
+      tools                              = None                                        
+      documents                          = None                                        
+      add_generation_prompt              = False                                       
+      continue_final_message             = False                                       
+      return_assistant_tokens_mask       = False                                       
+      tokenize                           = False                                        -> no tokenizing, so no processor kwargs are consulted
+      return_tensors                     = None                                        
+      return_dict                        = False                                       
+      load_audio_from_video              = False                                       
+      processor_kwargs                   = None                                        
+      kwargs                             = (bucket: collects the arguments resolved per checkpoint below)
 
-  what happens when the argument is omitted:
-      (the template reads no optional arguments)
+  [2] variables this checkpoint's Jinja template reads, and their value when nothing is passed
+      add_generation_prompt              = False                                        named parameter above
+      add_vision_id                      = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      content                            = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      messages                           = <the conversation>                           the argument you pass
+      reasoning_content                  = <undefined>                                  template kwarg, never defaulted so Jinja leaves it undefined (falsy); no visible effect on a plain text conversation
+      tools                              = None                                         named parameter above
 
-  prompt rendered with nothing declared:
+  [3] processor kwargs defaults on this class (only reached when tokenize=True)
+      text_kwargs:
+          padding                        = False
+          return_mm_token_type_ids       = True
+          return_token_type_ids          = False
+      videos_kwargs:
+          return_metadata                = True
+
+  [4] prompt produced when only the conversation is passed
+      '<|im_start|>user\nhi<|im_end|>\n'
+      with add_generation_prompt=True (what the pipelines pass):
       '<|im_start|>user\nhi<|im_end|>\n<|im_start|>assistant\n<think>\n'
 
 
@@ -207,163 +304,697 @@ chat template: 5199 chars
 # GENERATE
 ####################################################################################################
 
-python signature, shared by every checkpoint (GenerationMixin.generate):
-    inputs                           = None
-    generation_config                = None
-    logits_processor                 = None
-    stopping_criteria                = None
-    prefix_allowed_tokens_fn         = None
-    synced_gpus                      = None
-    assistant_model                  = None
-    streamer                         = None
-    negative_prompt_ids              = None
-    negative_prompt_attention_mask   = None
-    custom_generate                  = None
-    kwargs                           = (bucket: collects the arguments resolved per checkpoint below)
+names used by model cards that are NOT transformers arguments
+(GenerationConfig keeps them as unused attributes, so passing them changes nothing):
+    out_seq_length           present in GenerationConfig: False  not a transformers argument; the equivalent is max_new_tokens
+    presence_penalty         present in GenerationConfig: False  vLLM/SGLang only; transformers has repetition_penalty instead
+    frequency_penalty        present in GenerationConfig: False  vLLM/SGLang only; transformers has repetition_penalty instead
+    greedy                   present in GenerationConfig: False  not a transformers argument; the equivalent is do_sample=False
+    max_tokens               present in GenerationConfig: False  not a transformers argument; the equivalent is max_new_tokens
 
 ====================================================================================================
 llava-hf/llava-v1.6-34b-hf
 ====================================================================================================
-  decoding fields:
-      do_sample                = None
-      temperature              = None
-      top_p                    = None
-      top_k                    = None
-      num_beams                = None
-      repetition_penalty       = None
-      max_new_tokens           = None
-      max_length               = None
+  [1] named parameters of GenerationMixin.generate
+      inputs                             = None                                        
+      generation_config                  = None                                         -> falls back to the model's generation config, resolved below
+      logits_processor                   = None                                        
+      stopping_criteria                  = None                                        
+      prefix_allowed_tokens_fn           = None                                        
+      synced_gpus                        = None                                        
+      assistant_model                    = None                                        
+      streamer                           = None                                        
+      negative_prompt_ids                = None                                        
+      negative_prompt_attention_mask     = None                                        
+      custom_generate                    = None                                        
+      kwargs                             = (bucket: collects the arguments resolved per checkpoint below)
 
-  every field this checkpoint sets differently from the transformers default:
-      _from_model_config       = True
-      bos_token_id             = 1
-      eos_token_id             = 7
-      pad_token_id             = 0
-      use_cache                = False
+  [2] every generation argument (73 of them), with the value actually used
+      _from_model_config                 = True                                    [generation_config.json]
+      assistant_confidence_threshold     = 0.4                                     [transformers global default]
+      assistant_early_exit               = None                                    [never set: stays None]
+      assistant_ensemble_weight          = None                                    [never set: stays None]
+      assistant_lookbehind               = 10                                      [transformers global default]
+      bad_words_ids                      = None                                    [transformers global default]
+      begin_suppress_tokens              = None                                    [transformers global default]
+      bos_token_id                       = 1                                       [generation_config.json]
+      cache_config                       = None                                    [never set: stays None]
+      cache_implementation               = None                                    [never set: stays None]
+      compile_config                     = None                                    [never set: stays None]
+      constraints                        = None                                    [never set: stays None]
+      continuous_batching_config         = None                                    [never set: stays None]
+      decoder_start_token_id             = None                                    [never set: stays None]
+      disable_compile                    = None                                    [never set: stays None]
+      diversity_penalty                  = 0.0                                     [transformers global default]
+      do_sample                          = False                                   [transformers global default]
+      dola_layers                        = None                                    [never set: stays None]
+      early_stopping                     = False                                   [transformers global default]
+      encoder_no_repeat_ngram_size       = 0                                       [transformers global default]
+      encoder_repetition_penalty         = 1.0                                     [transformers global default]
+      eos_token_id                       = 7                                       [generation_config.json]
+      epsilon_cutoff                     = 0.0                                     [transformers global default]
+      eta_cutoff                         = 0.0                                     [transformers global default]
+      exponential_decay_length_penalty   = None                                    [transformers global default]
+      force_words_ids                    = None                                    [never set: stays None]
+      forced_bos_token_id                = None                                    [transformers global default]
+      forced_eos_token_id                = None                                    [transformers global default]
+      guidance_scale                     = None                                    [never set: stays None]
+      is_assistant                       = None                                    [never set: stays None]
+      length_penalty                     = 1.0                                     [transformers global default]
+      low_memory                         = None                                    [never set: stays None]
+      max_cache_len                      = None                                    [never set: stays None]
+      max_length                         = 20                                      [transformers global default]
+      max_matching_ngram_size            = None                                    [never set: stays None]
+      max_new_tokens                     = None                                    [never set: stays None] -> so the cap comes from max_length=20 instead
+      max_time                           = None                                    [never set: stays None]
+      min_length                         = 0                                       [transformers global default]
+      min_new_tokens                     = None                                    [never set: stays None]
+      min_p                              = None                                    [never set: stays None]
+      no_repeat_ngram_size               = 0                                       [transformers global default]
+      num_assistant_tokens               = 20                                      [transformers global default]
+      num_assistant_tokens_schedule      = 'constant'                              [transformers global default]
+      num_beam_groups                    = 1                                       [transformers global default]
+      num_beams                          = 1                                       [transformers global default]
+      num_return_sequences               = 1                                       [transformers global default]
+      output_attentions                  = None                                    [never set: stays None]
+      output_hidden_states               = None                                    [never set: stays None]
+      output_logits                      = None                                    [never set: stays None]
+      output_scores                      = False                                   [transformers global default]
+      pad_token_id                       = 0                                       [generation_config.json]
+      penalty_alpha                      = None                                    [never set: stays None]
+      prefill_chunk_size                 = None                                    [never set: stays None]
+      prompt_lookup_num_tokens           = None                                    [never set: stays None]
+      remove_invalid_values              = False                                   [transformers global default]
+      renormalize_logits                 = None                                    [never set: stays None]
+      repetition_penalty                 = 1.0                                     [transformers global default]
+      return_dict_in_generate            = False                                   [transformers global default]
+      sequence_bias                      = None                                    [never set: stays None]
+      speculation_type                   = None                                    [never set: stays None]
+      stop_strings                       = None                                    [never set: stays None]
+      suppress_tokens                    = None                                    [transformers global default]
+      target_lookbehind                  = 10                                      [transformers global default]
+      temperature                        = 1.0                                     [transformers global default]
+      token_healing                      = None                                    [never set: stays None]
+      top_h                              = None                                    [never set: stays None]
+      top_k                              = 50                                      [transformers global default]
+      top_p                              = 1.0                                     [transformers global default]
+      transformers_version               = '5.15.0'                                [library default]
+      typical_p                          = 1.0                                     [transformers global default]
+      use_cache                          = False                                   [generation_config.json]
+      use_mtp                            = None                                    [never set: stays None]
+      watermarking_config                = None                                    [never set: stays None]
+
+  [3] what this means when generate is called with inputs only
+      greedy decoding (do_sample=False); temperature/top_p/top_k are ignored
+      length: neither max_new_tokens nor max_length is set anywhere, so generate falls back to the
+              model-agnostic max_length=20 and adds the prompt length back onto it,
+              which yields exactly 20 new tokens (and warns that you should set max_new_tokens)
 
 ====================================================================================================
 llava-hf/llava-v1.6-mistral-7b-hf
 ====================================================================================================
-  decoding fields:
-      do_sample                = None
-      temperature              = None
-      top_p                    = None
-      top_k                    = None
-      num_beams                = None
-      repetition_penalty       = None
-      max_new_tokens           = None
-      max_length               = None
+  [1] named parameters of GenerationMixin.generate
+      inputs                             = None                                        
+      generation_config                  = None                                         -> falls back to the model's generation config, resolved below
+      logits_processor                   = None                                        
+      stopping_criteria                  = None                                        
+      prefix_allowed_tokens_fn           = None                                        
+      synced_gpus                        = None                                        
+      assistant_model                    = None                                        
+      streamer                           = None                                        
+      negative_prompt_ids                = None                                        
+      negative_prompt_attention_mask     = None                                        
+      custom_generate                    = None                                        
+      kwargs                             = (bucket: collects the arguments resolved per checkpoint below)
 
-  every field this checkpoint sets differently from the transformers default:
-      _from_model_config       = True
-      bos_token_id             = 1
-      eos_token_id             = 2
+  [2] every generation argument (73 of them), with the value actually used
+      _from_model_config                 = True                                    [generation_config.json]
+      assistant_confidence_threshold     = 0.4                                     [transformers global default]
+      assistant_early_exit               = None                                    [never set: stays None]
+      assistant_ensemble_weight          = None                                    [never set: stays None]
+      assistant_lookbehind               = 10                                      [transformers global default]
+      bad_words_ids                      = None                                    [transformers global default]
+      begin_suppress_tokens              = None                                    [transformers global default]
+      bos_token_id                       = 1                                       [generation_config.json]
+      cache_config                       = None                                    [never set: stays None]
+      cache_implementation               = None                                    [never set: stays None]
+      compile_config                     = None                                    [never set: stays None]
+      constraints                        = None                                    [never set: stays None]
+      continuous_batching_config         = None                                    [never set: stays None]
+      decoder_start_token_id             = None                                    [never set: stays None]
+      disable_compile                    = None                                    [never set: stays None]
+      diversity_penalty                  = 0.0                                     [transformers global default]
+      do_sample                          = False                                   [transformers global default]
+      dola_layers                        = None                                    [never set: stays None]
+      early_stopping                     = False                                   [transformers global default]
+      encoder_no_repeat_ngram_size       = 0                                       [transformers global default]
+      encoder_repetition_penalty         = 1.0                                     [transformers global default]
+      eos_token_id                       = 2                                       [generation_config.json]
+      epsilon_cutoff                     = 0.0                                     [transformers global default]
+      eta_cutoff                         = 0.0                                     [transformers global default]
+      exponential_decay_length_penalty   = None                                    [transformers global default]
+      force_words_ids                    = None                                    [never set: stays None]
+      forced_bos_token_id                = None                                    [transformers global default]
+      forced_eos_token_id                = None                                    [transformers global default]
+      guidance_scale                     = None                                    [never set: stays None]
+      is_assistant                       = None                                    [never set: stays None]
+      length_penalty                     = 1.0                                     [transformers global default]
+      low_memory                         = None                                    [never set: stays None]
+      max_cache_len                      = None                                    [never set: stays None]
+      max_length                         = 20                                      [transformers global default]
+      max_matching_ngram_size            = None                                    [never set: stays None]
+      max_new_tokens                     = None                                    [never set: stays None] -> so the cap comes from max_length=20 instead
+      max_time                           = None                                    [never set: stays None]
+      min_length                         = 0                                       [transformers global default]
+      min_new_tokens                     = None                                    [never set: stays None]
+      min_p                              = None                                    [never set: stays None]
+      no_repeat_ngram_size               = 0                                       [transformers global default]
+      num_assistant_tokens               = 20                                      [transformers global default]
+      num_assistant_tokens_schedule      = 'constant'                              [transformers global default]
+      num_beam_groups                    = 1                                       [transformers global default]
+      num_beams                          = 1                                       [transformers global default]
+      num_return_sequences               = 1                                       [transformers global default]
+      output_attentions                  = None                                    [never set: stays None]
+      output_hidden_states               = None                                    [never set: stays None]
+      output_logits                      = None                                    [never set: stays None]
+      output_scores                      = False                                   [transformers global default]
+      pad_token_id                       = None                                    [never set: stays None]
+      penalty_alpha                      = None                                    [never set: stays None]
+      prefill_chunk_size                 = None                                    [never set: stays None]
+      prompt_lookup_num_tokens           = None                                    [never set: stays None]
+      remove_invalid_values              = False                                   [transformers global default]
+      renormalize_logits                 = None                                    [never set: stays None]
+      repetition_penalty                 = 1.0                                     [transformers global default]
+      return_dict_in_generate            = False                                   [transformers global default]
+      sequence_bias                      = None                                    [never set: stays None]
+      speculation_type                   = None                                    [never set: stays None]
+      stop_strings                       = None                                    [never set: stays None]
+      suppress_tokens                    = None                                    [transformers global default]
+      target_lookbehind                  = 10                                      [transformers global default]
+      temperature                        = 1.0                                     [transformers global default]
+      token_healing                      = None                                    [never set: stays None]
+      top_h                              = None                                    [never set: stays None]
+      top_k                              = 50                                      [transformers global default]
+      top_p                              = 1.0                                     [transformers global default]
+      transformers_version               = '5.15.0'                                [library default]
+      typical_p                          = 1.0                                     [transformers global default]
+      use_cache                          = True                                    [transformers global default]
+      use_mtp                            = None                                    [never set: stays None]
+      watermarking_config                = None                                    [never set: stays None]
+
+  [3] what this means when generate is called with inputs only
+      greedy decoding (do_sample=False); temperature/top_p/top_k are ignored
+      length: neither max_new_tokens nor max_length is set anywhere, so generate falls back to the
+              model-agnostic max_length=20 and adds the prompt length back onto it,
+              which yields exactly 20 new tokens (and warns that you should set max_new_tokens)
 
 ====================================================================================================
 llava-hf/llava-onevision-qwen2-7b-ov-hf
 ====================================================================================================
-  decoding fields:
-      do_sample                = None
-      temperature              = None
-      top_p                    = None
-      top_k                    = None
-      num_beams                = None
-      repetition_penalty       = None
-      max_new_tokens           = None
-      max_length               = None
+  [1] named parameters of GenerationMixin.generate
+      inputs                             = None                                        
+      generation_config                  = None                                         -> falls back to the model's generation config, resolved below
+      logits_processor                   = None                                        
+      stopping_criteria                  = None                                        
+      prefix_allowed_tokens_fn           = None                                        
+      synced_gpus                        = None                                        
+      assistant_model                    = None                                        
+      streamer                           = None                                        
+      negative_prompt_ids                = None                                        
+      negative_prompt_attention_mask     = None                                        
+      custom_generate                    = None                                        
+      kwargs                             = (bucket: collects the arguments resolved per checkpoint below)
 
-  every field this checkpoint sets differently from the transformers default:
-      _from_model_config       = True
-      bos_token_id             = 151643
-      eos_token_id             = 151645
+  [2] every generation argument (73 of them), with the value actually used
+      _from_model_config                 = True                                    [generation_config.json]
+      assistant_confidence_threshold     = 0.4                                     [transformers global default]
+      assistant_early_exit               = None                                    [never set: stays None]
+      assistant_ensemble_weight          = None                                    [never set: stays None]
+      assistant_lookbehind               = 10                                      [transformers global default]
+      bad_words_ids                      = None                                    [transformers global default]
+      begin_suppress_tokens              = None                                    [transformers global default]
+      bos_token_id                       = 151643                                  [generation_config.json]
+      cache_config                       = None                                    [never set: stays None]
+      cache_implementation               = None                                    [never set: stays None]
+      compile_config                     = None                                    [never set: stays None]
+      constraints                        = None                                    [never set: stays None]
+      continuous_batching_config         = None                                    [never set: stays None]
+      decoder_start_token_id             = None                                    [never set: stays None]
+      disable_compile                    = None                                    [never set: stays None]
+      diversity_penalty                  = 0.0                                     [transformers global default]
+      do_sample                          = False                                   [transformers global default]
+      dola_layers                        = None                                    [never set: stays None]
+      early_stopping                     = False                                   [transformers global default]
+      encoder_no_repeat_ngram_size       = 0                                       [transformers global default]
+      encoder_repetition_penalty         = 1.0                                     [transformers global default]
+      eos_token_id                       = 151645                                  [generation_config.json]
+      epsilon_cutoff                     = 0.0                                     [transformers global default]
+      eta_cutoff                         = 0.0                                     [transformers global default]
+      exponential_decay_length_penalty   = None                                    [transformers global default]
+      force_words_ids                    = None                                    [never set: stays None]
+      forced_bos_token_id                = None                                    [transformers global default]
+      forced_eos_token_id                = None                                    [transformers global default]
+      guidance_scale                     = None                                    [never set: stays None]
+      is_assistant                       = None                                    [never set: stays None]
+      length_penalty                     = 1.0                                     [transformers global default]
+      low_memory                         = None                                    [never set: stays None]
+      max_cache_len                      = None                                    [never set: stays None]
+      max_length                         = 20                                      [transformers global default]
+      max_matching_ngram_size            = None                                    [never set: stays None]
+      max_new_tokens                     = None                                    [never set: stays None] -> so the cap comes from max_length=20 instead
+      max_time                           = None                                    [never set: stays None]
+      min_length                         = 0                                       [transformers global default]
+      min_new_tokens                     = None                                    [never set: stays None]
+      min_p                              = None                                    [never set: stays None]
+      no_repeat_ngram_size               = 0                                       [transformers global default]
+      num_assistant_tokens               = 20                                      [transformers global default]
+      num_assistant_tokens_schedule      = 'constant'                              [transformers global default]
+      num_beam_groups                    = 1                                       [transformers global default]
+      num_beams                          = 1                                       [transformers global default]
+      num_return_sequences               = 1                                       [transformers global default]
+      output_attentions                  = None                                    [never set: stays None]
+      output_hidden_states               = None                                    [never set: stays None]
+      output_logits                      = None                                    [never set: stays None]
+      output_scores                      = False                                   [transformers global default]
+      pad_token_id                       = None                                    [never set: stays None]
+      penalty_alpha                      = None                                    [never set: stays None]
+      prefill_chunk_size                 = None                                    [never set: stays None]
+      prompt_lookup_num_tokens           = None                                    [never set: stays None]
+      remove_invalid_values              = False                                   [transformers global default]
+      renormalize_logits                 = None                                    [never set: stays None]
+      repetition_penalty                 = 1.0                                     [transformers global default]
+      return_dict_in_generate            = False                                   [transformers global default]
+      sequence_bias                      = None                                    [never set: stays None]
+      speculation_type                   = None                                    [never set: stays None]
+      stop_strings                       = None                                    [never set: stays None]
+      suppress_tokens                    = None                                    [transformers global default]
+      target_lookbehind                  = 10                                      [transformers global default]
+      temperature                        = 1.0                                     [transformers global default]
+      token_healing                      = None                                    [never set: stays None]
+      top_h                              = None                                    [never set: stays None]
+      top_k                              = 50                                      [transformers global default]
+      top_p                              = 1.0                                     [transformers global default]
+      transformers_version               = '5.15.0'                                [library default]
+      typical_p                          = 1.0                                     [transformers global default]
+      use_cache                          = True                                    [transformers global default]
+      use_mtp                            = None                                    [never set: stays None]
+      watermarking_config                = None                                    [never set: stays None]
+
+  [3] what this means when generate is called with inputs only
+      greedy decoding (do_sample=False); temperature/top_p/top_k are ignored
+      length: neither max_new_tokens nor max_length is set anywhere, so generate falls back to the
+              model-agnostic max_length=20 and adds the prompt length back onto it,
+              which yields exactly 20 new tokens (and warns that you should set max_new_tokens)
 
 ====================================================================================================
 google/gemma-3-27b-it
 ====================================================================================================
-  decoding fields:
-      do_sample                = True
-      temperature              = None
-      top_p                    = 0.95
-      top_k                    = 64
-      num_beams                = None
-      repetition_penalty       = None
-      max_new_tokens           = None
-      max_length               = None
+  [1] named parameters of GenerationMixin.generate
+      inputs                             = None                                        
+      generation_config                  = None                                         -> falls back to the model's generation config, resolved below
+      logits_processor                   = None                                        
+      stopping_criteria                  = None                                        
+      prefix_allowed_tokens_fn           = None                                        
+      synced_gpus                        = None                                        
+      assistant_model                    = None                                        
+      streamer                           = None                                        
+      negative_prompt_ids                = None                                        
+      negative_prompt_attention_mask     = None                                        
+      custom_generate                    = None                                        
+      kwargs                             = (bucket: collects the arguments resolved per checkpoint below)
 
-  every field this checkpoint sets differently from the transformers default:
-      bos_token_id             = 2
-      cache_implementation     = 'hybrid'
-      do_sample                = True
-      eos_token_id             = [1, 106]
-      pad_token_id             = 0
-      top_k                    = 64
-      top_p                    = 0.95
+  [2] every generation argument (73 of them), with the value actually used
+      _from_model_config                 = None                                    [never set: stays None]
+      assistant_confidence_threshold     = 0.4                                     [transformers global default]
+      assistant_early_exit               = None                                    [never set: stays None]
+      assistant_ensemble_weight          = None                                    [never set: stays None]
+      assistant_lookbehind               = 10                                      [transformers global default]
+      bad_words_ids                      = None                                    [transformers global default]
+      begin_suppress_tokens              = None                                    [transformers global default]
+      bos_token_id                       = 2                                       [generation_config.json]
+      cache_config                       = None                                    [never set: stays None]
+      cache_implementation               = 'hybrid'                                [generation_config.json]
+      compile_config                     = None                                    [never set: stays None]
+      constraints                        = None                                    [never set: stays None]
+      continuous_batching_config         = None                                    [never set: stays None]
+      decoder_start_token_id             = None                                    [never set: stays None]
+      disable_compile                    = None                                    [never set: stays None]
+      diversity_penalty                  = 0.0                                     [transformers global default]
+      do_sample                          = True                                    [generation_config.json]
+      dola_layers                        = None                                    [never set: stays None]
+      early_stopping                     = False                                   [transformers global default]
+      encoder_no_repeat_ngram_size       = 0                                       [transformers global default]
+      encoder_repetition_penalty         = 1.0                                     [transformers global default]
+      eos_token_id                       = [1, 106]                                [generation_config.json]
+      epsilon_cutoff                     = 0.0                                     [transformers global default]
+      eta_cutoff                         = 0.0                                     [transformers global default]
+      exponential_decay_length_penalty   = None                                    [transformers global default]
+      force_words_ids                    = None                                    [never set: stays None]
+      forced_bos_token_id                = None                                    [transformers global default]
+      forced_eos_token_id                = None                                    [transformers global default]
+      guidance_scale                     = None                                    [never set: stays None]
+      is_assistant                       = None                                    [never set: stays None]
+      length_penalty                     = 1.0                                     [transformers global default]
+      low_memory                         = None                                    [never set: stays None]
+      max_cache_len                      = None                                    [never set: stays None]
+      max_length                         = 20                                      [transformers global default]
+      max_matching_ngram_size            = None                                    [never set: stays None]
+      max_new_tokens                     = None                                    [never set: stays None] -> so the cap comes from max_length=20 instead
+      max_time                           = None                                    [never set: stays None]
+      min_length                         = 0                                       [transformers global default]
+      min_new_tokens                     = None                                    [never set: stays None]
+      min_p                              = None                                    [never set: stays None]
+      no_repeat_ngram_size               = 0                                       [transformers global default]
+      num_assistant_tokens               = 20                                      [transformers global default]
+      num_assistant_tokens_schedule      = 'constant'                              [transformers global default]
+      num_beam_groups                    = 1                                       [transformers global default]
+      num_beams                          = 1                                       [transformers global default]
+      num_return_sequences               = 1                                       [transformers global default]
+      output_attentions                  = None                                    [never set: stays None]
+      output_hidden_states               = None                                    [never set: stays None]
+      output_logits                      = None                                    [never set: stays None]
+      output_scores                      = False                                   [transformers global default]
+      pad_token_id                       = 0                                       [generation_config.json]
+      penalty_alpha                      = None                                    [never set: stays None]
+      prefill_chunk_size                 = None                                    [never set: stays None]
+      prompt_lookup_num_tokens           = None                                    [never set: stays None]
+      remove_invalid_values              = False                                   [transformers global default]
+      renormalize_logits                 = None                                    [never set: stays None]
+      repetition_penalty                 = 1.0                                     [transformers global default]
+      return_dict_in_generate            = False                                   [transformers global default]
+      sequence_bias                      = None                                    [never set: stays None]
+      speculation_type                   = None                                    [never set: stays None]
+      stop_strings                       = None                                    [never set: stays None]
+      suppress_tokens                    = None                                    [transformers global default]
+      target_lookbehind                  = 10                                      [transformers global default]
+      temperature                        = 1.0                                     [transformers global default]
+      token_healing                      = None                                    [never set: stays None]
+      top_h                              = None                                    [never set: stays None]
+      top_k                              = 64                                      [generation_config.json]
+      top_p                              = 0.95                                    [generation_config.json]
+      transformers_version               = '5.15.0'                                [library default]
+      typical_p                          = 1.0                                     [transformers global default]
+      use_cache                          = True                                    [transformers global default]
+      use_mtp                            = None                                    [never set: stays None]
+      watermarking_config                = None                                    [never set: stays None]
+
+  [3] what this means when generate is called with inputs only
+      sampling on: temperature=1.0, top_p=0.95, top_k=64, repetition_penalty=1.0
+      length: neither max_new_tokens nor max_length is set anywhere, so generate falls back to the
+              model-agnostic max_length=20 and adds the prompt length back onto it,
+              which yields exactly 20 new tokens (and warns that you should set max_new_tokens)
 
 ====================================================================================================
 google/gemma-4-31B-it
 ====================================================================================================
-  decoding fields:
-      do_sample                = True
-      temperature              = 1.0
-      top_p                    = 0.95
-      top_k                    = 64
-      num_beams                = None
-      repetition_penalty       = None
-      max_new_tokens           = None
-      max_length               = None
+  [1] named parameters of GenerationMixin.generate
+      inputs                             = None                                        
+      generation_config                  = None                                         -> falls back to the model's generation config, resolved below
+      logits_processor                   = None                                        
+      stopping_criteria                  = None                                        
+      prefix_allowed_tokens_fn           = None                                        
+      synced_gpus                        = None                                        
+      assistant_model                    = None                                        
+      streamer                           = None                                        
+      negative_prompt_ids                = None                                        
+      negative_prompt_attention_mask     = None                                        
+      custom_generate                    = None                                        
+      kwargs                             = (bucket: collects the arguments resolved per checkpoint below)
 
-  every field this checkpoint sets differently from the transformers default:
-      bos_token_id             = 2
-      do_sample                = True
-      eos_token_id             = [1, 106, 50]
-      pad_token_id             = 0
-      temperature              = 1.0
-      top_k                    = 64
-      top_p                    = 0.95
+  [2] every generation argument (73 of them), with the value actually used
+      _from_model_config                 = None                                    [never set: stays None]
+      assistant_confidence_threshold     = 0.4                                     [transformers global default]
+      assistant_early_exit               = None                                    [never set: stays None]
+      assistant_ensemble_weight          = None                                    [never set: stays None]
+      assistant_lookbehind               = 10                                      [transformers global default]
+      bad_words_ids                      = None                                    [transformers global default]
+      begin_suppress_tokens              = None                                    [transformers global default]
+      bos_token_id                       = 2                                       [generation_config.json]
+      cache_config                       = None                                    [never set: stays None]
+      cache_implementation               = None                                    [never set: stays None]
+      compile_config                     = None                                    [never set: stays None]
+      constraints                        = None                                    [never set: stays None]
+      continuous_batching_config         = None                                    [never set: stays None]
+      decoder_start_token_id             = None                                    [never set: stays None]
+      disable_compile                    = None                                    [never set: stays None]
+      diversity_penalty                  = 0.0                                     [transformers global default]
+      do_sample                          = True                                    [generation_config.json]
+      dola_layers                        = None                                    [never set: stays None]
+      early_stopping                     = False                                   [transformers global default]
+      encoder_no_repeat_ngram_size       = 0                                       [transformers global default]
+      encoder_repetition_penalty         = 1.0                                     [transformers global default]
+      eos_token_id                       = [1, 106, 50]                            [generation_config.json]
+      epsilon_cutoff                     = 0.0                                     [transformers global default]
+      eta_cutoff                         = 0.0                                     [transformers global default]
+      exponential_decay_length_penalty   = None                                    [transformers global default]
+      force_words_ids                    = None                                    [never set: stays None]
+      forced_bos_token_id                = None                                    [transformers global default]
+      forced_eos_token_id                = None                                    [transformers global default]
+      guidance_scale                     = None                                    [never set: stays None]
+      is_assistant                       = None                                    [never set: stays None]
+      length_penalty                     = 1.0                                     [transformers global default]
+      low_memory                         = None                                    [never set: stays None]
+      max_cache_len                      = None                                    [never set: stays None]
+      max_length                         = 20                                      [transformers global default]
+      max_matching_ngram_size            = None                                    [never set: stays None]
+      max_new_tokens                     = None                                    [never set: stays None] -> so the cap comes from max_length=20 instead
+      max_time                           = None                                    [never set: stays None]
+      min_length                         = 0                                       [transformers global default]
+      min_new_tokens                     = None                                    [never set: stays None]
+      min_p                              = None                                    [never set: stays None]
+      no_repeat_ngram_size               = 0                                       [transformers global default]
+      num_assistant_tokens               = 20                                      [transformers global default]
+      num_assistant_tokens_schedule      = 'constant'                              [transformers global default]
+      num_beam_groups                    = 1                                       [transformers global default]
+      num_beams                          = 1                                       [transformers global default]
+      num_return_sequences               = 1                                       [transformers global default]
+      output_attentions                  = None                                    [never set: stays None]
+      output_hidden_states               = None                                    [never set: stays None]
+      output_logits                      = None                                    [never set: stays None]
+      output_scores                      = False                                   [transformers global default]
+      pad_token_id                       = 0                                       [generation_config.json]
+      penalty_alpha                      = None                                    [never set: stays None]
+      prefill_chunk_size                 = None                                    [never set: stays None]
+      prompt_lookup_num_tokens           = None                                    [never set: stays None]
+      remove_invalid_values              = False                                   [transformers global default]
+      renormalize_logits                 = None                                    [never set: stays None]
+      repetition_penalty                 = 1.0                                     [transformers global default]
+      return_dict_in_generate            = False                                   [transformers global default]
+      sequence_bias                      = None                                    [never set: stays None]
+      speculation_type                   = None                                    [never set: stays None]
+      stop_strings                       = None                                    [never set: stays None]
+      suppress_tokens                    = None                                    [transformers global default]
+      target_lookbehind                  = 10                                      [transformers global default]
+      temperature                        = 1.0                                     [generation_config.json]
+      token_healing                      = None                                    [never set: stays None]
+      top_h                              = None                                    [never set: stays None]
+      top_k                              = 64                                      [generation_config.json]
+      top_p                              = 0.95                                    [generation_config.json]
+      transformers_version               = '5.15.0'                                [library default]
+      typical_p                          = 1.0                                     [transformers global default]
+      use_cache                          = True                                    [transformers global default]
+      use_mtp                            = None                                    [never set: stays None]
+      watermarking_config                = None                                    [never set: stays None]
+
+  [3] what this means when generate is called with inputs only
+      sampling on: temperature=1.0, top_p=0.95, top_k=64, repetition_penalty=1.0
+      length: neither max_new_tokens nor max_length is set anywhere, so generate falls back to the
+              model-agnostic max_length=20 and adds the prompt length back onto it,
+              which yields exactly 20 new tokens (and warns that you should set max_new_tokens)
 
 ====================================================================================================
 Qwen/Qwen3-VL-32B-Instruct
 ====================================================================================================
-  decoding fields:
-      do_sample                = True
-      temperature              = 0.7
-      top_p                    = 0.8
-      top_k                    = 20
-      num_beams                = None
-      repetition_penalty       = 1.0
-      max_new_tokens           = None
-      max_length               = None
+  [1] named parameters of GenerationMixin.generate
+      inputs                             = None                                        
+      generation_config                  = None                                         -> falls back to the model's generation config, resolved below
+      logits_processor                   = None                                        
+      stopping_criteria                  = None                                        
+      prefix_allowed_tokens_fn           = None                                        
+      synced_gpus                        = None                                        
+      assistant_model                    = None                                        
+      streamer                           = None                                        
+      negative_prompt_ids                = None                                        
+      negative_prompt_attention_mask     = None                                        
+      custom_generate                    = None                                        
+      kwargs                             = (bucket: collects the arguments resolved per checkpoint below)
 
-  every field this checkpoint sets differently from the transformers default:
-      bos_token_id             = 151643
-      do_sample                = True
-      eos_token_id             = [151645, 151643]
-      pad_token_id             = 151643
-      repetition_penalty       = 1.0
-      temperature              = 0.7
-      top_k                    = 20
-      top_p                    = 0.8
+  [2] every generation argument (73 of them), with the value actually used
+      _from_model_config                 = None                                    [never set: stays None]
+      assistant_confidence_threshold     = 0.4                                     [transformers global default]
+      assistant_early_exit               = None                                    [never set: stays None]
+      assistant_ensemble_weight          = None                                    [never set: stays None]
+      assistant_lookbehind               = 10                                      [transformers global default]
+      bad_words_ids                      = None                                    [transformers global default]
+      begin_suppress_tokens              = None                                    [transformers global default]
+      bos_token_id                       = 151643                                  [generation_config.json]
+      cache_config                       = None                                    [never set: stays None]
+      cache_implementation               = None                                    [never set: stays None]
+      compile_config                     = None                                    [never set: stays None]
+      constraints                        = None                                    [never set: stays None]
+      continuous_batching_config         = None                                    [never set: stays None]
+      decoder_start_token_id             = None                                    [never set: stays None]
+      disable_compile                    = None                                    [never set: stays None]
+      diversity_penalty                  = 0.0                                     [transformers global default]
+      do_sample                          = True                                    [generation_config.json]
+      dola_layers                        = None                                    [never set: stays None]
+      early_stopping                     = False                                   [transformers global default]
+      encoder_no_repeat_ngram_size       = 0                                       [transformers global default]
+      encoder_repetition_penalty         = 1.0                                     [transformers global default]
+      eos_token_id                       = [151645, 151643]                        [generation_config.json]
+      epsilon_cutoff                     = 0.0                                     [transformers global default]
+      eta_cutoff                         = 0.0                                     [transformers global default]
+      exponential_decay_length_penalty   = None                                    [transformers global default]
+      force_words_ids                    = None                                    [never set: stays None]
+      forced_bos_token_id                = None                                    [transformers global default]
+      forced_eos_token_id                = None                                    [transformers global default]
+      guidance_scale                     = None                                    [never set: stays None]
+      is_assistant                       = None                                    [never set: stays None]
+      length_penalty                     = 1.0                                     [transformers global default]
+      low_memory                         = None                                    [never set: stays None]
+      max_cache_len                      = None                                    [never set: stays None]
+      max_length                         = 20                                      [transformers global default]
+      max_matching_ngram_size            = None                                    [never set: stays None]
+      max_new_tokens                     = None                                    [never set: stays None] -> so the cap comes from max_length=20 instead
+      max_time                           = None                                    [never set: stays None]
+      min_length                         = 0                                       [transformers global default]
+      min_new_tokens                     = None                                    [never set: stays None]
+      min_p                              = None                                    [never set: stays None]
+      no_repeat_ngram_size               = 0                                       [transformers global default]
+      num_assistant_tokens               = 20                                      [transformers global default]
+      num_assistant_tokens_schedule      = 'constant'                              [transformers global default]
+      num_beam_groups                    = 1                                       [transformers global default]
+      num_beams                          = 1                                       [transformers global default]
+      num_return_sequences               = 1                                       [transformers global default]
+      output_attentions                  = None                                    [never set: stays None]
+      output_hidden_states               = None                                    [never set: stays None]
+      output_logits                      = None                                    [never set: stays None]
+      output_scores                      = False                                   [transformers global default]
+      pad_token_id                       = 151643                                  [generation_config.json]
+      penalty_alpha                      = None                                    [never set: stays None]
+      prefill_chunk_size                 = None                                    [never set: stays None]
+      prompt_lookup_num_tokens           = None                                    [never set: stays None]
+      remove_invalid_values              = False                                   [transformers global default]
+      renormalize_logits                 = None                                    [never set: stays None]
+      repetition_penalty                 = 1.0                                     [generation_config.json]
+      return_dict_in_generate            = False                                   [transformers global default]
+      sequence_bias                      = None                                    [never set: stays None]
+      speculation_type                   = None                                    [never set: stays None]
+      stop_strings                       = None                                    [never set: stays None]
+      suppress_tokens                    = None                                    [transformers global default]
+      target_lookbehind                  = 10                                      [transformers global default]
+      temperature                        = 0.7                                     [generation_config.json]
+      token_healing                      = None                                    [never set: stays None]
+      top_h                              = None                                    [never set: stays None]
+      top_k                              = 20                                      [generation_config.json]
+      top_p                              = 0.8                                     [generation_config.json]
+      transformers_version               = '5.15.0'                                [library default]
+      typical_p                          = 1.0                                     [transformers global default]
+      use_cache                          = True                                    [transformers global default]
+      use_mtp                            = None                                    [never set: stays None]
+      watermarking_config                = None                                    [never set: stays None]
+
+  [3] what this means when generate is called with inputs only
+      sampling on: temperature=0.7, top_p=0.8, top_k=20, repetition_penalty=1.0
+      length: neither max_new_tokens nor max_length is set anywhere, so generate falls back to the
+              model-agnostic max_length=20 and adds the prompt length back onto it,
+              which yields exactly 20 new tokens (and warns that you should set max_new_tokens)
 
 ====================================================================================================
 Qwen/Qwen3-VL-32B-Thinking
 ====================================================================================================
-  decoding fields:
-      do_sample                = True
-      temperature              = 0.8
-      top_p                    = 0.95
-      top_k                    = 20
-      num_beams                = None
-      repetition_penalty       = 1.0
-      max_new_tokens           = None
-      max_length               = None
+  [1] named parameters of GenerationMixin.generate
+      inputs                             = None                                        
+      generation_config                  = None                                         -> falls back to the model's generation config, resolved below
+      logits_processor                   = None                                        
+      stopping_criteria                  = None                                        
+      prefix_allowed_tokens_fn           = None                                        
+      synced_gpus                        = None                                        
+      assistant_model                    = None                                        
+      streamer                           = None                                        
+      negative_prompt_ids                = None                                        
+      negative_prompt_attention_mask     = None                                        
+      custom_generate                    = None                                        
+      kwargs                             = (bucket: collects the arguments resolved per checkpoint below)
 
-  every field this checkpoint sets differently from the transformers default:
-      bos_token_id             = 151643
-      do_sample                = True
-      eos_token_id             = [151645, 151643]
-      pad_token_id             = 151643
-      repetition_penalty       = 1.0
-      temperature              = 0.8
-      top_k                    = 20
-      top_p                    = 0.95
+  [2] every generation argument (73 of them), with the value actually used
+      _from_model_config                 = None                                    [never set: stays None]
+      assistant_confidence_threshold     = 0.4                                     [transformers global default]
+      assistant_early_exit               = None                                    [never set: stays None]
+      assistant_ensemble_weight          = None                                    [never set: stays None]
+      assistant_lookbehind               = 10                                      [transformers global default]
+      bad_words_ids                      = None                                    [transformers global default]
+      begin_suppress_tokens              = None                                    [transformers global default]
+      bos_token_id                       = 151643                                  [generation_config.json]
+      cache_config                       = None                                    [never set: stays None]
+      cache_implementation               = None                                    [never set: stays None]
+      compile_config                     = None                                    [never set: stays None]
+      constraints                        = None                                    [never set: stays None]
+      continuous_batching_config         = None                                    [never set: stays None]
+      decoder_start_token_id             = None                                    [never set: stays None]
+      disable_compile                    = None                                    [never set: stays None]
+      diversity_penalty                  = 0.0                                     [transformers global default]
+      do_sample                          = True                                    [generation_config.json]
+      dola_layers                        = None                                    [never set: stays None]
+      early_stopping                     = False                                   [transformers global default]
+      encoder_no_repeat_ngram_size       = 0                                       [transformers global default]
+      encoder_repetition_penalty         = 1.0                                     [transformers global default]
+      eos_token_id                       = [151645, 151643]                        [generation_config.json]
+      epsilon_cutoff                     = 0.0                                     [transformers global default]
+      eta_cutoff                         = 0.0                                     [transformers global default]
+      exponential_decay_length_penalty   = None                                    [transformers global default]
+      force_words_ids                    = None                                    [never set: stays None]
+      forced_bos_token_id                = None                                    [transformers global default]
+      forced_eos_token_id                = None                                    [transformers global default]
+      guidance_scale                     = None                                    [never set: stays None]
+      is_assistant                       = None                                    [never set: stays None]
+      length_penalty                     = 1.0                                     [transformers global default]
+      low_memory                         = None                                    [never set: stays None]
+      max_cache_len                      = None                                    [never set: stays None]
+      max_length                         = 20                                      [transformers global default]
+      max_matching_ngram_size            = None                                    [never set: stays None]
+      max_new_tokens                     = None                                    [never set: stays None] -> so the cap comes from max_length=20 instead
+      max_time                           = None                                    [never set: stays None]
+      min_length                         = 0                                       [transformers global default]
+      min_new_tokens                     = None                                    [never set: stays None]
+      min_p                              = None                                    [never set: stays None]
+      no_repeat_ngram_size               = 0                                       [transformers global default]
+      num_assistant_tokens               = 20                                      [transformers global default]
+      num_assistant_tokens_schedule      = 'constant'                              [transformers global default]
+      num_beam_groups                    = 1                                       [transformers global default]
+      num_beams                          = 1                                       [transformers global default]
+      num_return_sequences               = 1                                       [transformers global default]
+      output_attentions                  = None                                    [never set: stays None]
+      output_hidden_states               = None                                    [never set: stays None]
+      output_logits                      = None                                    [never set: stays None]
+      output_scores                      = False                                   [transformers global default]
+      pad_token_id                       = 151643                                  [generation_config.json]
+      penalty_alpha                      = None                                    [never set: stays None]
+      prefill_chunk_size                 = None                                    [never set: stays None]
+      prompt_lookup_num_tokens           = None                                    [never set: stays None]
+      remove_invalid_values              = False                                   [transformers global default]
+      renormalize_logits                 = None                                    [never set: stays None]
+      repetition_penalty                 = 1.0                                     [generation_config.json]
+      return_dict_in_generate            = False                                   [transformers global default]
+      sequence_bias                      = None                                    [never set: stays None]
+      speculation_type                   = None                                    [never set: stays None]
+      stop_strings                       = None                                    [never set: stays None]
+      suppress_tokens                    = None                                    [transformers global default]
+      target_lookbehind                  = 10                                      [transformers global default]
+      temperature                        = 0.8                                     [generation_config.json]
+      token_healing                      = None                                    [never set: stays None]
+      top_h                              = None                                    [never set: stays None]
+      top_k                              = 20                                      [generation_config.json]
+      top_p                              = 0.95                                    [generation_config.json]
+      transformers_version               = '5.15.0'                                [library default]
+      typical_p                          = 1.0                                     [transformers global default]
+      use_cache                          = True                                    [transformers global default]
+      use_mtp                            = None                                    [never set: stays None]
+      watermarking_config                = None                                    [never set: stays None]
+
+  [3] what this means when generate is called with inputs only
+      sampling on: temperature=0.8, top_p=0.95, top_k=20, repetition_penalty=1.0
+      length: neither max_new_tokens nor max_length is set anywhere, so generate falls back to the
+              model-agnostic max_length=20 and adds the prompt length back onto it,
+              which yields exactly 20 new tokens (and warns that you should set max_new_tokens)
 
