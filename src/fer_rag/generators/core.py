@@ -71,23 +71,33 @@ def _fold_system_into_first_user(conversation):
     Used for checkpoints whose chat template has no system role (llava-v1.6-mistral).
     The system text is prepended to the first text item of the first user message, so
     the instruction still reaches the model, just as user text instead of system text.
+    System messages are always dropped, including ones that carry no text.
     """
+    # iterate over the conversation and collect the system text as a list of strings
     system_texts = []
     for message in conversation:
         if message.get("role") == "system":
             for item in message.get("content", []):
                 if item.get("type") == "text":
-                    system_texts.append(item.get("text", ""))
+                    text = item.get("text", "")
+                    if text:
+                        system_texts.append(text)
 
+    # remove the system messages from the conversation
+    conversation = [m for m in conversation if m.get("role") != "system"]
+
+    # nothing to fold; any system messages have already been dropped
     if not system_texts:
         return conversation
 
-    conversation = [m for m in conversation if m.get("role") != "system"]
+    # join the system messages into a single string
     system_text = "\n".join(system_texts)
 
+    # iterate over the conversation and add the system text to the first user message
     for message in conversation:
         if message.get("role") != "user":
             continue
+        # iterate over the content of the user message, and add the system text to the first text item
         for item in message.get("content", []):
             if item.get("type") == "text":
                 item["text"] = f"{system_text}\n{item.get('text', '')}"
@@ -138,7 +148,8 @@ def normalize_conversation(conversation, images, spec):
     """
     conversation = copy.deepcopy(conversation)
 
-    if not spec.get("supports_system", True):
+    supports_system = spec.get("supports_system", True)
+    if supports_system is False:
         conversation = _fold_system_into_first_user(conversation)
 
     if spec["style"] == "one_step":
