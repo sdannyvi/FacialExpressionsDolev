@@ -1,0 +1,133 @@
+====================================================================================================
+llava-hf/llava-v1.6-34b-hf
+====================================================================================================
+processor class: LlavaNextProcessor
+apply_chat_template defined on: ProcessorMixin.apply_chat_template
+    conversation                 = <required>                     (positional_or_keyword)
+    chat_template                = None                           (positional_or_keyword)
+    tools                        = None                           (positional_or_keyword)
+    documents                    = None                           (positional_or_keyword)
+    add_generation_prompt        = False                          (positional_or_keyword)
+    continue_final_message       = False                          (positional_or_keyword)
+    return_assistant_tokens_mask = False                          (positional_or_keyword)
+    tokenize                     = False                          (positional_or_keyword)
+    return_tensors               = None                           (positional_or_keyword)
+    return_dict                  = False                          (positional_or_keyword)
+    load_audio_from_video        = False                          (positional_or_keyword)
+    processor_kwargs             = None                           (positional_or_keyword)
+    kwargs                       = <required>                     (var_keyword)
+
+====================================================================================================
+llava-hf/llava-v1.6-mistral-7b-hf
+====================================================================================================
+processor class: LlavaNextProcessor
+apply_chat_template defined on: ProcessorMixin.apply_chat_template
+    conversation                 = <required>                     (positional_or_keyword)
+    chat_template                = None                           (positional_or_keyword)
+    tools                        = None                           (positional_or_keyword)
+    documents                    = None                           (positional_or_keyword)
+    add_generation_prompt        = False                          (positional_or_keyword)
+    continue_final_message       = False                          (positional_or_keyword)
+    return_assistant_tokens_mask = False                          (positional_or_keyword)
+    tokenize                     = False                          (positional_or_keyword)
+    return_tensors               = None                           (positional_or_keyword)
+    return_dict                  = False                          (positional_or_keyword)
+    load_audio_from_video        = False                          (positional_or_keyword)
+    processor_kwargs             = None                           (positional_or_keyword)
+    kwargs                       = <required>                     (var_keyword)
+
+====================================================================================================
+llava-hf/llava-onevision-qwen2-7b-ov-hf
+====================================================================================================
+processor class: LlavaOnevisionProcessor
+apply_chat_template defined on: ProcessorMixin.apply_chat_template
+    conversation                 = <required>                     (positional_or_keyword)
+    chat_template                = None                           (positional_or_keyword)
+    tools                        = None                           (positional_or_keyword)
+    documents                    = None                           (positional_or_keyword)
+    add_generation_prompt        = False                          (positional_or_keyword)
+    continue_final_message       = False                          (positional_or_keyword)
+    return_assistant_tokens_mask = False                          (positional_or_keyword)
+    tokenize                     = False                          (positional_or_keyword)
+    return_tensors               = None                           (positional_or_keyword)
+    return_dict                  = False                          (positional_or_keyword)
+    load_audio_from_video        = False                          (positional_or_keyword)
+    processor_kwargs             = None                           (positional_or_keyword)
+    kwargs                       = <required>                     (var_keyword)
+
+====================================================================================================
+google/gemma-3-27b-it
+====================================================================================================
+processor class: Gemma3Processor
+apply_chat_template defined on: ProcessorMixin.apply_chat_template
+    conversation                 = <required>                     (positional_or_keyword)
+    chat_template                = None                           (positional_or_keyword)
+    tools                        = None                           (positional_or_keyword)
+    documents                    = None                           (positional_or_keyword)
+    add_generation_prompt        = False                          (positional_or_keyword)
+    continue_final_message       = False                          (positional_or_keyword)
+    return_assistant_tokens_mask = False                          (positional_or_keyword)
+    tokenize                     = False                          (positional_or_keyword)
+    return_tensors               = None                           (positional_or_keyword)
+    return_dict                  = False                          (positional_or_keyword)
+    load_audio_from_video        = False                          (positional_or_keyword)
+    processor_kwargs             = None                           (positional_or_keyword)
+    kwargs                       = <required>                     (var_keyword)
+
+====================================================================================================
+google/gemma-4-31B-it
+====================================================================================================
+processor class: Gemma4Processor
+apply_chat_template defined on: ProcessorMixin.apply_chat_template
+    conversation                 = <required>                     (positional_or_keyword)
+    chat_template                = None                           (positional_or_keyword)
+    tools                        = None                           (positional_or_keyword)
+    documents                    = None                           (positional_or_keyword)
+    add_generation_prompt        = False                          (positional_or_keyword)
+    continue_final_message       = False                          (positional_or_keyword)
+    return_assistant_tokens_mask = False                          (positional_or_keyword)
+    tokenize                     = False                          (positional_or_keyword)
+    return_tensors               = None                           (positional_or_keyword)
+    return_dict                  = False                          (positional_or_keyword)
+    load_audio_from_video        = False                          (positional_or_keyword)
+    processor_kwargs             = None                           (positional_or_keyword)
+    kwargs                       = <required>                     (var_keyword)
+
+====================================================================================================
+Qwen/Qwen3-VL-32B-Instruct
+====================================================================================================
+processor class: Qwen3VLProcessor
+apply_chat_template defined on: ProcessorMixin.apply_chat_template
+    conversation                 = <required>                     (positional_or_keyword)
+    chat_template                = None                           (positional_or_keyword)
+    tools                        = None                           (positional_or_keyword)
+    documents                    = None                           (positional_or_keyword)
+    add_generation_prompt        = False                          (positional_or_keyword)
+    continue_final_message       = False                          (positional_or_keyword)
+    return_assistant_tokens_mask = False                          (positional_or_keyword)
+    tokenize                     = False                          (positional_or_keyword)
+    return_tensors               = None                           (positional_or_keyword)
+    return_dict                  = False                          (positional_or_keyword)
+    load_audio_from_video        = False                          (positional_or_keyword)
+    processor_kwargs             = None                           (positional_or_keyword)
+    kwargs                       = <required>                     (var_keyword)
+
+====================================================================================================
+Qwen/Qwen3-VL-32B-Thinking
+====================================================================================================
+processor class: Qwen3VLProcessor
+apply_chat_template defined on: ProcessorMixin.apply_chat_template
+    conversation                 = <required>                     (positional_or_keyword)
+    chat_template                = None                           (positional_or_keyword)
+    tools                        = None                           (positional_or_keyword)
+    documents                    = None                           (positional_or_keyword)
+    add_generation_prompt        = False                          (positional_or_keyword)
+    continue_final_message       = False                          (positional_or_keyword)
+    return_assistant_tokens_mask = False                          (positional_or_keyword)
+    tokenize                     = False                          (positional_or_keyword)
+    return_tensors               = None                           (positional_or_keyword)
+    return_dict                  = False                          (positional_or_keyword)
+    load_audio_from_video        = False                          (positional_or_keyword)
+    processor_kwargs             = None                           (positional_or_keyword)
+    kwargs                       = <required>                     (var_keyword)
+
