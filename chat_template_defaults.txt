@@ -1,133 +1,369 @@
+
+####################################################################################################
+# CHAT TEMPLATE
+####################################################################################################
+
+python signature, shared by every checkpoint (ProcessorMixin.apply_chat_template):
+    conversation                     = <required>
+    chat_template                    = None
+    tools                            = None
+    documents                        = None
+    add_generation_prompt            = False
+    continue_final_message           = False
+    return_assistant_tokens_mask     = False
+    tokenize                         = False
+    return_tensors                   = None
+    return_dict                      = False
+    load_audio_from_video            = False
+    processor_kwargs                 = None
+    kwargs                           = (bucket: collects the arguments resolved per checkpoint below)
+
 ====================================================================================================
 llava-hf/llava-v1.6-34b-hf
 ====================================================================================================
 processor class: LlavaNextProcessor
-apply_chat_template defined on: ProcessorMixin.apply_chat_template
-    conversation                 = <required>                     (positional_or_keyword)
-    chat_template                = None                           (positional_or_keyword)
-    tools                        = None                           (positional_or_keyword)
-    documents                    = None                           (positional_or_keyword)
-    add_generation_prompt        = False                          (positional_or_keyword)
-    continue_final_message       = False                          (positional_or_keyword)
-    return_assistant_tokens_mask = False                          (positional_or_keyword)
-    tokenize                     = False                          (positional_or_keyword)
-    return_tensors               = None                           (positional_or_keyword)
-    return_dict                  = False                          (positional_or_keyword)
-    load_audio_from_video        = False                          (positional_or_keyword)
-    processor_kwargs             = None                           (positional_or_keyword)
-    kwargs                       = <required>                     (var_keyword)
+chat template: 451 chars
+
+  lines that declare a default:
+      (none found)
+
+  what happens when the argument is omitted:
+      (the template reads no optional arguments)
+
+  prompt rendered with nothing declared:
+      '<|im_start|>user\nhi<|im_end|>\n<|im_start|>assistant\n'
 
 ====================================================================================================
 llava-hf/llava-v1.6-mistral-7b-hf
 ====================================================================================================
 processor class: LlavaNextProcessor
-apply_chat_template defined on: ProcessorMixin.apply_chat_template
-    conversation                 = <required>                     (positional_or_keyword)
-    chat_template                = None                           (positional_or_keyword)
-    tools                        = None                           (positional_or_keyword)
-    documents                    = None                           (positional_or_keyword)
-    add_generation_prompt        = False                          (positional_or_keyword)
-    continue_final_message       = False                          (positional_or_keyword)
-    return_assistant_tokens_mask = False                          (positional_or_keyword)
-    tokenize                     = False                          (positional_or_keyword)
-    return_tensors               = None                           (positional_or_keyword)
-    return_dict                  = False                          (positional_or_keyword)
-    load_audio_from_video        = False                          (positional_or_keyword)
-    processor_kwargs             = None                           (positional_or_keyword)
-    kwargs                       = <required>                     (var_keyword)
+chat template: 663 chars
+
+  lines that declare a default:
+      (none found)
+
+  what happens when the argument is omitted:
+      (the template reads no optional arguments)
+
+  prompt rendered with nothing declared:
+      '[INST] hi [/INST]'
 
 ====================================================================================================
 llava-hf/llava-onevision-qwen2-7b-ov-hf
 ====================================================================================================
 processor class: LlavaOnevisionProcessor
-apply_chat_template defined on: ProcessorMixin.apply_chat_template
-    conversation                 = <required>                     (positional_or_keyword)
-    chat_template                = None                           (positional_or_keyword)
-    tools                        = None                           (positional_or_keyword)
-    documents                    = None                           (positional_or_keyword)
-    add_generation_prompt        = False                          (positional_or_keyword)
-    continue_final_message       = False                          (positional_or_keyword)
-    return_assistant_tokens_mask = False                          (positional_or_keyword)
-    tokenize                     = False                          (positional_or_keyword)
-    return_tensors               = None                           (positional_or_keyword)
-    return_dict                  = False                          (positional_or_keyword)
-    load_audio_from_video        = False                          (positional_or_keyword)
-    processor_kwargs             = None                           (positional_or_keyword)
-    kwargs                       = <required>                     (var_keyword)
+chat template: 797 chars
+
+  lines that declare a default:
+      (none found)
+
+  what happens when the argument is omitted:
+      (the template reads no optional arguments)
+
+  prompt rendered with nothing declared:
+      '<|im_start|>user \nhi<|im_end|><|im_start|>assistant\n'
 
 ====================================================================================================
 google/gemma-3-27b-it
 ====================================================================================================
 processor class: Gemma3Processor
-apply_chat_template defined on: ProcessorMixin.apply_chat_template
-    conversation                 = <required>                     (positional_or_keyword)
-    chat_template                = None                           (positional_or_keyword)
-    tools                        = None                           (positional_or_keyword)
-    documents                    = None                           (positional_or_keyword)
-    add_generation_prompt        = False                          (positional_or_keyword)
-    continue_final_message       = False                          (positional_or_keyword)
-    return_assistant_tokens_mask = False                          (positional_or_keyword)
-    tokenize                     = False                          (positional_or_keyword)
-    return_tensors               = None                           (positional_or_keyword)
-    return_dict                  = False                          (positional_or_keyword)
-    load_audio_from_video        = False                          (positional_or_keyword)
-    processor_kwargs             = None                           (positional_or_keyword)
-    kwargs                       = <required>                     (var_keyword)
+chat template: 1532 chars
+
+  lines that declare a default:
+      {%- set first_user_prefix = messages[0]['content'] + '
+      {%- set first_user_prefix = messages[0]['content'][0]['text'] + '
+      {%- set loop_messages = messages[1:] -%}
+      {%- set first_user_prefix = "" -%}
+      {%- set loop_messages = messages -%}
+      {%- set role = "model" -%}
+      {%- set role = message['role'] -%}
+
+  what happens when the argument is omitted:
+      (the template reads no optional arguments)
+
+  prompt rendered with nothing declared:
+      '<bos><start_of_turn>user\nhi<end_of_turn>\n<start_of_turn>model\n'
 
 ====================================================================================================
 google/gemma-4-31B-it
 ====================================================================================================
 processor class: Gemma4Processor
-apply_chat_template defined on: ProcessorMixin.apply_chat_template
-    conversation                 = <required>                     (positional_or_keyword)
-    chat_template                = None                           (positional_or_keyword)
-    tools                        = None                           (positional_or_keyword)
-    documents                    = None                           (positional_or_keyword)
-    add_generation_prompt        = False                          (positional_or_keyword)
-    continue_final_message       = False                          (positional_or_keyword)
-    return_assistant_tokens_mask = False                          (positional_or_keyword)
-    tokenize                     = False                          (positional_or_keyword)
-    return_tensors               = None                           (positional_or_keyword)
-    return_dict                  = False                          (positional_or_keyword)
-    load_audio_from_video        = False                          (positional_or_keyword)
-    processor_kwargs             = None                           (positional_or_keyword)
-    kwargs                       = <required>                     (var_keyword)
+chat template: 18681 chars
+
+  lines that declare a default:
+      {%- set standard_keys = ['description', 'type', 'properties', 'required', 'nullable'] -%}
+      {%- set ns = namespace(found_first=false) -%}
+      {%- set add_comma = false -%}
+      {%- set ns.found_first = true -%}
+      {%- set add_comma = true -%}
+      {%- if add_comma %},{%- else -%} {%- set add_comma = true -%} {% endif -%}
+      {%- set ns_items = namespace(found_first=false) -%}
+      {%- set ns_items.found_first = true -%}
+      {{- format_parameters(item_value, value['items']['required'] | default([])) -}}
+      {%- if value['properties'] is defined and value['properties'] is mapping -%}
+      {{- format_parameters(value['properties'], value['required'] | default([])) -}}
+      {{- format_parameters(value, value['required'] | default([]), filter_keys=true) -}}
+      {%- for item in value['required'] | default([]) -%}
+      {%- set params = tool_data['function']['parameters'] -%}
+      {%- set response_declaration = tool_data['function']['response'] -%}
+      {%- set ns = namespace(result='') -%}
+      {%- set ns.result = ns.result + part.split('<|channel>')[0] -%}
+      {%- set ns.result = ns.result + part -%}
+      {%- set ns = namespace(prev_message_type=None, prev_non_tool_role=None) -%}
+      {%- set loop_messages = messages -%}
+      {%- set enable_thinking = enable_thinking | default(false) -%}
+      {%- set preserve_thinking = preserve_thinking | default(false) -%}
+      {%- set ns.prev_message_type = 'think' -%}
+      {%- set loop_messages = messages[1:] -%}
+      {%- set ns.prev_message_type = 'tool' -%}
+      {%- set ns_turn = namespace(last_user_idx=-1) -%}
+      {%- set ns_turn.last_user_idx = i -%}
+      {%- set ns.prev_message_type = None -%}
+      {%- set role = 'model' if message['role'] == 'assistant' else message['role'] -%}
+      {%- set continue_same_model_turn = (role == 'model' and ns.prev_non_tool_role == 'assistant') -%}
+      {%- set thinking_text = message.get('reasoning') or message.get('reasoning_content') -%}
+      {%- set thinking_gate = (loop.index0 > ns_turn.last_user_idx) or (preserve_thinking and message.get('tool_calls')) -%}
+      {%- set function = tool_call['function'] -%}
+      {%- set ns_args = namespace(found_first=false) -%}
+      {%- set ns_args.found_first = true -%}
+      {%- set ns.prev_message_type = 'tool_call' -%}
+      {%- set ns_tr_out = namespace(flag=false) -%}
+      {{- format_tool_response_block(tool_response['name'] | default('unknown', true), tool_response['response']) -}}
+      {%- set ns_tr_out.flag = true -%}
+      {%- set ns.prev_message_type = 'tool_response' -%}
+      {%- set ns_tool_scan = namespace(stopped=false) -%}
+      {%- set ns_tool_scan.stopped = true -%}
+      {%- set follow = loop_messages[k] -%}
+      {%- set ns_tname = namespace(name=follow.get('name') or 'unknown') -%}
+      {%- set ns_tname.name = tc['function']['name'] -%}
+      {%- set tool_body = follow.get('content') -%}
+      {%- set ns_txt = namespace(s='') -%}
+      {%- set ns_txt.s = ns_txt.s + (part.get('text') | default('')) -%}
+      {%- set captured_content -%}
+      {%- set has_content = captured_content | trim | length > 0 -%}
+      {%- set next_nt = namespace(role=None, found=false) -%}
+      {%- set next_nt.role = loop_messages[j]['role'] -%}
+      {%- set next_nt.found = true -%}
+      {%- set continues_into_next = (
+      {%- set ns.prev_non_tool_role = message['role'] -%}
+
+  what happens when the argument is omitted:
+      enable_thinking          -> False
+      preserve_thinking        -> no visible effect on this conversation (True and False render the same)
+
+  prompt rendered with nothing declared:
+      '<bos><|turn>user\nhi<turn|>\n<|turn>model\n<|channel>thought\n<channel|>'
 
 ====================================================================================================
 Qwen/Qwen3-VL-32B-Instruct
 ====================================================================================================
 processor class: Qwen3VLProcessor
-apply_chat_template defined on: ProcessorMixin.apply_chat_template
-    conversation                 = <required>                     (positional_or_keyword)
-    chat_template                = None                           (positional_or_keyword)
-    tools                        = None                           (positional_or_keyword)
-    documents                    = None                           (positional_or_keyword)
-    add_generation_prompt        = False                          (positional_or_keyword)
-    continue_final_message       = False                          (positional_or_keyword)
-    return_assistant_tokens_mask = False                          (positional_or_keyword)
-    tokenize                     = False                          (positional_or_keyword)
-    return_tensors               = None                           (positional_or_keyword)
-    return_dict                  = False                          (positional_or_keyword)
-    load_audio_from_video        = False                          (positional_or_keyword)
-    processor_kwargs             = None                           (positional_or_keyword)
-    kwargs                       = <required>                     (var_keyword)
+chat template: 5292 chars
+
+  lines that declare a default:
+      {%- set image_count = namespace(value=0) %}
+      {%- set video_count = namespace(value=0) %}
+      {%- set image_count.value = image_count.value + 1 %}
+      {%- set video_count.value = video_count.value + 1 %}
+      {%- set tool_call = tool_call.function %}
+
+  what happens when the argument is omitted:
+      (the template reads no optional arguments)
+
+  prompt rendered with nothing declared:
+      '<|im_start|>user\nhi<|im_end|>\n<|im_start|>assistant\n'
 
 ====================================================================================================
 Qwen/Qwen3-VL-32B-Thinking
 ====================================================================================================
 processor class: Qwen3VLProcessor
-apply_chat_template defined on: ProcessorMixin.apply_chat_template
-    conversation                 = <required>                     (positional_or_keyword)
-    chat_template                = None                           (positional_or_keyword)
-    tools                        = None                           (positional_or_keyword)
-    documents                    = None                           (positional_or_keyword)
-    add_generation_prompt        = False                          (positional_or_keyword)
-    continue_final_message       = False                          (positional_or_keyword)
-    return_assistant_tokens_mask = False                          (positional_or_keyword)
-    tokenize                     = False                          (positional_or_keyword)
-    return_tensors               = None                           (positional_or_keyword)
-    return_dict                  = False                          (positional_or_keyword)
-    load_audio_from_video        = False                          (positional_or_keyword)
-    processor_kwargs             = None                           (positional_or_keyword)
-    kwargs                       = <required>                     (var_keyword)
+chat template: 5199 chars
+
+  lines that declare a default:
+      {%- set image_count = namespace(value=0) %}
+      {%- set video_count = namespace(value=0) %}
+      {%- set image_count.value = image_count.value + 1 %}
+      {%- set video_count.value = video_count.value + 1 %}
+      {%- set ns = namespace(multi_step_tool=true, last_query_index=messages|length - 1) %}
+      {%- set index = (messages|length - 1) - loop.index0 %}
+      {%- set content = render_content(message.content, false) %}
+      {%- set ns.multi_step_tool = false %}
+      {%- set ns.last_query_index = index %}
+      {%- set content = render_content(message.content, True) %}
+      {%- set reasoning_content = '' %}
+      {%- set reasoning_content = message.reasoning_content %}
+      {%- set reasoning_content = content.split('</think>')[0].rstrip('\n').split('<think>')[-1].lstrip('\n') %}
+      {%- set content = content.split('</think>')[-1].lstrip('\n') %}
+      {%- set tool_call = tool_call.function %}
+
+  what happens when the argument is omitted:
+      (the template reads no optional arguments)
+
+  prompt rendered with nothing declared:
+      '<|im_start|>user\nhi<|im_end|>\n<|im_start|>assistant\n<think>\n'
+
+
+####################################################################################################
+# GENERATE
+####################################################################################################
+
+python signature, shared by every checkpoint (GenerationMixin.generate):
+    inputs                           = None
+    generation_config                = None
+    logits_processor                 = None
+    stopping_criteria                = None
+    prefix_allowed_tokens_fn         = None
+    synced_gpus                      = None
+    assistant_model                  = None
+    streamer                         = None
+    negative_prompt_ids              = None
+    negative_prompt_attention_mask   = None
+    custom_generate                  = None
+    kwargs                           = (bucket: collects the arguments resolved per checkpoint below)
+
+====================================================================================================
+llava-hf/llava-v1.6-34b-hf
+====================================================================================================
+  decoding fields:
+      do_sample                = None
+      temperature              = None
+      top_p                    = None
+      top_k                    = None
+      num_beams                = None
+      repetition_penalty       = None
+      max_new_tokens           = None
+      max_length               = None
+
+  every field this checkpoint sets differently from the transformers default:
+      _from_model_config       = True
+      bos_token_id             = 1
+      eos_token_id             = 7
+      pad_token_id             = 0
+      use_cache                = False
+
+====================================================================================================
+llava-hf/llava-v1.6-mistral-7b-hf
+====================================================================================================
+  decoding fields:
+      do_sample                = None
+      temperature              = None
+      top_p                    = None
+      top_k                    = None
+      num_beams                = None
+      repetition_penalty       = None
+      max_new_tokens           = None
+      max_length               = None
+
+  every field this checkpoint sets differently from the transformers default:
+      _from_model_config       = True
+      bos_token_id             = 1
+      eos_token_id             = 2
+
+====================================================================================================
+llava-hf/llava-onevision-qwen2-7b-ov-hf
+====================================================================================================
+  decoding fields:
+      do_sample                = None
+      temperature              = None
+      top_p                    = None
+      top_k                    = None
+      num_beams                = None
+      repetition_penalty       = None
+      max_new_tokens           = None
+      max_length               = None
+
+  every field this checkpoint sets differently from the transformers default:
+      _from_model_config       = True
+      bos_token_id             = 151643
+      eos_token_id             = 151645
+
+====================================================================================================
+google/gemma-3-27b-it
+====================================================================================================
+  decoding fields:
+      do_sample                = True
+      temperature              = None
+      top_p                    = 0.95
+      top_k                    = 64
+      num_beams                = None
+      repetition_penalty       = None
+      max_new_tokens           = None
+      max_length               = None
+
+  every field this checkpoint sets differently from the transformers default:
+      bos_token_id             = 2
+      cache_implementation     = 'hybrid'
+      do_sample                = True
+      eos_token_id             = [1, 106]
+      pad_token_id             = 0
+      top_k                    = 64
+      top_p                    = 0.95
+
+====================================================================================================
+google/gemma-4-31B-it
+====================================================================================================
+  decoding fields:
+      do_sample                = True
+      temperature              = 1.0
+      top_p                    = 0.95
+      top_k                    = 64
+      num_beams                = None
+      repetition_penalty       = None
+      max_new_tokens           = None
+      max_length               = None
+
+  every field this checkpoint sets differently from the transformers default:
+      bos_token_id             = 2
+      do_sample                = True
+      eos_token_id             = [1, 106, 50]
+      pad_token_id             = 0
+      temperature              = 1.0
+      top_k                    = 64
+      top_p                    = 0.95
+
+====================================================================================================
+Qwen/Qwen3-VL-32B-Instruct
+====================================================================================================
+  decoding fields:
+      do_sample                = True
+      temperature              = 0.7
+      top_p                    = 0.8
+      top_k                    = 20
+      num_beams                = None
+      repetition_penalty       = 1.0
+      max_new_tokens           = None
+      max_length               = None
+
+  every field this checkpoint sets differently from the transformers default:
+      bos_token_id             = 151643
+      do_sample                = True
+      eos_token_id             = [151645, 151643]
+      pad_token_id             = 151643
+      repetition_penalty       = 1.0
+      temperature              = 0.7
+      top_k                    = 20
+      top_p                    = 0.8
+
+====================================================================================================
+Qwen/Qwen3-VL-32B-Thinking
+====================================================================================================
+  decoding fields:
+      do_sample                = True
+      temperature              = 0.8
+      top_p                    = 0.95
+      top_k                    = 20
+      num_beams                = None
+      repetition_penalty       = 1.0
+      max_new_tokens           = None
+      max_length               = None
+
+  every field this checkpoint sets differently from the transformers default:
+      bos_token_id             = 151643
+      do_sample                = True
+      eos_token_id             = [151645, 151643]
+      pad_token_id             = 151643
+      repetition_penalty       = 1.0
+      temperature              = 0.8
+      top_k                    = 20
+      top_p                    = 0.95
 
