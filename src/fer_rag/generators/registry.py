@@ -57,19 +57,19 @@ MODELS = {
     "google/gemma-4-31B-it": {
         "style": "one_step",
         "supports_system": True,
-        "max_new_tokens": 20,
+        "max_new_tokens": 1024,
+        "enable_thinking": False,
     },
     "Qwen/Qwen3-VL-32B-Instruct": {
         "style": "one_step",
         "supports_system": True,
-        "max_new_tokens": 20,
+        "max_new_tokens": 128,
     },
     "Qwen/Qwen3-VL-32B-Thinking": {
+        # does not support reasoning=False. 
         "style": "one_step",
         "supports_system": True,
-        # Reasoning is emitted before the answer, so the 20-token budget used by the
-        # other checkpoints would return truncated reasoning instead of a label.
-        "max_new_tokens": 1024,
+        "max_new_tokens": 40960,
         "parse": parse_thinking,
     },
 }

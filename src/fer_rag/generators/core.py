@@ -194,8 +194,9 @@ def generate_prediction(model, processor, conversation, images, spec):
     rather than printed: this is library code, so the calling pipeline decides whether and
     how often to report them.
     """
+
+    # system role truncated if support system is false, and imaged are attached if one-step style 
     conversation = normalize_conversation(conversation, images, spec)
-    device_type = next(iter(model.parameters())).device
 
     if spec["style"] == "two_step":
         # Images are passed separately to the processor; placeholders stay bare.
@@ -210,7 +211,8 @@ def generate_prediction(model, processor, conversation, images, spec):
             add_generation_prompt=True,
             return_tensors="pt",
         )
-
+    # move inputs to the model device
+    device_type = next(iter(model.parameters())).device
     inputs = inputs.to(device_type)
 
     max_new_tokens = spec.get("max_new_tokens", DEFAULT_MAX_NEW_TOKENS)
