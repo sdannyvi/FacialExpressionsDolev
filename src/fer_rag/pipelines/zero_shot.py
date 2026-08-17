@@ -5,6 +5,7 @@ from PIL import Image
 import pandas as pd
 import argparse
 import sys
+from config import resolve_path, validate_image_paths
 
 from ..generators import (AVAILABLE_MODELS, get_model_spec, load_generator, generate_prediction,
                           resolve_thinking, thinking_models, validate_thinking_request)
@@ -55,6 +56,14 @@ def print_conversation(conv):
         else:
             print("  CONTENT:", content)
 
+# read csv
+test_df = pd.read_csv(test_path).reset_index(drop=True)
+# classes list
+classes_list = sorted(test_df['true_label'].unique().tolist())
+
+# validate image paths
+validate_image_paths(test_df["file_path"].tolist(), test_path)
+
 # load the generator
 generator_model, generator_processor, generator_spec = load_generator(generator_id)
 # check the checkpoint loaded as asked: the classes the Auto loader resolved to, float16
@@ -66,11 +75,6 @@ print(f"[generators.registry.load_generator] generator classes: "
       f"{type(generator_model).__name__} / {type(generator_processor).__name__}")
 print(f"[generators.registry.load_generator] generator model dtype: {next(generator_model.parameters()).dtype}")
 print(f"[generators.registry.load_generator] generator device map: {generator_model.hf_device_map}")
-
-# read csv
-test_df = pd.read_csv(test_path).reset_index(drop=True)
-# classes list
-classes_list = sorted(test_df['true_label'].unique().tolist())
 
 # if results path exist, load it
 if os.path.exists(results_path):
@@ -118,7 +122,8 @@ for batch_start in range(start_row, len(test_df), batch_size):
         # load query
         query_path = row["file_path"]
         query_file_paths.append(query_path)
-        with Image.open(query_path) as im:
+        absolute_query_path = resolve_path(query_path)
+        with Image.open(absolute_query_path) as im:
             query_image = im.convert("RGB")
 
 
