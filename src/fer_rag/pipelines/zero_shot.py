@@ -167,6 +167,12 @@ for batch_start in range(start_row, len(test_df), batch_size):
         torch.cuda.empty_cache()
     # end batch
 
+    # validate predictions are not empty or none
+    empty_count = sum(1 for p in batch_predictions if not p)
+    if empty_count:
+        print(f"[WARNING] {empty_count} empty predictions in this batch - generation ended "
+              f"before an answer. Consider raising max_new_tokens for '{generator_id}'.")
+
     # update results
     results_df.loc[batch_start:batch_end - 1, "prediction"] = batch_predictions
     results_df.loc[batch_start:batch_end - 1, "query_file_path"] = query_file_paths

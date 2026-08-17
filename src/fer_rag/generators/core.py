@@ -6,7 +6,7 @@ This module holds everything that differs between generator checkpoints:
 * normalizers      - how the pipeline's neutral conversation is reshaped for a checkpoint
 * generate_prediction         - the shared inference call (template -> processor -> generate -> decode)
 * decode_generation - how generated ids become ``(thinking, prediction)``
-* parsers          - how a raw decoded string becomes a prediction
+
 
 The decoding defaults these functions apply (``GENERATION_ARGS``,
 ``DEFAULT_MAX_NEW_TOKENS``) live in ``constants.py``.
@@ -227,6 +227,7 @@ def decode_generation(processor, prompt_ids, gen_ids, spec, thinking_on):
                 f"tokenizer, so the reasoning cannot be split off from the answer."
             )
         positions = (gen_ids == end_id).nonzero()
+        # if end token never appeared in generation, model wasn't finish to generate reasoning. 
         if positions.numel() == 0:
             # the reasoning never closed: generation hit max_new_tokens mid-thought, so
             # everything generated is reasoning and no answer was reached
@@ -238,18 +239,6 @@ def decode_generation(processor, prompt_ids, gen_ids, spec, thinking_on):
 
     # 3. the checkpoint does not reason
     return None, processor.decode(gen_ids, skip_special_tokens=True)
-
-
-def last_non_empty_line(text):
-    """Keep the last non-empty line, which is where a talkative model puts its answer.
-
-    Applied through the registry's ``parse`` key, after the reasoning has already been
-    split off by ``decode_generation``.
-    """
-    lines = [line.strip() for line in text.splitlines() if line.strip()]
-    if lines:
-        return lines[-1]
-    return text
 
 
 # --------------------------------------------------------------------------------------
@@ -326,10 +315,8 @@ def generate_prediction(model, processor, conversation, images, spec, enable_thi
         "max_new_tokens": max_new_tokens,
     }
     prompt_tokens = inputs["input_ids"][0]
-    thinking, prediction = decode_generation(processor, prompt_tokens, gen_ids, spec, thinking_on)
 
-    parse = spec.get("parse")
-    if parse is not None:
-        prediction = parse(prediction)
+    # if thinking is off then thinking is None
+    thinking, prediction = decode_generation(processor, prompt_tokens, gen_ids, spec, thinking_on)
 
     return prediction.strip().lower(), thinking, stats

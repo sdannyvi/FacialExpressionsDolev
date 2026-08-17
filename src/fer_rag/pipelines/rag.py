@@ -390,6 +390,12 @@ for curr_batch in range(num_batches):
 
     # at the end of batch I will save predictions of the batch
 
+    # validate predictions are not empty or none
+    empty_count = sum(1 for p in batch_predictions if not p)
+    if empty_count:
+        print(f"[WARNING] {empty_count} empty predictions in this batch - generation ended "
+              f"before an answer. Consider raising max_new_tokens for '{generator_id}'.")
+
     # update the predictions column (if there is no such column - creates it)
     # current start row (taking into account past savings)
     curr_start_row = (start_batch + curr_batch) * batch_size

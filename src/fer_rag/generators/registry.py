@@ -21,7 +21,6 @@ Keys per entry:
     supports_system  whether the chat template accepts a system role. When False the
                      system text is folded into the first user message.
     max_new_tokens   generation budget. Optional; defaults to DEFAULT_MAX_NEW_TOKENS.
-    parse            optional callable(str) -> str applied to the decoded output.
     supports_consecutive_user
                      whether the template tolerates several user messages in a row.
                      Optional, defaults True. False rules out the RAG pipeline's
@@ -49,7 +48,7 @@ whether a run will reason and ``validate_thinking_request`` whether it may, so t
 names stay an implementation detail of the table below.
 """
 
-from .core import last_non_empty_line, load_multimodal_lm
+from .core import load_multimodal_lm
 
 MODELS = {
     "llava-hf/llava-v1.6-34b-hf": {
@@ -104,7 +103,6 @@ MODELS = {
         # its tokenizer ships no response_template, so the reasoning is split on this
         # token instead; </think> is a single token here
         "thinking_end_token": "</think>",
-        "parse": last_non_empty_line,
     },
 }
 
