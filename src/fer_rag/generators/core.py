@@ -5,6 +5,7 @@ This module holds everything that differs between generator checkpoints:
 * loader           - how a checkpoint is instantiated
 * normalizers      - how the pipeline's neutral conversation is reshaped for a checkpoint
 * generate_prediction         - the shared inference call (template -> processor -> generate -> decode)
+* decode_generation - how generated ids become ``(thinking, prediction)``
 * parsers          - how a raw decoded string becomes a prediction
 
 The decoding defaults these functions apply (``GENERATION_ARGS``,
@@ -159,20 +160,92 @@ def normalize_conversation(conversation, images, spec):
 
 
 # --------------------------------------------------------------------------------------
-# Output parsing.
+# Thinking mode.
 # --------------------------------------------------------------------------------------
 
-def parse_thinking(text):
-    """Strip the reasoning block from a thinking model's output.
+def resolve_thinking(spec, enable_thinking):
+    """Return whether this run will actually produce reasoning text.
 
-    Qwen3-VL Thinking emits its reasoning before the answer. Keep whatever follows the
-    closing tag; if the tag is absent (for instance because generation hit the token
-    limit mid-reasoning) fall back to the last non-empty line, which is where the answer
-    lands when the model finishes normally.
+    The registry's ``thinking`` key says which kind of checkpoint this is, and the request
+    only gets a say for the "optional" kind: an "always" checkpoint reasons whatever the
+    caller asks, and one that declares no kind never does. Callers therefore never have to
+    know which kind they are holding, nor how the registry spells it.
+
+    This is the only place that turns those two inputs into a yes or no. Everything that
+    depends on the answer - the generation budget, the decode strategy, whether the
+    results file grows a thinking column - asks here rather than re-deriving it.
     """
-    if "</think>" in text:
-        text = text.rsplit("</think>", 1)[1]
+    mode = spec.get("thinking")
+    if mode == "always":
+        return True
+    return mode == "optional" and bool(enable_thinking)
 
+
+# --------------------------------------------------------------------------------------
+# Output decoding and parsing.
+# --------------------------------------------------------------------------------------
+
+def decode_generation(processor, prompt_ids, gen_ids, spec, thinking_on):
+    """Turn the generated ids into ``(thinking, prediction)``.
+
+    ``thinking`` is ``None`` for a run that produces no reasoning, so a caller can tell
+    "this model does not reason" apart from "it reasoned and said nothing".
+
+    Splitting happens on **token ids, before decoding**, never on the decoded string,
+    because the two reasoning checkpoints delimit their reasoning differently in kind and
+    not merely in spelling: Qwen3-VL marks ``</think>`` as ``special: false`` (it survives
+    ``skip_special_tokens=True``) while Gemma 4 marks ``<channel|>`` as ``special: true``
+    (it is erased). A string split would therefore work for one and silently fail for the
+    other.
+
+    Three strategies, in order of how generic they are:
+
+    1. the checkpoint ships a machine-readable response schema (``response_template``) ->
+       hand the ids to ``parse_response`` and let the checkpoint's own schema do the
+       split. Names no model-specific token at all and covers both thinking modes with
+       one call. ``prefix`` is required because the template pre-writes part of the
+       assistant message that the parser has to see.
+    2. no schema, but the registry declares the token that closes the reasoning -> split
+       the ids at it and decode the two halves separately.
+    3. neither -> a plain decode, exactly as before thinking existed.
+    """
+    tokenizer = getattr(processor, "tokenizer", None)
+
+    # 1. the checkpoint describes its own output format
+    if getattr(tokenizer, "response_template", None) is not None:
+        message = processor.parse_response(gen_ids, prefix=prompt_ids)
+        # 'content' is absent when generation stopped before the reasoning closed
+        return message.get("thinking"), message.get("content", "")
+
+    # 2. older template: split on the closing token the registry declares
+    end_token = spec.get("thinking_end_token")
+    if thinking_on and end_token is not None:
+        end_id = tokenizer.convert_tokens_to_ids(end_token)
+        if end_id is None or end_id == getattr(tokenizer, "unk_token_id", None):
+            raise ValueError(
+                f"thinking_end_token '{end_token}' is not a token of this checkpoint's "
+                f"tokenizer, so the reasoning cannot be split off from the answer."
+            )
+        positions = (gen_ids == end_id).nonzero()
+        if positions.numel() == 0:
+            # the reasoning never closed: generation hit max_new_tokens mid-thought, so
+            # everything generated is reasoning and no answer was reached
+            return processor.decode(gen_ids, skip_special_tokens=True).strip(), ""
+        cut = int(positions[0])
+        thinking = processor.decode(gen_ids[:cut], skip_special_tokens=True)
+        prediction = processor.decode(gen_ids[cut + 1:], skip_special_tokens=True)
+        return thinking.strip(), prediction
+
+    # 3. the checkpoint does not reason
+    return None, processor.decode(gen_ids, skip_special_tokens=True)
+
+
+def last_non_empty_line(text):
+    """Keep the last non-empty line, which is where a talkative model puts its answer.
+
+    Applied through the registry's ``parse`` key, after the reasoning has already been
+    split off by ``decode_generation``.
+    """
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     if lines:
         return lines[-1]
@@ -183,24 +256,40 @@ def parse_thinking(text):
 # Inference.
 # --------------------------------------------------------------------------------------
 
-def generate_prediction(model, processor, conversation, images, spec):
-    """Run one generation and return ``(prediction, stats)``.
+def generate_prediction(model, processor, conversation, images, spec, enable_thinking=False):
+    """Run one generation and return ``(prediction, thinking, stats)``.
 
     ``conversation`` is the pipeline's neutral message list and ``images`` the PIL images
     in placeholder order. Normalization, templating, generation, slicing and decoding all
     happen here, so the pipelines never touch model-specific details.
+
+    ``enable_thinking`` asks the checkpoint to reason before answering. It defaults to
+    False, so a caller that says nothing gets no thinking, and it only reaches templates
+    that declare they read it. ``thinking`` comes back ``None`` whenever the run produced
+    no reasoning.
 
     ``stats`` holds the per-call diagnostics (device and token counts). They are returned
     rather than printed: this is library code, so the calling pipeline decides whether and
     how often to report them.
     """
 
-    # system role truncated if support system is false, and imaged are attached if one-step style 
+    # system role truncated if support system is false, and imaged are attached if one-step style
     conversation = normalize_conversation(conversation, images, spec)
+    thinking_on = resolve_thinking(spec, enable_thinking)
+
+    # Only a template that declares it reads enable_thinking is given it. Passing it to a
+    # template that ignores it would be a silent no-op that reads like a working switch.
+    # add_generation_prompt stays True in both modes: for Gemma 4 it is what opens the
+    # model turn *and* what writes the pre-closed, empty thought channel that suppresses
+    # reasoning when enable_thinking is False. It never enables thinking by itself.
+    template_kwargs = {}
+    if spec.get("thinking") == "optional":
+        template_kwargs["enable_thinking"] = enable_thinking
 
     if spec["style"] == "two_step":
         # Images are passed separately to the processor; placeholders stay bare.
-        text_prompt = processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
+        text_prompt = processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False,
+                                                    **template_kwargs)
         inputs = processor(images=images, text=text_prompt, padding=True, return_tensors="pt")
     else:
         # One-step templates process the inline images themselves.
@@ -210,12 +299,19 @@ def generate_prediction(model, processor, conversation, images, spec):
             return_dict=True,
             add_generation_prompt=True,
             return_tensors="pt",
+            **template_kwargs,
         )
     # move inputs to the model device
     device_type = next(iter(model.parameters())).device
     inputs = inputs.to(device_type)
 
-    max_new_tokens = spec.get("max_new_tokens", DEFAULT_MAX_NEW_TOKENS)
+    # reasoning and answer share one budget, so a thinking run gets its own larger one
+    if thinking_on:
+        max_new_tokens = spec.get("max_new_tokens_thinking",
+                                  spec.get("max_new_tokens", DEFAULT_MAX_NEW_TOKENS))
+    else:
+        max_new_tokens = spec.get("max_new_tokens", DEFAULT_MAX_NEW_TOKENS)
+
     with torch.no_grad():
         output = model.generate(**inputs, max_new_tokens=max_new_tokens, **GENERATION_ARGS)
 
@@ -226,12 +322,14 @@ def generate_prediction(model, processor, conversation, images, spec):
         "prompt_toeken_len": prompt_len,
         "generated_token_len": gen_ids.shape[-1],
         "total_token_len": output[0].shape[-1],
+        "thinking_on": thinking_on,
+        "max_new_tokens": max_new_tokens,
     }
-
-    prediction = processor.decode(gen_ids, skip_special_tokens=True)
+    prompt_tokens = inputs["input_ids"][0]
+    thinking, prediction = decode_generation(processor, prompt_tokens, gen_ids, spec, thinking_on)
 
     parse = spec.get("parse")
     if parse is not None:
         prediction = parse(prediction)
 
-    return prediction.strip().lower(), stats
+    return prediction.strip().lower(), thinking, stats

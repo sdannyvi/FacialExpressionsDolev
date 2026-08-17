@@ -11,8 +11,9 @@ import faiss
 import numpy as np
 from config import resolve_path, validate_image_paths
 
-from ..generators import AVAILABLE_MODELS, get_model_spec, load_generator, generate_prediction
-
+from ..generators import (AVAILABLE_MODELS, get_model_spec, load_generator, generate_prediction,
+                          resolve_thinking, thinking_models, validate_prompt_request,
+                          validate_thinking_request)
 
 # parameters
 parser = argparse.ArgumentParser(description="Run Retrieval-Augmented Generation.")
@@ -38,6 +39,11 @@ parser.add_argument("--prompt",type=str,  default="single-user-message",
                     help="Prompt structure.")
 parser.add_argument("--top_k",type=int, default=2,
                     help="Number of top examples to retrieve from the knowledge base.")
+parser.add_argument("--enable_thinking", action="store_true",
+                    help="Let the generator reason before answering, and save that reasoning to a "
+                         "'thinking' column. Omitting the flag means no thinking. Only checkpoints "
+                         f"whose chat template takes an enable_thinking argument support it: "
+                         f"{', '.join(thinking_models('optional'))}.")
 
 args = parser.parse_args()
 
@@ -50,17 +56,21 @@ clip_model_id = args.clip_model_id
 dim_reduction = args.dim_reduction
 prompt = args.prompt
 top_k = args.top_k
+enable_thinking = args.enable_thinking
 print(f"Code running:\nGenerator model: {generator_id},\nCLIP model: {clip_model_id},\ndim_reduction: {dim_reduction},\n"
-      f"prompt: {prompt},\ntop_k: {top_k}")
+      f"prompt: {prompt},\ntop_k: {top_k},\nenable_thinking: {enable_thinking}")
 
-# validate the requested prompt structure against the chosen generator before doing any
-# work, so an unsupported combination fails immediately instead of after loading weights
 generator_spec = get_model_spec(generator_id)
-if prompt == "multi-user-message" and not generator_spec.get("supports_consecutive_user", True):
-    raise ValueError(
-        f"'{generator_id}' requires its chat roles to alternate, so it cannot be used with "
-        f"--prompt multi-user-message. Use --prompt single-user-message instead."
-    )
+
+# if generator model does not allow multi user message, raise an error 
+validate_prompt_request(generator_id, generator_spec, prompt)
+
+# validate thinking mode request - checks whether generator model checkpoint allows. otherwise, raise an error 
+validate_thinking_request(generator_id, generator_spec, enable_thinking)
+
+# if thinking is on, this run will record "thinking" generations in results file 
+thinking_on = resolve_thinking(generator_spec, enable_thinking)
+print(f"the run produces thinking text: {thinking_on}")
 
 # CUDA
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -180,6 +190,10 @@ all_retrieval_cols = label_cols + path_cols + cosine_cols
 print(f"label cols: {label_cols}")
 print(f"all retrieval cols: {all_retrieval_cols}")
 
+# the thinking column exists only for a run that produces reasoning; prediction is
+# unaffected either way
+thinking_dict = {"thinking": None} if thinking_on else {}
+
 # if start batch not 0, then read the existing csv
 if start_batch > 0:
     results_df = pd.read_csv(results_path)
@@ -187,7 +201,7 @@ if start_batch > 0:
 else:
     retrieval_dict = {col: None for col in all_retrieval_cols}
     results_df = test_df.copy(deep=True)
-    results_df = results_df.assign(prediction=None, query_file_path=None, **retrieval_dict)
+    results_df = results_df.assign(prediction=None, query_file_path=None, **thinking_dict, **retrieval_dict)
 
 
 results_df = results_df.reset_index(drop=True)
@@ -218,6 +232,7 @@ for curr_batch in range(num_batches):
     batch_df = df.iloc[start_row:end_row].reset_index(drop=True)
 
     batch_predictions = []
+    batch_thinking = []
     # create datasets based  on k
     top_labels_df = pd.DataFrame(columns=label_cols)
     top_paths_df = pd.DataFrame(columns=path_cols)
@@ -358,14 +373,18 @@ for curr_batch in range(num_batches):
             print(f"conversation structure:\n{conversation}")
 
         # generate prediction
-        prediction, gen_stats = generate_prediction(generator_model, generator_processor, conversation, images, generator_spec)
+        prediction, thinking, gen_stats = generate_prediction(generator_model, generator_processor, conversation,
+                                                              images, generator_spec,
+                                                              enable_thinking=enable_thinking)
 
-        if debug_printed == False: 
+        if debug_printed == False:
             print(f"gen_stats: {gen_stats}")
             print(f'prediction: {prediction}')
+            print(f'thinking: {thinking}')
             debug_printed = True
 
         batch_predictions.append(prediction)
+        batch_thinking.append(thinking)
         del query_image, images, query_embedding, scores, ids, faiss_ids, top_similarities, kb_row_indices, top_examples
         del top_labels, top_paths
 
@@ -379,11 +398,14 @@ for curr_batch in range(num_batches):
     # assigns the values in batch predictions to the specified rows in results df
     results_df.loc[curr_start_row:curr_end_row, "prediction"] = batch_predictions
     results_df.loc[curr_start_row:curr_end_row, "query_file_path"] = query_file_paths
+    # the reasoning that produced those predictions, on the same rows
+    if thinking_on:
+        results_df.loc[curr_start_row:curr_end_row, "thinking"] = batch_thinking
     # saving top examples to results
     results_df.loc[curr_start_row:curr_end_row, label_cols] = top_labels_df.values
     results_df.loc[curr_start_row:curr_end_row, path_cols] = top_paths_df.values
     results_df.loc[curr_start_row:curr_end_row, cosine_cols] = top_similarities_df.values
-    del top_labels_df, top_paths_df, top_similarities_df, batch_df
+    del top_labels_df, top_paths_df, top_similarities_df, batch_df, batch_thinking
     # save results
     results_df.to_csv(results_path, index=False)
     torch.cuda.empty_cache()

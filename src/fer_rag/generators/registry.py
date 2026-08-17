@@ -26,9 +26,30 @@ Keys per entry:
                      whether the template tolerates several user messages in a row.
                      Optional, defaults True. False rules out the RAG pipeline's
                      "multi-user-message" prompt mode.
+
+Reasoning ("thinking") is one key, in the same spirit as ``style``: a checkpoint states
+which of the three kinds it is, so it cannot claim two at once.
+
+    thinking         "optional" - the chat template takes an ``enable_thinking`` kwarg,
+                                  so each run chooses.
+                     "always"   - the checkpoint reasons unconditionally, with no
+                                  argument to turn it off.
+                     omitted    - the checkpoint never reasons, whatever a run asks for.
+    max_new_tokens_thinking
+                     generation budget used only when reasoning is on, where the
+                     reasoning and the answer share it. Optional; falls back to
+                     max_new_tokens.
+    thinking_end_token
+                     the token that closes the reasoning. Needed only by a checkpoint
+                     whose tokenizer ships no ``response_template``; see
+                     ``decode_generation``.
+
+Nothing outside this package reads those keys. A pipeline asks ``resolve_thinking``
+whether a run will reason and ``validate_thinking_request`` whether it may, so the key
+names stay an implementation detail of the table below.
 """
 
-from .core import load_multimodal_lm, parse_thinking
+from .core import last_non_empty_line, load_multimodal_lm
 
 MODELS = {
     "llava-hf/llava-v1.6-34b-hf": {
@@ -57,8 +78,16 @@ MODELS = {
     "google/gemma-4-31B-it": {
         "style": "one_step",
         "supports_system": True,
+        # the model card's quickstart budget, which is its enable_thinking=False example
         "max_new_tokens": 1024,
-        "enable_thinking": False,
+        # the only checkpoint here whose thinking is a per-run choice. The template
+        # defaults enable_thinking to false, so omitting it already means no thinking;
+        # the pipelines pass it explicitly anyway, so a template revision cannot silently
+        # flip a run. Its output is split by the response_template the checkpoint ships,
+        # so no thinking_end_token is needed.
+        "thinking": "optional",
+        # the card publishes no thinking budget: reasoning and answer must share this one
+        "max_new_tokens_thinking": 4096,
     },
     "Qwen/Qwen3-VL-32B-Instruct": {
         "style": "one_step",
@@ -66,16 +95,20 @@ MODELS = {
         "max_new_tokens": 128,
     },
     "Qwen/Qwen3-VL-32B-Thinking": {
-        # does not support reasoning=False. 
+        # does not support reasoning=False.
         "style": "one_step",
         "supports_system": True,
+        # the model card's vision-language recommendation (out_seq_length=40960)
         "max_new_tokens": 40960,
-        "parse": parse_thinking,
+        "thinking": "always",
+        # its tokenizer ships no response_template, so the reasoning is split on this
+        # token instead; </think> is a single token here
+        "thinking_end_token": "</think>",
+        "parse": last_non_empty_line,
     },
 }
 
 AVAILABLE_MODELS = sorted(MODELS)
-
 
 def get_model_spec(model_id):
     """Return the registry entry for ``model_id`` without loading any weights.
@@ -89,6 +122,55 @@ def get_model_spec(model_id):
             f"Supported models: {', '.join(AVAILABLE_MODELS)}"
         )
     return MODELS[model_id]
+
+
+def thinking_models(mode):
+    """Return the checkpoints whose ``thinking`` key is ``mode``, for help and error text.
+
+    Derived from ``MODELS`` on demand rather than frozen into module-level constants, so
+    registering a reasoning checkpoint updates every message that names one by editing the
+    table above and nothing else.
+    """
+    return sorted(model_id for model_id, spec in MODELS.items() if spec.get("thinking") == mode)
+
+def validate_thinking_request(model_id, spec, enable_thinking):
+    """Reject a thinking request the checkpoint cannot honour, before any weights load.
+
+    Only an "optional" checkpoint can be switched on by the caller: an "always" one needs
+    no flag, and one with no ``thinking`` key cannot be talked into reasoning at all. Both
+    groups are named, because a run that asked for thinking wants to know where to find it.
+
+    Lives here, next to the table it reports on, so that every pipeline raises the same
+    message and no pipeline has to know how the table spells its keys.
+    """
+    # if thinking is on and the model does not have an optional thinking argument, raise an error.
+    if enable_thinking and spec.get("thinking") != "optional":
+        raise ValueError(
+            f"--enable_thinking was requested, but the model checkpoint '{model_id}' does not take "
+            f"an enable_thinking argument, so its thinking mode cannot be switched on.\n"
+            f"Model checkpoints that accept --enable_thinking: {', '.join(thinking_models('optional'))}.\n"
+            f"Model checkpoints that always think, with no flag needed: {', '.join(thinking_models('always'))}.\n"
+            f"Drop --enable_thinking to run '{model_id}' without thinking."
+        )
+
+
+def validate_prompt_request(model_id, spec, prompt):
+    """Reject a prompt structure the checkpoint cannot honour, before any weights load.
+
+    A template that requires user and assistant to alternate cannot take the RAG
+    pipeline's "multi-user-message" mode, which sends several user messages in a row.
+
+    Lives here, next to the table it reports on, so no pipeline has to know how the table
+    spells its keys.
+    """
+    # if the prompt sends consecutive user messages but the template needs alternating roles, raise
+    if prompt == "multi-user-message" and not spec.get("supports_consecutive_user", True):
+        raise ValueError(
+            f"'{model_id}' requires its chat roles to alternate, so it cannot be used with "
+            f"--prompt multi-user-message. Use --prompt single-user-message instead."
+        )
+
+
 
 
 def load_generator(model_id):

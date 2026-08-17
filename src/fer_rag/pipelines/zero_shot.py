@@ -6,7 +6,8 @@ import pandas as pd
 import argparse
 import sys
 
-from ..generators import AVAILABLE_MODELS, load_generator, generate_prediction
+from ..generators import (AVAILABLE_MODELS, get_model_spec, load_generator, generate_prediction,
+                          resolve_thinking, thinking_models, validate_thinking_request)
 
 parser = argparse.ArgumentParser(description="Run Retrieval-Augmented Generation.")
 parser.add_argument("--test_path", type=str, required=True,
@@ -16,11 +17,25 @@ parser.add_argument("--results_path", type=str, required=True,
 parser.add_argument("--generator_id", type=str, default="llava-hf/llava-v1.6-34b-hf",
                     choices=AVAILABLE_MODELS,
                     help="The path to the Hugging Face generator model checkpoint.")
+parser.add_argument("--enable_thinking", action="store_true",
+                    help="Let the generator reason before answering, and save that reasoning to a "
+                         "'thinking' column. Omitting the flag means no thinking. Only checkpoints "
+                         f"whose chat template takes an enable_thinking argument support it: "
+                         f"{', '.join(thinking_models('optional'))}.")
 
 args = parser.parse_args()
 test_path = args.test_path
 results_path = args.results_path
 generator_id = args.generator_id
+enable_thinking = args.enable_thinking
+
+generator_spec = get_model_spec(generator_id)
+# validate thinking mode request - checks whether generator model checkpoint allows. otherwise, raise an error 
+validate_thinking_request(generator_id, generator_spec, enable_thinking)
+
+# if thinking is on, this run will record "thinking" generations in results file 
+thinking_on = resolve_thinking(generator_spec, enable_thinking)
+print(f"the run produces thinking text: {thinking_on}")
 
 # print conversation
 def print_conversation(conv):
@@ -84,6 +99,10 @@ else:
     results_df = test_df.copy(deep=True)
     results_df["prediction"] = None
     results_df["query_file_path"] = None
+    # the thinking column exists only for a run that produces reasoning; prediction is
+    # unaffected either way
+    if thinking_on:
+        results_df["thinking"] = None
     start_row = 0
 
 debug_printed = False
@@ -92,6 +111,7 @@ for batch_start in range(start_row, len(test_df), batch_size):
     batch_end = min(batch_start + batch_size, len(test_df))
     batch_df = test_df.iloc[batch_start:batch_end].copy()
     batch_predictions = []
+    batch_thinking = []
     query_file_paths = []
     # loop through images to classify
     for _, row in batch_df.iterrows():
@@ -129,15 +149,19 @@ for batch_start in range(start_row, len(test_df), batch_size):
             print(f"conversation structure:\n{conversation}")
  
         # generate prediction
-        prediction, gen_stats = generate_prediction(generator_model, generator_processor, conversation, [query_image], generator_spec)
+        prediction, thinking, gen_stats = generate_prediction(generator_model, generator_processor, conversation,
+                                                              [query_image], generator_spec,
+                                                              enable_thinking=enable_thinking)
 
 
-        if debug_printed == False: 
+        if debug_printed == False:
             print(f"gen_stats: {gen_stats}")
             print(f'prediction: {prediction}')
+            print(f'thinking: {thinking}')
             debug_printed = True
 
         batch_predictions.append(prediction)
+        batch_thinking.append(thinking)
 
         del query_image
         torch.cuda.empty_cache()
@@ -146,4 +170,7 @@ for batch_start in range(start_row, len(test_df), batch_size):
     # update results
     results_df.loc[batch_start:batch_end - 1, "prediction"] = batch_predictions
     results_df.loc[batch_start:batch_end - 1, "query_file_path"] = query_file_paths
+    # the reasoning that produced those predictions, on the same rows
+    if thinking_on:
+        results_df.loc[batch_start:batch_end - 1, "thinking"] = batch_thinking
     results_df.to_csv(results_path, index=False)
