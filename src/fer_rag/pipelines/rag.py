@@ -80,7 +80,7 @@ print(f"the device being used: {device}")
 knowledge_base_set = pd.read_csv(knowledge_base_path)
 test_df = pd.read_csv(test_path)
 # create a list of classes out of the train_set
-classes_list = sorted(knowledge_base_set['true_label'].unique().tolist())
+classes_list = sorted(test_df['true_label'].unique().tolist())
 
 # validate image paths
 validate_image_paths(knowledge_base_set["file_path"].tolist(), knowledge_base_path)
