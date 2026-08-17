@@ -345,7 +345,6 @@ for curr_batch in range(num_batches):
             user_text = [f"You are given {top_k} labeled examples and one query image, in the following order:"]
 
             for i, example_row in enumerate(top_examples.itertuples(), start=1):
-                print(f"example row: {example_row}")
                 # add images to image list
                 example_label = example_row.true_label
                 example_image = Image.open(resolve_path(example_row.file_path)).convert('RGB')
@@ -360,7 +359,6 @@ for curr_batch in range(num_batches):
             content.append({"type": "image"})
             user_text.append(f"Image {top_k + 1} is the query. Based on the examples, classify the emotion shown in this image into one of the following emotions: {', '.join(classes_list)}.")
             user_text.append("Respond with only one word: the emotion label.")
-            print(f"user text: {user_text}")
             # concat user text
             user_text = "\n".join(user_text)
             content.append({"type": "text", "text": user_text})
