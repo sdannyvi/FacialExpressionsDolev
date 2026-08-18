@@ -26,6 +26,7 @@ module stays cheap and does not depend on the library being installed.
 """
 
 import copy
+import re
 
 import torch
 
@@ -245,7 +246,48 @@ def decode_generation(processor, prompt_ids, gen_ids, spec, thinking_on):
 # Inference.
 # --------------------------------------------------------------------------------------
 
-def generate_prediction(model, processor, conversation, images, spec, enable_thinking=False):
+def _stop_token_ids(model):
+    """Return the ids that end a generation, as a set.
+
+    ``generation_config.eos_token_id`` is what ``generate`` itself stops on, so it is read
+    from there rather than from the tokenizer. It is an int for some checkpoints
+    (llava-v1.6-34b, llava-v1.6-mistral, llava-onevision) and a list for others (Gemma 3/4
+    and Qwen3-VL, whose chat templates close a turn with a token of their own). Both
+    spellings are normalized here, so a caller never has to ask which kind it is holding.
+    """
+    stop_ids = set()
+    eos_token_id = getattr(model.generation_config, "eos_token_id", None)
+    if isinstance(eos_token_id, int):
+        stop_ids.add(eos_token_id)
+    elif eos_token_id is not None:
+        stop_ids.update(eos_token_id)
+    return stop_ids
+
+
+def _collapse_repeated_tokens(text):
+    """Collapse a run of one repeated token into ``<token>xN``, for a readable dump.
+
+    The processor expands every image placeholder into one token per patch, so a decoded
+    prompt carries thousands of identical tokens in a row. They are collapsed to their
+    count, which is the part worth reading: it says how many tokens each image cost.
+    """
+    return re.sub(r"(<[^<>]+>)\1+",
+                  lambda match: f"{match.group(1)}x{match.group(0).count(match.group(1))}",
+                  text)
+
+def get_context_window(model):
+    """
+    model: a loaded generator model
+    returns: the context window in tokens, or None if the config does not declare one
+    """
+    for config in (getattr(model.config, "text_config", None), model.config):
+        context_window = getattr(config, "max_position_embeddings", None)
+        if context_window:
+            return context_window
+    return None
+    
+def generate_prediction(model, processor, conversation, images, spec, enable_thinking=False,
+                        debug=False, check_truncation=True):
     """Run one generation and return ``(prediction, thinking, stats)``.
 
     ``conversation`` is the pipeline's neutral message list and ``images`` the PIL images
@@ -257,20 +299,29 @@ def generate_prediction(model, processor, conversation, images, spec, enable_thi
     that declare they read it. ``thinking`` comes back ``None`` whenever the run produced
     no reasoning.
 
-    ``stats`` holds the per-call diagnostics (device and token counts). They are returned
-    rather than printed: this is library code, so the calling pipeline decides whether and
-    how often to report them.
+    ``stats`` holds the per-call diagnostics (device and token counts, and why generation
+    stopped: ``finish_reason`` is "stop" when the model ended the turn itself, "length" when
+    max_new_tokens cut it off, and "unknown" for a checkpoint that declares no stop token,
+    which cannot be told apart). They are returned rather than printed: this is library
+    code, so the calling pipeline decides whether and how often to report them.
+
+    ``check_truncation`` can be switched off by a pipeline that has already learned what
+    it needs, which is the case once a run has been told the checkpoint declares no stop
+    token: that cannot change later, so there is nothing left to find out. ``finish_reason``
+    is then None, meaning "not checked" rather than "nothing wrong".
+
+    ``debug`` adds a ``stats["debug"]`` entry describing this one call: the prompt as the
+    model receives it, the shapes of the tensors it is given, and the raw generation before
+    it is split into thinking and prediction. It is off by default because collecting it
+    means decoding a multi-thousand-token prompt, which is wasted work on every sample of a
+    run but exactly what is wanted on the first one.
     """
 
     # system role truncated if support system is false, and imaged are attached if one-step style
     conversation = normalize_conversation(conversation, images, spec)
     thinking_on = resolve_thinking(spec, enable_thinking)
 
-    # Only a template that declares it reads enable_thinking is given it. Passing it to a
-    # template that ignores it would be a silent no-op that reads like a working switch.
-    # add_generation_prompt stays True in both modes: for Gemma 4 it is what opens the
-    # model turn *and* what writes the pre-closed, empty thought channel that suppresses
-    # reasoning when enable_thinking is False. It never enables thinking by itself.
+    # set enable thinking if model accepts enable thinking arg 
     template_kwargs = {}
     if spec.get("thinking") == "optional":
         template_kwargs["enable_thinking"] = enable_thinking
@@ -290,6 +341,19 @@ def generate_prediction(model, processor, conversation, images, spec, enable_thi
             return_tensors="pt",
             **template_kwargs,
         )
+
+    debug_stats = {}
+    if debug:
+        # validate the prompt structure as the generator see it, in cpu 
+        debug_stats["prompt_text"] = _collapse_repeated_tokens(
+            processor.decode(inputs["input_ids"][0], skip_special_tokens=False)
+        )
+        # name -> shape of every tensor handed to the model: pixel_values missing or shorter than len(images) means dropped images
+        debug_stats["input_keys"] = {
+            key: tuple(value.shape) if hasattr(value, "shape") else type(value).__name__
+            for key, value in inputs.items()
+        }
+
     # move inputs to the model device
     device_type = next(iter(model.parameters())).device
     inputs = inputs.to(device_type)
@@ -306,14 +370,36 @@ def generate_prediction(model, processor, conversation, images, spec, enable_thi
 
     prompt_len = inputs["input_ids"].shape[-1]
     gen_ids = output[0][prompt_len:]
+
+    # validate whether generation stopped early 
+    finish_reason = None
+    if check_truncation:
+        stop_ids = _stop_token_ids(model)
+        # if no eos finish generation token was found, validation cannot be applied 
+        if not stop_ids:
+            finish_reason = "unknown"
+        # if eos token not in generated ids, generation stopped early 
+        elif int(gen_ids[-1]) not in stop_ids:
+            finish_reason = "length"
+        # generation completed 
+        else:
+            finish_reason = "stop"
+
     stats = {
         "device": str(device_type),
-        "prompt_toeken_len": prompt_len,
+        "prompt_token_len": prompt_len,
         "generated_token_len": gen_ids.shape[-1],
         "total_token_len": output[0].shape[-1],
         "thinking_on": thinking_on,
         "max_new_tokens": max_new_tokens,
+        "finish_reason": finish_reason,
     }
+
+    if debug:
+        # validate decoder function extracts thinking and prediction 
+        debug_stats["raw_generated"] = processor.decode(gen_ids, skip_special_tokens=False)
+        stats["debug"] = debug_stats
+
     prompt_tokens = inputs["input_ids"][0]
 
     # if thinking is off then thinking is None

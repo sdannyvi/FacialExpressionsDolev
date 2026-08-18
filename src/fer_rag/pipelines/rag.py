@@ -13,7 +13,7 @@ from config import resolve_path, validate_image_paths
 
 from ..generators import (AVAILABLE_MODELS, get_model_spec, load_generator, generate_prediction,
                           resolve_thinking, thinking_models, validate_prompt_request,
-                          validate_thinking_request)
+                          validate_thinking_request, get_context_window)
 
 # parameters
 parser = argparse.ArgumentParser(description="Run Retrieval-Augmented Generation.")
@@ -182,6 +182,7 @@ print(f"[generators.registry.load_generator] generator model dtype: {next(genera
 print(f"[generators.registry.load_generator] generator device map: {generator_model.hf_device_map}")
 
 
+
 # create top K cols
 label_cols = [f'top_label_{i+1}' for i in range(top_k)]
 path_cols = [f'top_path_{i+1}' for i in range(top_k)]
@@ -223,7 +224,10 @@ del test_df
 # keep in mind the last batch might not contain "batch size" samples
 num_batches = (len(df) + batch_size - 1) // batch_size
 
-debug_printed = False
+print_debug = True
+
+check_output_truncation = True
+truncated_count = 0
 # looping through batch 0 to the last batch
 for curr_batch in range(num_batches):
     # initialize start batch and end batch
@@ -365,7 +369,7 @@ for curr_batch in range(num_batches):
             conversation.append({"role": "user", "content": content})
 
         # process inputs
-        if debug_printed == False:
+        if print_debug == True:
             print("conversation:")
             print_conversation(conversation)
             print(f"conversation structure:\n{conversation}")
@@ -373,13 +377,50 @@ for curr_batch in range(num_batches):
         # generate prediction
         prediction, thinking, gen_stats = generate_prediction(generator_model, generator_processor, conversation,
                                                               images, generator_spec,
-                                                              enable_thinking=enable_thinking)
+                                                              enable_thinking=enable_thinking,
+                                                              debug=print_debug,
+                                                              check_truncation=check_output_truncation)
 
-        if debug_printed == False:
+        # the first sample is dumped in full: the prompt the model is actually given (the
+        # conversation above is what was sent, this is what it became), the tensors it
+        # receives, and the raw generation next to the thinking and prediction that
+        # decode_generation split out of it. Printed with !r so that an empty string stays
+        # distinguishable from None.
+        if print_debug == True:
+            debug_info = gen_stats.pop("debug")
             print(f"gen_stats: {gen_stats}")
-            print(f'prediction: {prediction}')
-            print(f'thinking: {thinking}')
-            debug_printed = True
+            print(f"input tensors the model receives: {debug_info['input_keys']}")
+            print(f"prompt the model actually sees:\n{debug_info['prompt_text']}")
+            print(f"raw generation, special tokens kept: {debug_info['raw_generated']!r}")
+            print(f'prediction: {prediction!r}')
+            print(f'thinking: {thinking!r}')
+            print_debug = False
+
+        # validate promt and generation do not exceed model context window 
+        context_window = get_context_window(generator_model)
+        if context_window is None:
+            print(f"[WARNING] pipelines.rag: '{generator_id}' does not declare a context window in "
+                f"its config, so the context window validation cannot be performed for this run.")
+        elif gen_stats['prompt_token_len'] + gen_stats['max_new_tokens']> context_window:
+            print(f"[WARNING] pipelines.rag: the input with the assigned max_new_tokens exceed the "
+            f"model context window: with {gen_stats['prompt_token_len']} input tokens "
+            f"and {gen_stats['max_new_tokens']} max_new_tokens limit, against a context window of "
+            f"{context_window} for model checkpoint: '{generator_id}'. Predictions may be unreliable. ")
+
+        # generation that ran out of budget (max new tokens) rather than finishing its answer. 
+        if gen_stats["finish_reason"] == "length":
+            truncated_count += 1
+            if truncated_count == 1:
+                print(f"[WARNING] pipelines.rag: the output was truncated by max_new_tokens="
+                      f"{gen_stats['max_new_tokens']}, so the answer may be incomplete. Consider "
+                      f"raising max_new_tokens for '{generator_id}'."
+                      f"prediction: {prediction!r}, query: {query_path}")
+        elif gen_stats["finish_reason"] == "unknown":
+            print(f"[WARNING] pipelines.rag: '{generator_id}' does not declare an end of "
+                  f"generation token, so the truncation validation cannot be performed for this "
+                  f"run.")
+            # the checkpoint cannot start declaring one later, so there is nothing more to learn
+            check_output_truncation = False
 
         batch_predictions.append(prediction)
         batch_thinking.append(thinking)
@@ -413,3 +454,10 @@ for curr_batch in range(num_batches):
     # save results
     results_df.to_csv(results_path, index=False)
     torch.cuda.empty_cache()
+
+# a few truncated samples are noise, a large share means the generation budget is too small
+# for this configuration. The rate is what tells the two apart.
+if truncated_count:
+    print(f"[WARNING] pipelines.rag: {truncated_count} of {len(df)} samples were truncated "
+          f"before the model finished its answer. Consider raising max_new_tokens for "
+          f"'{generator_id}'.")

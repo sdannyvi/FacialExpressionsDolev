@@ -21,7 +21,7 @@ pipeline needs to know about reasoning, and neither requires it to read a regist
 help text.
 """
 
-from .core import generate_prediction, resolve_thinking
+from .core import generate_prediction, resolve_thinking, get_context_window
 from .registry import (
     AVAILABLE_MODELS,
     get_model_spec,
@@ -40,4 +40,5 @@ __all__ = [
     "thinking_models",
     "validate_thinking_request",
     "validate_prompt_request",
+    "get_context_window",
 ]
