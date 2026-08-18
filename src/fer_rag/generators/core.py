@@ -21,8 +21,7 @@ registry maps one-to-one onto a future class, so moving to classes later is mech
 Assumes ``transformers>=5``, where the Auto classes are the recommended way to instantiate a
 checkpoint. Resolving the concrete model and processor classes is therefore delegated to
 ``AutoModelForMultimodalLM`` / ``AutoProcessor`` rather than hard-coded per family; see
-``load_multimodal_lm``. transformers is imported inside the loader so that importing this
-module stays cheap and does not depend on the library being installed.
+``load_multimodal_lm``.
 """
 
 import copy
@@ -30,7 +29,7 @@ import re
 
 import torch
 
-from .constants import DEFAULT_MAX_NEW_TOKENS, GENERATION_ARGS
+from .constants import DEFAULT_MAX_NEW_TOKENS, GENERATION_ARGS, QUANTIZATION
 
 
 # --------------------------------------------------------------------------------------
@@ -53,8 +52,9 @@ def load_multimodal_lm(model_id):
 
     model = AutoModelForMultimodalLM.from_pretrained(
         pretrained_model_name_or_path=model_id,
-        torch_dtype=torch.float16,
-        device_map="balanced",
+        dtype=torch.bfloat16,
+        quantization_config=QUANTIZATION,
+        device_map={"": 0},   # everything on GPU 0
     )
     processor = AutoProcessor.from_pretrained(
         pretrained_model_name_or_path=model_id,

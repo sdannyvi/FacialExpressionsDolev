@@ -75,6 +75,9 @@ print(f"[generators.registry.load_generator] generator classes: "
       f"{type(generator_model).__name__} / {type(generator_processor).__name__}")
 print(f"[generators.registry.load_generator] generator model dtype: {next(generator_model.parameters()).dtype}")
 print(f"[generators.registry.load_generator] generator device map: {generator_model.hf_device_map}")
+print(f"[generators.registry.load_generator] generator quantization: "
+      f"{getattr(generator_model.config, 'quantization_config', None)}")
+
 
 # if results path exist, load it
 if os.path.exists(results_path):
