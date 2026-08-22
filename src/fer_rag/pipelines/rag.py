@@ -243,11 +243,10 @@ for curr_batch in range(num_batches):
     top_paths_df = pd.DataFrame(columns=path_cols)
     top_similarities_df = pd.DataFrame(columns=cosine_cols)
     query_file_paths = []
+    # memory usage
+    torch.cuda.reset_peak_memory_stats()
     # looping through samples in the batch
     for _, row in batch_df.iterrows():
-        # memor usage
-        torch.cuda.reset_peak_memory_stats()
-        baseline = torch.cuda.memory_allocated() / 1024 ** 3
         # load query
         query_path = row['file_path']
         absolute_query_path = resolve_path(query_path)
@@ -454,6 +453,7 @@ for curr_batch in range(num_batches):
     del top_labels_df, top_paths_df, top_similarities_df, batch_df, batch_thinking
     # save results
     results_df.to_csv(results_path, index=False)
+    print(f"peak GPU memory this batch: {torch.cuda.max_memory_allocated()/1024**3:.2f} GB")
     torch.cuda.empty_cache()
 
 # a few truncated samples are noise, a large share means the generation budget is too small
