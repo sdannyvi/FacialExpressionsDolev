@@ -2,13 +2,13 @@
 # =============================================================================
 #  FacialExpressionsDolev - batch experiment launcher (ECE-HPC / BGU)
 #
-#  Layout produced:
-#      experiments/<EXP_GROUP>/logs/<run_name>_<jobid>.log
-#      experiments/<EXP_GROUP>/results/<run_name>_<jobid>.csv
+#  Layout produced - log and csv side by side in one folder:
+#      experiments/<EXP_GROUP>/<run_name>_<jobid>.log
+#      experiments/<EXP_GROUP>/<run_name>_<jobid>.csv
 #  Same stem, same job id - the log and the csv always pair up.
 #
 #  Run with:
-#      mkdir -p experiments/generator_comparison/logs
+#      mkdir -p experiments/generator_comparison
 #      sbatch --job-name=gemma_3 main_job.sh
 #
 #  TWO THINGS TO SET:
@@ -16,14 +16,14 @@
 #    2. exp group -> BOTH the --output line below AND the EXP_GROUP variable.
 #       They must say the same thing. SLURM opens the log before bash runs, so
 #       the --output path cannot use a variable - it has to be literal text.
-#       (The script warns you at startup if the two disagree.)
 #
-#  !! experiments/<EXP_GROUP>/logs/ must exist BEFORE you submit, or the job
-#  !! dies instantly with no log to explain why. results/ is created for you.
+#  !! The folder must exist BEFORE you submit, or SLURM cannot open the log
+#  !! and the job dies with nothing to explain why:
+#  !!     mkdir -p experiments/<EXP_GROUP>
 # =============================================================================
 
 #SBATCH --job-name=gemma_3
-#SBATCH --output=/truenas/home/sdolev/FacialExpressionsDolev/experiments/generator_comparison/logs/%x_%j.log
+#SBATCH --output=/truenas/home/sdolev/FacialExpressionsDolev/experiments/generator_comparison/%x_%j.log
 #SBATCH --partition=vilenchik_part
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
@@ -68,15 +68,8 @@ PIPELINE_ARGS=(
 
 RUN_ID="${SLURM_JOB_NAME}_${SLURM_JOB_ID}"
 EXP_DIR="$PROJECT/experiments/$EXP_GROUP"
-RESULTS_CSV="$EXP_DIR/results/${RUN_ID}.csv"
-LOG_FILE="$EXP_DIR/logs/${RUN_ID}.log"
-mkdir -p "$EXP_DIR/results"
-
-# Guard: the --output line is literal text, so it can drift from $EXP_GROUP.
-if [ ! -f "$LOG_FILE" ]; then
-  echo "WARNING: EXP_GROUP='$EXP_GROUP' does not match the #SBATCH --output line."
-  echo "         This log is NOT at $LOG_FILE - fix one of the two."
-fi
+RESULTS_CSV="$EXP_DIR/${RUN_ID}.csv"
+LOG_FILE="$EXP_DIR/${RUN_ID}.log"
 
 # --------------------------------------------------------- provenance / git
 # Run on the host, before entering the container (git may not exist in the image).
