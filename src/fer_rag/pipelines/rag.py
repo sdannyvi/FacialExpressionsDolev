@@ -15,16 +15,25 @@ from ..generators import (AVAILABLE_MODELS, get_model_spec, load_generator, gene
                           resolve_thinking, thinking_models, validate_prompt_request,
                           validate_thinking_request, get_context_window)
 import time 
+from datetime import datetime
 
 _T0 = time.perf_counter()
 _last = _T0
 
+def now_str():
+    """Wall-clock date and time, so a log line can be matched to the SLURM job."""
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
 def stamp(label):
-    """Print elapsed time since the previous stamp, and since process start."""
+    """Print the wall-clock time, the time this stage took, and the time since the run began."""
     global _last
     now = time.perf_counter()
-    print(f"[TIME] {label}: {now-_last:6.1f}s   (total {now-_T0:6.1f}s)", flush=True)
+    print(f"[TIME] {now_str()} | {label} | stage took {now-_last:7.1f}s "
+          f"| elapsed since start {now-_T0:7.1f}s", flush=True)
     _last = now
+
+print(f"[TIME] {now_str()} | pipeline started - this is the wall-clock date and time the run "
+      f"began; every [TIME] line below is measured from this moment", flush=True)
 
 # parameters
 parser = argparse.ArgumentParser(description="Run Retrieval-Augmented Generation.")
@@ -191,9 +200,9 @@ print("FAISS GPU device ID:", index.getDevice())
 
 
 # load the generator
-stamp("before generator load")
+stamp("retrieval ready -> Time passed from the start of the run up to the end of retrieval")
 generator_model, generator_processor, generator_spec = load_generator(generator_id)
-stamp(f"generator loaded: {generator_id}")
+stamp(f"generator loaded: {generator_id} -> Time passed for loading model")
 # check the checkpoint loaded as asked: the classes the Auto loader resolved to, float16
 # weights, layers spread over the GPUs and not offloaded to CPU/disk. The classes are printed
 # rather than hard-coded in the loader, so the run log records the architecture that actually
@@ -452,9 +461,6 @@ for curr_batch in range(num_batches):
         batch_thinking.append(thinking)
         del query_image, images, query_embedding, scores, ids, faiss_ids, top_similarities, kb_row_indices, top_examples
         del top_labels, top_paths
-        # timestamp 
-        torch.cuda.synchronize()
-        stamp(f"sample {query_path}")
 
     # at the end of batch I will save predictions of the batch
 
@@ -484,6 +490,10 @@ for curr_batch in range(num_batches):
     results_df.to_csv(results_path, index=False)
     print(f"peak GPU memory this batch: {torch.cuda.max_memory_allocated()/1024**3:.2f} GB")
     torch.cuda.empty_cache()
+    # end of batch 
+    what_batch = curr_batch +1
+    stamp(f"batch {what_batch}/{num_batches} done, ({len(batch_predictions)} samples) -> Time for "
+          f"processing the batch")
 
 # a few truncated samples are noise, a large share means the generation budget is too small
 # for this configuration. The rate is what tells the two apart.
@@ -491,3 +501,6 @@ if truncated_count:
     print(f"[WARNING] pipelines.rag: {truncated_count} of {len(df)} samples were truncated "
           f"before the model finished its answer. Consider raising max_new_tokens for "
           f"'{generator_id}'.")
+
+print(f"[TIME] {now_str()} | pipeline ended -> total runtime "
+      f"{(time.perf_counter()-_T0)/60:.1f} min", flush=True)
