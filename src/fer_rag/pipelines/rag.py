@@ -14,6 +14,17 @@ from config import resolve_path, validate_image_paths
 from ..generators import (AVAILABLE_MODELS, get_model_spec, load_generator, generate_prediction,
                           resolve_thinking, thinking_models, validate_prompt_request,
                           validate_thinking_request, get_context_window)
+import time 
+
+_T0 = time.perf_counter()
+_last = _T0
+
+def stamp(label):
+    """Print elapsed time since the previous stamp, and since process start."""
+    global _last
+    now = time.perf_counter()
+    print(f"[TIME] {label}: {now-_last:6.1f}s   (total {now-_T0:6.1f}s)", flush=True)
+    _last = now
 
 # parameters
 parser = argparse.ArgumentParser(description="Run Retrieval-Augmented Generation.")
@@ -57,10 +68,23 @@ dim_reduction = args.dim_reduction
 prompt = args.prompt
 top_k = args.top_k
 enable_thinking = args.enable_thinking
-print(f"Code running:\nGenerator model: {generator_id},\nCLIP model: {clip_model_id},\ndim_reduction: {dim_reduction},\n"
-      f"prompt: {prompt},\ntop_k: {top_k},\nenable_thinking: {enable_thinking}")
 
-generator_spec = get_model_spec(generator_id)
+print("Code running. CLI call:")
+for _k, _v in vars(args).items():
+    print(f"  {_k}: {_v}")
+
+generator_spec = get_model_spec(f"Generator model info:\n{generator_id}")
+
+print("Package versions:")
+print(f"versions | torch {torch.__version__} | transformers {transformers.__version__} | "
+      f"faiss {faiss.__version__} | sklearn {sklearn.__version__} | numpy {np.__version__}")
+
+print("GPU device:")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"the device being used: {device}")
+if torch.cuda.is_available():
+    print(f"GPU: {torch.cuda.get_device_name(0)}")
+
 
 # if generator model does not allow multi user message, raise an error 
 validate_prompt_request(generator_id, generator_spec, prompt)
@@ -72,9 +96,6 @@ validate_thinking_request(generator_id, generator_spec, enable_thinking)
 thinking_on = resolve_thinking(generator_spec, enable_thinking)
 print(f"the run produces thinking text: {thinking_on}")
 
-# CUDA
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"the device being used: {device}")
 
 # read csv
 knowledge_base_set = pd.read_csv(knowledge_base_path)
@@ -126,7 +147,7 @@ def get_clip_embedding(image_path, model, processor):
     image = Image.open(image_path).convert('RGB')
     inputs = processor(images=image, return_tensors='pt', padding=True).to(model.device)
     with torch.no_grad():
-        image_embedding = model.get_image_features(**inputs).squeeze(0)
+        image_embedding = model.get_image_features(**inputs).pooler_output.squeeze(0)
     return image_embedding
 
 # create embedding_list and store clip embeddings
@@ -170,7 +191,9 @@ print("FAISS GPU device ID:", index.getDevice())
 
 
 # load the generator
+stamp("before generator load")
 generator_model, generator_processor, generator_spec = load_generator(generator_id)
+stamp(f"generator loaded: {generator_id}")
 # check the checkpoint loaded as asked: the classes the Auto loader resolved to, float16
 # weights, layers spread over the GPUs and not offloaded to CPU/disk. The classes are printed
 # rather than hard-coded in the loader, so the run log records the architecture that actually
@@ -179,9 +202,12 @@ generator_model, generator_processor, generator_spec = load_generator(generator_
 print(f"[generators.registry.load_generator] generator classes: "
       f"{type(generator_model).__name__} / {type(generator_processor).__name__}")
 print(f"[generators.registry.load_generator] generator model dtype: {next(generator_model.parameters()).dtype}")
-print(f"[generators.registry.load_generator] generator device map: {generator_model.hf_device_map}")
+print(f"[generators.registry.load_generator] generator device: {next(generator_model.parameters()).device}")
 print(f"[generators.registry.load_generator] generator quantization: "
       f"{getattr(generator_model.config, 'quantization_config', None)}")
+print(f"[generators.registry.load_generator] checkpoint revision: "
+      f"{getattr(generator_model.config, '_commit_hash', None)}")
+
 
 
 # create top K cols
@@ -426,6 +452,9 @@ for curr_batch in range(num_batches):
         batch_thinking.append(thinking)
         del query_image, images, query_embedding, scores, ids, faiss_ids, top_similarities, kb_row_indices, top_examples
         del top_labels, top_paths
+        # timestamp 
+        torch.cuda.synchronize()
+        stamp(f"sample {query_path}")
 
     # at the end of batch I will save predictions of the batch
 

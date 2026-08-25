@@ -393,6 +393,7 @@ def generate_prediction(model, processor, conversation, images, spec, enable_thi
         "thinking_on": thinking_on,
         "max_new_tokens": max_new_tokens,
         "finish_reason": finish_reason,
+        "generation_args": GENERATION_ARGS,
     }
 
     if debug:
