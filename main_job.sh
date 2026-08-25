@@ -8,7 +8,7 @@
 #  Same stem, same job id - the log and the csv always pair up.
 #
 #  Run with:
-#      mkdir -p experiments/generator_comparison
+#      mkdir -p experiments/generator_comparison/runs
 #      sbatch --job-name=gemma_3 main_job.sh
 #
 #  TWO THINGS TO SET:
@@ -23,7 +23,7 @@
 # =============================================================================
 
 #SBATCH --job-name=gemma_3
-#SBATCH --output=/truenas/home/sdolev/FacialExpressionsDolev/experiments/generator_comparison/%x_%j.log
+#SBATCH --output=/truenas/home/sdolev/FacialExpressionsDolev/experiments/generator_comparison/runs/%x_%j.log
 #SBATCH --partition=vilenchik_part
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
@@ -46,7 +46,7 @@ CONDA_SH=/truenas/home/sdolev/miniconda3/etc/profile.d/conda.sh
 # ------------------------------------------------------------- PER-EXPERIMENT
 # Experiment group = the folder under experiments/.
 # MUST match the --output line above.
-EXP_GROUP="generator_comparison"
+EXP_GROUP="generator_comparison/runs"
 
 # Which pipeline: zero_shot | rag
 PIPELINE="zero_shot"
