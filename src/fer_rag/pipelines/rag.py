@@ -1,3 +1,5 @@
+import transformers
+import sklearn
 import os
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 import torch
@@ -82,7 +84,7 @@ print("Code running. CLI call:")
 for _k, _v in vars(args).items():
     print(f"  {_k}: {_v}")
 
-generator_spec = get_model_spec(f"Generator model info:\n{generator_id}")
+generator_spec = get_model_spec(generator_id)
 
 print("Package versions:")
 print(f"versions | torch {torch.__version__} | transformers {transformers.__version__} | "
@@ -216,6 +218,15 @@ print(f"[generators.registry.load_generator] generator quantization: "
       f"{getattr(generator_model.config, 'quantization_config', None)}")
 print(f"[generators.registry.load_generator] checkpoint revision: "
       f"{getattr(generator_model.config, '_commit_hash', None)}")
+
+      
+from collections import Counter
+vision_layers = Counter(
+    type(m).__name__
+    for n, m in generator_model.named_modules()
+    if "vision" in n and hasattr(m, "weight")
+)
+print(f"[generators.registry.load_generator] vision tower layers: {dict(vision_layers)}")
 
 
 
