@@ -1,0 +1,24 @@
+0    25a9d6ec024fa26fb4d470940683596b2c4b7acd839d8f...
+1    3b5df82d38d634cd608300165671505a01fe6e0648260e...
+2    2e747a2aa142075b057766ed4da3dcceb3f48034de048a...
+3    e34288b0bb53dbff491168c04b3608e33f4516c56b8ea5...
+4    7cd192b8910679624259bb9c2d94397bf0011e2ee04719...
+Name: hash_blake3, dtype: object
+% of test images with >=1 KB duplicate: 7.846%
+how many rows the KB has in total: 25060
+how many KB rows are part of any duplicate group (KB<->KB,KB<->TEST): 2182
+how many KB rows has at least one matching sample in the TEST (this is a leak): 305
+how many KB rows are duplicates only against other KB rows: 1877
+how many KB rows has at least one matching sample in the TEST (in percentage, will be removed): 305/25060 = 1.217%
+how many KB rows are duplicates only against other KB rows (in percentage, kept): 1877/25060 = 7.490%
+% of test images with >=1 KB duplicate: 7.846%
+how many rows the KB has in total: 25060
+how many KB rows are part of any duplicate group (KB<->KB,KB<->TEST): 2182
+how many KB rows has at least one matching sample in the TEST (this is a leak): 305
+how many KB rows are duplicates only against other KB rows: 1877
+how many KB rows has at least one matching sample in the TEST (in percentage, will be removed): 305/25060 = 1.217%
+how many KB rows are duplicates only against other KB rows (in percentage, kept): 1877/25060 = 7.490%
+number of KB samples before cleanup: 25060
+number of KB samples after cleanup (duplicate removal): 24755
+validate all file_paths are unique, number of all unique file paths: 24755
+validate split column in the KB set contains only KB-split: ['kb']
