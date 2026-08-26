@@ -1,9 +1,14 @@
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 import pandas as pd
 import numpy as np
 from PIL import Image
 from blake3 import blake3
 import argparse
 
+from config import resolve_path
 
 # parameters
 parser = argparse.ArgumentParser(description="Duplicate removal - ablation study")
@@ -41,7 +46,7 @@ def convert_image_to_bytes(path):
     """
     """
     # open image in grayscale and convert to numpy array
-    with Image.open(path) as img:
+    with Image.open(resolve_path(path)) as img:
         #img = img.convert("L")
         image_arr = np.array(img, dtype=np.uint8)
 
@@ -110,7 +115,7 @@ combined_groups = groups_with_both[groups_with_both["n_splits"] > 1][["group_id"
 duplicated_test= (dup_df[dup_df["split"] == "private_test"].merge(combined_groups, on="group_id", how="inner"))
 
 percentage = (float((len(duplicated_test)) / (df["split"] == "private_test").sum())) * 100
-print(f"% of private_test images with >=1 KB duplicate: {percentage:.3f}%")
+print(f"% of test images with >=1 KB duplicate: {percentage:.3f}%")
 
 
 # KB duplicates
@@ -137,14 +142,14 @@ kb_dup_leaky = len(kb_dup_df.merge(combined_groups_clean, on="group_id", how="in
 # KB duplicate rows that are duplicates only within KB
 kb_dup_only = kb_dup_total - kb_dup_leaky
 
-print(f"KB total rows: {kb_total}")
-print(f"KB duplicate rows total: {kb_dup_total}")
+print(f"how many rows the KB has in total: {kb_total}")
+print(f"how many KB rows are part of any duplicate group (KB<->KB,KB<->TEST): {kb_dup_total}")
 
-print(f"KB duplicate rows that ALSO have a duplicate in test (leaky): {kb_dup_leaky}")
-print(f"KB duplicate rows that are duplicates only within KB: {kb_dup_only}")
+print(f"how many KB rows has at least one matching sample in the TEST (this is a leak): {kb_dup_leaky}")
+print(f"how many KB rows are duplicates only against other KB rows: {kb_dup_only}")
 
-print(f"leaky out of KB total: {kb_dup_leaky}/{kb_total} = {100*kb_dup_leaky/kb_total:.3f}%")
-print(f"KB-only out of KB total: {kb_dup_only}/{kb_total} = {100*kb_dup_only/kb_total:.3f}%")
+print(f"how many KB rows has at least one matching sample in the TEST (in percentage, will be removed): {kb_dup_leaky}/{kb_total} = {100*kb_dup_leaky/kb_total:.3f}%")
+print(f"how many KB rows are duplicates only against other KB rows (in percentage, kept): {kb_dup_only}/{kb_total} = {100*kb_dup_only/kb_total:.3f}%")
 
 
 # create a map csv with: file path, split, group id, is leakage (bool).
@@ -159,7 +164,7 @@ dup_map_df.to_csv(dup_map_output, index=False)
 test_total = int((dup_map_df["split"] == "private_test").sum())
 test_leaky = int(((dup_map_df["split"] == "private_test") & (dup_map_df["is_leakage"])).sum())
 percentage = 100 * test_leaky / test_total if test_total else 0.0
-print(f"% of private_test images with >=1 KB duplicate: {percentage:.3f}%")
+print(f"% of test images with >=1 KB duplicate: {percentage:.3f}%")
 
 kb_total = int((dup_map_df["split"] == "kb").sum())
 
@@ -169,13 +174,13 @@ kb_dup_total = int(((dup_map_df["split"] == "kb") & (dup_map_df["group_id"] != -
 
 kb_dup_only = kb_dup_total - kb_leaky  # duplicates in KB that do NOT overlap test
 
-print(f"KB total rows: {kb_total}")
-print(f"KB duplicate rows total: {kb_dup_total}")
-print(f"KB duplicate rows that ALSO have a duplicate in test (leaky): {kb_leaky}")
-print(f"KB duplicate rows that are duplicates only within KB: {kb_dup_only}")
+print(f"how many rows the KB has in total: {kb_total}")
+print(f"how many KB rows are part of any duplicate group (KB<->KB,KB<->TEST): {kb_dup_total}")
+print(f"how many KB rows has at least one matching sample in the TEST (this is a leak): {kb_leaky}")
+print(f"how many KB rows are duplicates only against other KB rows: {kb_dup_only}")
 
-print(f"leaky out of KB total: {kb_leaky}/{kb_total} = {100*kb_leaky/kb_total:.3f}%")
-print(f"KB-only out of KB total: {kb_dup_only}/{kb_total} = {100*kb_dup_only/kb_total:.3f}%")
+print(f"how many KB rows has at least one matching sample in the TEST (in percentage, will be removed): {kb_leaky}/{kb_total} = {100*kb_leaky/kb_total:.3f}%")
+print(f"how many KB rows are duplicates only against other KB rows (in percentage, kept): {kb_dup_only}/{kb_total} = {100*kb_dup_only/kb_total:.3f}%")
 
 
 # save the clean KB after removing duplicates
@@ -186,10 +191,10 @@ kb_keep_paths = dup_map_df[(dup_map_df["split"] == "kb") & (~dup_map_df["is_leak
 kb_clean = kb_set.merge(kb_keep_paths, on="file_path", how="inner")
 
 # validate
-print(f"number of samples: {len(kb_set)}")
-print(f"number of samples clean: {len(kb_clean)}")
-print(f"number of  unique values in file path: {kb_clean['file_path'].nunique()}")
-print(f"unique values in split: {kb_clean['split'].unique().tolist()}")
+print(f"number of KB samples before cleanup: {len(kb_set)}")
+print(f"number of KB samples after cleanup (duplicate removal): {len(kb_clean)}")
+print(f"validate all file_paths are unique, number of all unique file paths: {kb_clean['file_path'].nunique()}")
+print(f"validate split column in the KB set contains only KB-split: {kb_clean['split'].unique().tolist()}")
 kb_clean = kb_clean.drop(columns=["split"])
 #kb_clean.to_csv("/gpfs0/bgu-vilenchi/users/sdolev/Thesis/VLMs/ablation/kb_50%_no_leakage.csv", index=False)
 kb_clean.to_csv(kb_clean_output, index=False)
