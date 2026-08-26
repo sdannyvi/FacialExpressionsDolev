@@ -35,6 +35,24 @@ test_set = pd.read_csv(test_path)
 #kb_set = pd.read_csv("/gpfs0/bgu-vilenchi/users/sdolev/Thesis/VLMs/rag_thresholds/train_test_sets/kb_50%.csv")
 #test_set = pd.read_csv("/gpfs0/bgu-vilenchi/users/sdolev/Thesis/VLMs/rag_thresholds/train_test_sets/private_test_50%.csv")
 
+# validate the outputs are not written into the folder holding the original datasets 
+input_dirs = {
+    "KB": Path(kb_path).resolve().parent,
+    "test": Path(test_path).resolve().parent,
+}
+output_dirs = {
+    "--kb_clean_output": Path(kb_clean_output).resolve().parent,
+    "--dup_map_output": Path(dup_map_output).resolve().parent,
+}
+
+for out_name, out_dir in output_dirs.items():
+    for in_name, in_dir in input_dirs.items():
+        if out_dir == in_dir:
+            raise ValueError(
+                f"{out_name} points to the same folder as the original {in_name} set: {out_dir}\n"
+                f"Choose an output folder outside the original train/test sets folder."
+            )
+
 # merge dataframes for subsequent duplicate removal actions
 kb_set = kb_set.assign(split="kb")
 test_set = test_set.assign(split="private_test")
