@@ -22,13 +22,13 @@
 #  !!     mkdir -p experiments/<EXP_GROUP>
 # =============================================================================
 
-#SBATCH --job-name=rag_gemma_4_31b_thinking
-#SBATCH --output=/truenas/home/sdolev/FacialExpressionsDolev/experiments/generator_comparison/runs/gemma_4_31b/%x_%j.log
+#SBATCH --job-name=rag_gemma_3_27b
+#SBATCH --output=/truenas/home/sdolev/FacialExpressionsDolev/experiments/generator_comparison/runs/gemma_3_27b/%x_%j.log
 #SBATCH --partition=vilenchik_part
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=64G
-#SBATCH --time=35:00:00
+#SBATCH --mem=45000M
+#SBATCH --time=20:00:00
 
 # No --error line on purpose: without it SLURM merges stderr into stdout, so
 # prints + warnings + tracebacks all land in the ONE log file above.
@@ -46,7 +46,7 @@ CONDA_SH=/truenas/home/sdolev/miniconda3/etc/profile.d/conda.sh
 # ------------------------------------------------------------- PER-EXPERIMENT
 # Experiment group = the folder under experiments/.
 # MUST match the --output line above.
-EXP_GROUP="generator_comparison/runs/gemma_4_31b"
+EXP_GROUP="generator_comparison/runs/gemma_3_27b"
 
 # Which pipeline: zero_shot | rag
 PIPELINE="rag"
@@ -55,12 +55,15 @@ PIPELINE="rag"
 # Do NOT pass --results_path here; it is derived from the job name.
 PIPELINE_ARGS=(
   --test_path    "$PROJECT/rag_thresholds/train_test_sets/public_test_50%.csv"
-  --generator_id "google/gemma-4-31B-it"
+  --generator_id "google/gemma-3-27b-it"
 
   # --- rag.py only: uncomment when PIPELINE="rag" ---
   --knowledge_base_path "$PROJECT/ablation/cleaned_kb_sets/fer_plus_kb_50%.csv"
   # --enable_thinking is a bare on/off flag: present = thinking on, absent = off.
-  --enable_thinking
+  # This checkpoint has NO thinking key in the registry, so it cannot reason at all and
+  # passing --enable_thinking is rejected by validate_thinking_request before load.
+  # The results csv therefore has no thinking column.
+  # --enable_thinking
   # --top_k         2
   # --dim_reduction lda
   # --prompt        single-user-message
@@ -107,9 +110,16 @@ echo "=============================================================="
 # The pipelines use relative imports (from ..generators), so they must be run
 # as MODULES with src/ on PYTHONPATH - `python /path/to/zero_shot.py` fails.
 apptainer exec --nv --bind /truenas "$IMAGE" bash -lc "
-  set -euo pipefail
+  set -eo pipefail
   source '$CONDA_SH'
+  # conda's activate.d scripts read unset vars (qt-main_activate.sh line 5 reads
+  # QT_XCB_GL_INTEGRATION with no default), which is fatal under -u. Relax it just for
+  # the activation, then restore it so the pipeline command runs with the check on.
+  # NOTE: no dollar signs in this block - it is inside a double-quoted string, so the
+  # OUTER shell expands them before the container ever sees the text.
+  set +u
   conda activate '$CONDA_ENV'
+  set -u
   export PYTHONPATH='$PROJECT/src'
   export PYTHONUNBUFFERED=1
   cd '$PROJECT'
