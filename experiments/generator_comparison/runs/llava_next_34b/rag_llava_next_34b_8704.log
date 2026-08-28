@@ -193,3 +193,18 @@ peak GPU memory this batch: 19.61 GB
 [TIME] 2026-08-27 22:41:44 | batch 26/32 done, (100 samples) -> Time for processing the batch | stage took  1113.6s | elapsed since start 29623.0s
 peak GPU memory this batch: 19.61 GB
 [TIME] 2026-08-27 23:00:04 | batch 27/32 done, (100 samples) -> Time for processing the batch | stage took  1100.1s | elapsed since start 30723.1s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-08-27 23:18:42 | batch 28/32 done, (100 samples) -> Time for processing the batch | stage took  1118.0s | elapsed since start 31841.2s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-08-27 23:37:31 | batch 29/32 done, (100 samples) -> Time for processing the batch | stage took  1129.6s | elapsed since start 32970.8s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-08-27 23:56:26 | batch 30/32 done, (100 samples) -> Time for processing the batch | stage took  1135.0s | elapsed since start 34105.8s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-08-28 00:15:23 | batch 31/32 done, (100 samples) -> Time for processing the batch | stage took  1136.1s | elapsed since start 35241.9s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-08-28 00:34:18 | batch 32/32 done, (99 samples) -> Time for processing the batch | stage took  1135.6s | elapsed since start 36377.5s
+[TIME] 2026-08-28 00:34:18 | pipeline ended -> total runtime 606.3 min
+==============================================================
+ finished    : 2026-08-28 00:34:21
+ results     : /truenas/home/sdolev/FacialExpressionsDolev/experiments/generator_comparison/runs/llava_next_34b/rag_llava_next_34b_8704.csv
+==============================================================

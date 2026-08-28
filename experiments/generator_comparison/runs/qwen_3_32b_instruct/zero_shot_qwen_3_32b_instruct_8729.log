@@ -1,0 +1,253 @@
+==============================================================
+ run name    : zero_shot_qwen_3_32b_instruct
+ exp group   : generator_comparison/runs/qwen_3_32b_instruct
+ job id      : 8729
+ started     : 2026-08-28 15:33:17
+ node        : hpc-vilenchik   partition: vilenchik_part
+--------------------------------------------------------------
+ git branch  : main
+ git commit  : acf6931713ac5ac0498d955d637b5f34a22a54f8
+ git state   : DIRTY - the commit above does NOT match what ran:
+                M experiments/generator_comparison/runs/gemma_3_27b/zeroshot_gemma_3_27b_job.sh
+                M experiments/generator_comparison/runs/gemma_4_31b/rag_gemma_4_31b_thinking_8701.csv
+                M experiments/generator_comparison/runs/gemma_4_31b/rag_gemma_4_31b_thinking_8701.log
+                M experiments/generator_comparison/runs/llava_next_34b/rag_llava_next_34b_8704.csv
+                M experiments/generator_comparison/runs/llava_next_34b/rag_llava_next_34b_8704.log
+                M experiments/generator_comparison/runs/qwen_3_32b_instruct/zeroshot_qwen_3_32b_job.sh
+                M experiments/generator_comparison/runs/qwen_3_32b_thinking/rag_qwen_3_32b_thinking_8703.csv
+                M experiments/generator_comparison/runs/qwen_3_32b_thinking/rag_qwen_3_32b_thinking_8703.log
+                M src/fer_rag/pipelines/zero_shot.py
+               ?? experiments/generator_comparison/runs/gemma_3_27b/rag_gemma_3_27b_8716.csv
+               ?? experiments/generator_comparison/runs/gemma_3_27b/rag_gemma_3_27b_8716.log
+               ?? experiments/generator_comparison/runs/qwen_3_32b_instruct/rag_qwen_3_32b_instruct_8717.csv
+               ?? experiments/generator_comparison/runs/qwen_3_32b_instruct/rag_qwen_3_32b_instruct_8717.log
+               ?? experiments/generator_comparison/runs/qwen_3_32b_instruct/zero_shot_qwen_3_32b_instruct_8729.log
+--------------------------------------------------------------
+ image       : /truenas/sif_images/pytorch_cuda12.6_ngc_conda_vscode.sif
+ conda env   : rag
+ results csv : /truenas/home/sdolev/FacialExpressionsDolev/experiments/generator_comparison/runs/qwen_3_32b_instruct/zero_shot_qwen_3_32b_instruct_8729.csv
+ log file    : /truenas/home/sdolev/FacialExpressionsDolev/experiments/generator_comparison/runs/qwen_3_32b_instruct/zero_shot_qwen_3_32b_instruct_8729.log
+==============================================================
+Fri Aug 28 15:33:17 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.95.05              Driver Version: 580.95.05      CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA RTX A5000               Off |   00000000:30:00.0 Off |                  Off |
+| 30%   33C    P8             23W /  230W |       0MiB /  24564MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA RTX A5000               Off |   00000000:36:00.0 N/A |                  N/A |
+|ERR!   49C    P2            N/A  /  N/A  |       0MiB /  24564MiB |     N/A      Default |
+|                                         |                        |                 ERR! |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+==============================================================
+[TIME] 2026-08-28 15:33:25 | pipeline started - this is the wall-clock date and time the run began; every [TIME] line below is measured from this moment
+Code running. CLI call:
+  test_path: /truenas/home/sdolev/FacialExpressionsDolev/rag_thresholds/train_test_sets/public_test_50%.csv
+  results_path: /truenas/home/sdolev/FacialExpressionsDolev/experiments/generator_comparison/runs/qwen_3_32b_instruct/zero_shot_qwen_3_32b_instruct_8729.csv
+  generator_id: Qwen/Qwen3-VL-32B-Instruct
+  enable_thinking: False
+Package versions:
+versions | torch 2.8.0+cu126 | transformers 5.15.0 | numpy 1.26.4
+GPU device:
+the device being used: cuda
+GPU: NVIDIA RTX A5000
+the run produces thinking text: False
+/truenas/home/sdolev/FacialExpressionsDolev/rag_thresholds/train_test_sets/public_test_50%.csv: all 3199 image paths OK
+Loading weights:   0%|          | 0/1058 [00:00<?, ?it/s]Loading weights:   0%|          | 1/1058 [00:00<05:51,  3.01it/s]Loading weights:   0%|          | 2/1058 [00:00<05:45,  3.06it/s]Loading weights:   0%|          | 4/1058 [00:00<02:45,  6.37it/s]Loading weights:   1%|          | 6/1058 [00:00<01:57,  8.97it/s]Loading weights:   1%|▏         | 15/1058 [00:00<00:38, 27.30it/s]Loading weights:   2%|▏         | 19/1058 [00:01<00:35, 29.21it/s]Loading weights:   2%|▏         | 26/1058 [00:01<00:26, 38.82it/s]Loading weights:   3%|▎         | 31/1058 [00:01<00:26, 39.08it/s]Loading weights:   3%|▎         | 37/1058 [00:01<00:23, 44.11it/s]Loading weights:   4%|▍         | 42/1058 [00:01<00:23, 43.00it/s]Loading weights:   5%|▍         | 48/1058 [00:01<00:21, 47.13it/s]Loading weights:   5%|▌         | 53/1058 [00:01<00:22, 45.08it/s]Loading weights:   6%|▌         | 59/1058 [00:01<00:20, 48.57it/s]Loading weights:   6%|▌         | 65/1058 [00:02<00:21, 46.06it/s]Loading weights:   7%|▋         | 71/1058 [00:02<00:22, 44.25it/s]Loading weights:   7%|▋         | 78/1058 [00:02<00:19, 50.32it/s]Loading weights:   8%|▊         | 84/1058 [00:02<00:21, 46.10it/s]Loading weights:   9%|▉         | 93/1058 [00:02<00:17, 54.18it/s]Loading weights:  10%|▉         | 103/1058 [00:02<00:15, 62.90it/s]Loading weights:  10%|█         | 110/1058 [00:02<00:14, 63.96it/s]Loading weights:  11%|█         | 117/1058 [00:02<00:17, 53.71it/s]Loading weights:  12%|█▏        | 126/1058 [00:03<00:16, 56.08it/s]Loading weights:  13%|█▎        | 136/1058 [00:03<00:15, 60.92it/s]Loading weights:  14%|█▎        | 143/1058 [00:03<00:15, 60.98it/s]Loading weights:  14%|█▍        | 150/1058 [00:03<00:16, 55.40it/s]Loading weights:  15%|█▍        | 158/1058 [00:03<00:14, 61.07it/s]Loading weights:  16%|█▌        | 165/1058 [00:03<00:14, 60.56it/s]Loading weights:  16%|█▋        | 172/1058 [00:03<00:16, 54.50it/s]Loading weights:  17%|█▋        | 181/1058 [00:04<00:15, 57.92it/s]Loading weights:  18%|█▊        | 191/1058 [00:04<00:13, 62.42it/s]Loading weights:  19%|█▊        | 198/1058 [00:04<00:14, 61.30it/s]Loading weights:  19%|█▉        | 205/1058 [00:04<00:15, 53.73it/s]Loading weights:  20%|██        | 214/1058 [00:04<00:14, 56.35it/s]Loading weights:  21%|██        | 224/1058 [00:04<00:13, 61.84it/s]Loading weights:  22%|██▏       | 231/1058 [00:04<00:13, 59.15it/s]Loading weights:  22%|██▏       | 237/1058 [00:05<00:17, 48.18it/s]Loading weights:  23%|██▎       | 246/1058 [00:05<00:14, 56.21it/s]Loading weights:  24%|██▍       | 253/1058 [00:05<00:14, 53.93it/s]Loading weights:  24%|██▍       | 259/1058 [00:05<00:16, 47.90it/s]Loading weights:  25%|██▌       | 269/1058 [00:05<00:13, 58.38it/s]Loading weights:  26%|██▋       | 279/1058 [00:05<00:11, 66.65it/s]Loading weights:  27%|██▋       | 287/1058 [00:05<00:11, 69.06it/s]Loading weights:  28%|██▊       | 295/1058 [00:05<00:11, 64.08it/s]Loading weights:  29%|██▊       | 302/1058 [00:06<00:13, 56.69it/s]Loading weights:  29%|██▉       | 309/1058 [00:06<00:12, 59.50it/s]Loading weights:  30%|██▉       | 316/1058 [00:06<00:14, 51.74it/s]Loading weights:  31%|███       | 323/1058 [00:06<00:13, 55.34it/s]Loading weights:  31%|███       | 329/1058 [00:06<00:14, 51.13it/s]Loading weights:  32%|███▏      | 335/1058 [00:06<00:14, 49.09it/s]Loading weights:  32%|███▏      | 342/1058 [00:06<00:13, 53.32it/s]Loading weights:  33%|███▎      | 348/1058 [00:07<00:15, 46.00it/s]Loading weights:  34%|███▎      | 356/1058 [00:07<00:13, 53.61it/s]Loading weights:  34%|███▍      | 362/1058 [00:07<00:13, 49.85it/s]Loading weights:  35%|███▍      | 368/1058 [00:07<00:14, 47.96it/s]Loading weights:  35%|███▌      | 375/1058 [00:07<00:12, 53.02it/s]Loading weights:  36%|███▌      | 381/1058 [00:07<00:14, 45.54it/s]Loading weights:  37%|███▋      | 389/1058 [00:07<00:12, 52.88it/s]Loading weights:  37%|███▋      | 395/1058 [00:07<00:13, 50.04it/s]Loading weights:  38%|███▊      | 401/1058 [00:08<00:13, 47.75it/s]Loading weights:  39%|███▊      | 408/1058 [00:08<00:12, 52.80it/s]Loading weights:  39%|███▉      | 414/1058 [00:08<00:14, 45.57it/s]Loading weights:  40%|███▉      | 422/1058 [00:08<00:12, 52.89it/s]Loading weights:  40%|████      | 428/1058 [00:08<00:12, 49.34it/s]Loading weights:  41%|████      | 434/1058 [00:08<00:13, 47.18it/s]Loading weights:  42%|████▏     | 441/1058 [00:08<00:11, 52.57it/s]Loading weights:  42%|████▏     | 447/1058 [00:09<00:13, 45.23it/s]Loading weights:  43%|████▎     | 455/1058 [00:09<00:11, 53.06it/s]Loading weights:  44%|████▎     | 461/1058 [00:09<00:12, 49.60it/s]Loading weights:  44%|████▍     | 467/1058 [00:09<00:12, 47.49it/s]Loading weights:  45%|████▌     | 477/1058 [00:09<00:10, 53.02it/s]Loading weights:  46%|████▌     | 483/1058 [00:09<00:11, 49.34it/s]Loading weights:  46%|████▌     | 489/1058 [00:09<00:11, 48.07it/s]Loading weights:  47%|████▋     | 497/1058 [00:10<00:10, 55.39it/s]Loading weights:  48%|████▊     | 503/1058 [00:10<00:11, 47.63it/s]Loading weights:  48%|████▊     | 510/1058 [00:10<00:10, 51.90it/s]Loading weights:  49%|████▉     | 516/1058 [00:10<00:11, 48.83it/s]Loading weights:  49%|████▉     | 522/1058 [00:10<00:11, 46.36it/s]Loading weights:  50%|█████     | 529/1058 [00:10<00:10, 51.66it/s]Loading weights:  51%|█████     | 535/1058 [00:10<00:11, 45.47it/s]Loading weights:  51%|█████▏    | 543/1058 [00:10<00:09, 52.79it/s]Loading weights:  52%|█████▏    | 549/1058 [00:11<00:10, 49.80it/s]Loading weights:  52%|█████▏    | 555/1058 [00:11<00:10, 47.09it/s]Loading weights:  53%|█████▎    | 562/1058 [00:11<00:09, 52.11it/s]Loading weights:  54%|█████▎    | 568/1058 [00:11<00:11, 44.04it/s]Loading weights:  54%|█████▍    | 576/1058 [00:11<00:09, 51.15it/s]Loading weights:  55%|█████▌    | 582/1058 [00:11<00:09, 47.79it/s]Loading weights:  56%|█████▌    | 588/1058 [00:11<00:10, 46.10it/s]Loading weights:  56%|█████▌    | 595/1058 [00:12<00:09, 51.09it/s]Loading weights:  57%|█████▋    | 601/1058 [00:12<00:10, 43.80it/s]Loading weights:  58%|█████▊    | 609/1058 [00:12<00:08, 50.95it/s]Loading weights:  58%|█████▊    | 615/1058 [00:12<00:09, 47.79it/s]Loading weights:  59%|█████▊    | 621/1058 [00:12<00:09, 45.89it/s]Loading weights:  59%|█████▉    | 628/1058 [00:12<00:08, 50.55it/s]Loading weights:  60%|█████▉    | 634/1058 [00:12<00:09, 43.69it/s]Loading weights:  61%|██████    | 642/1058 [00:13<00:08, 51.13it/s]Loading weights:  61%|██████    | 648/1058 [00:13<00:08, 47.91it/s]Loading weights:  62%|██████▏   | 654/1058 [00:13<00:08, 45.84it/s]Loading weights:  62%|██████▏   | 661/1058 [00:13<00:07, 51.36it/s]Loading weights:  63%|██████▎   | 667/1058 [00:13<00:08, 44.04it/s]Loading weights:  64%|██████▍   | 675/1058 [00:13<00:07, 50.94it/s]Loading weights:  64%|██████▍   | 681/1058 [00:13<00:07, 48.21it/s]Loading weights:  65%|██████▍   | 687/1058 [00:14<00:08, 45.68it/s]Loading weights:  66%|██████▌   | 694/1058 [00:14<00:07, 50.81it/s]Loading weights:  66%|██████▌   | 700/1058 [00:14<00:08, 43.03it/s]Loading weights:  73%|███████▎  | 773/1058 [00:14<00:01, 195.79it/s]Loading weights:  85%|████████▌ | 901/1058 [00:14<00:00, 457.08it/s]Loading weights:  97%|█████████▋| 1023/1058 [00:14<00:00, 651.23it/s]Loading weights: 100%|██████████| 1058/1058 [00:14<00:00, 71.94it/s] 
+[transformers] The `use_fast` parameter is deprecated and will be removed in a future version. Use `backend="torchvision"` instead of `use_fast=True`, or `backend="pil"` instead of `use_fast=False`.
+[TIME] 2026-08-28 15:33:56 | generator loaded: Qwen/Qwen3-VL-32B-Instruct -> Time passed for loading model | stage took    30.6s | elapsed since start    30.6s
+[generators.registry.load_generator] generator classes: Qwen3VLForConditionalGeneration / Qwen3VLProcessor
+[generators.registry.load_generator] generator model dtype: torch.bfloat16
+[generators.registry.load_generator] generator device: cuda:0
+[generators.registry.load_generator] generator quantization: BitsAndBytesConfig {
+  "_load_in_4bit": true,
+  "_load_in_8bit": false,
+  "bnb_4bit_compute_dtype": "bfloat16",
+  "bnb_4bit_quant_storage": "uint8",
+  "bnb_4bit_quant_type": "nf4",
+  "bnb_4bit_use_double_quant": true,
+  "llm_int8_enable_fp32_cpu_offload": false,
+  "llm_int8_has_fp16_weight": false,
+  "llm_int8_skip_modules": null,
+  "llm_int8_threshold": 6.0,
+  "load_in_4bit": true,
+  "load_in_8bit": false,
+  "quant_method": "bitsandbytes"
+}
+
+[generators.registry.load_generator] checkpoint revision: 0cfaf48183f594c314753d30a4c4974bc75f3ccb
+[generators.registry.load_generator] vision tower layers: {}
+conversation:
+
+ROLE: system
+  TEXT: You are an expert in classifying emotions from facial expressions in images.
+You are given a query image. Analyze the facial expression in the query image and classify the emotion.
+Follow the user's requested output format.
+
+ROLE: user
+  <IMAGE>
+  TEXT: Classify the emotion shown in this image into one of the following emotions: angry, contempt, disgust, fear, happy, neutral, sad, surprise.
+Respond with only one word: the emotion label.
+conversation structure:
+[{'role': 'system', 'content': [{'type': 'text', 'text': "You are an expert in classifying emotions from facial expressions in images.\nYou are given a query image. Analyze the facial expression in the query image and classify the emotion.\nFollow the user's requested output format."}]}, {'role': 'user', 'content': [{'type': 'image'}, {'type': 'text', 'text': 'Classify the emotion shown in this image into one of the following emotions: angry, contempt, disgust, fear, happy, neutral, sad, surprise.\nRespond with only one word: the emotion label.'}]}]
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+gen_stats: {'device': 'cuda:0', 'prompt_token_len': 163, 'generated_token_len': 2, 'total_token_len': 165, 'thinking_on': False, 'max_new_tokens': 128, 'finish_reason': 'stop', 'generation_args': {'do_sample': False, 'temperature': 1.0, 'num_beams': 1}}
+input tensors the model receives: {'input_ids': (1, 163), 'attention_mask': (1, 163), 'mm_token_type_ids': (1, 163), 'pixel_values': (256, 1536), 'image_grid_thw': (1, 3)}
+prompt the model actually sees:
+<|im_start|>system
+You are an expert in classifying emotions from facial expressions in images.
+You are given a query image. Analyze the facial expression in the query image and classify the emotion.
+Follow the user's requested output format.<|im_end|>
+<|im_start|>user
+<|vision_start|><|image_pad|>x64<|vision_end|>Classify the emotion shown in this image into one of the following emotions: angry, contempt, disgust, fear, happy, neutral, sad, surprise.
+Respond with only one word: the emotion label.<|im_end|>
+<|im_start|>assistant
+
+raw generation, special tokens kept: 'happy<|im_end|>'
+prediction: 'happy'
+thinking: None
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:34:51 | batch 1/32 done, (100 samples) -> Time for processing the batch | stage took    55.3s | elapsed since start    85.8s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:35:44 | batch 2/32 done, (100 samples) -> Time for processing the batch | stage took    53.2s | elapsed since start   139.0s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:36:37 | batch 3/32 done, (100 samples) -> Time for processing the batch | stage took    53.0s | elapsed since start   192.0s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:37:30 | batch 4/32 done, (100 samples) -> Time for processing the batch | stage took    53.2s | elapsed since start   245.3s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:38:24 | batch 5/32 done, (100 samples) -> Time for processing the batch | stage took    53.1s | elapsed since start   298.4s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:39:16 | batch 6/32 done, (100 samples) -> Time for processing the batch | stage took    52.8s | elapsed since start   351.2s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:40:09 | batch 7/32 done, (100 samples) -> Time for processing the batch | stage took    52.9s | elapsed since start   404.1s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:41:03 | batch 8/32 done, (100 samples) -> Time for processing the batch | stage took    53.7s | elapsed since start   457.8s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:41:56 | batch 9/32 done, (100 samples) -> Time for processing the batch | stage took    52.7s | elapsed since start   510.5s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:42:49 | batch 10/32 done, (100 samples) -> Time for processing the batch | stage took    53.2s | elapsed since start   563.7s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:43:43 | batch 11/32 done, (100 samples) -> Time for processing the batch | stage took    54.4s | elapsed since start   618.1s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:44:37 | batch 12/32 done, (100 samples) -> Time for processing the batch | stage took    53.9s | elapsed since start   672.0s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:45:30 | batch 13/32 done, (100 samples) -> Time for processing the batch | stage took    53.3s | elapsed since start   725.3s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:46:24 | batch 14/32 done, (100 samples) -> Time for processing the batch | stage took    53.7s | elapsed since start   778.9s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:47:18 | batch 15/32 done, (100 samples) -> Time for processing the batch | stage took    53.8s | elapsed since start   832.7s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:48:11 | batch 16/32 done, (100 samples) -> Time for processing the batch | stage took    53.1s | elapsed since start   885.8s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:49:04 | batch 17/32 done, (100 samples) -> Time for processing the batch | stage took    53.1s | elapsed since start   938.9s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:49:57 | batch 18/32 done, (100 samples) -> Time for processing the batch | stage took    52.7s | elapsed since start   991.5s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:50:49 | batch 19/32 done, (100 samples) -> Time for processing the batch | stage took    52.6s | elapsed since start  1044.1s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:51:42 | batch 20/32 done, (100 samples) -> Time for processing the batch | stage took    52.8s | elapsed since start  1096.9s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:52:34 | batch 21/32 done, (100 samples) -> Time for processing the batch | stage took    52.3s | elapsed since start  1149.2s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:53:27 | batch 22/32 done, (100 samples) -> Time for processing the batch | stage took    52.8s | elapsed since start  1202.0s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:54:21 | batch 23/32 done, (100 samples) -> Time for processing the batch | stage took    53.3s | elapsed since start  1255.3s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:55:13 | batch 24/32 done, (100 samples) -> Time for processing the batch | stage took    52.5s | elapsed since start  1307.8s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:56:06 | batch 25/32 done, (100 samples) -> Time for processing the batch | stage took    53.2s | elapsed since start  1361.0s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:57:00 | batch 26/32 done, (100 samples) -> Time for processing the batch | stage took    53.4s | elapsed since start  1414.4s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:57:53 | batch 27/32 done, (100 samples) -> Time for processing the batch | stage took    53.3s | elapsed since start  1467.7s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:58:46 | batch 28/32 done, (100 samples) -> Time for processing the batch | stage took    53.1s | elapsed since start  1520.8s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 15:59:40 | batch 29/32 done, (100 samples) -> Time for processing the batch | stage took    53.5s | elapsed since start  1574.3s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 16:00:33 | batch 30/32 done, (100 samples) -> Time for processing the batch | stage took    53.0s | elapsed since start  1627.4s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 16:01:26 | batch 31/32 done, (100 samples) -> Time for processing the batch | stage took    53.7s | elapsed since start  1681.0s
+/truenas/home/sdolev/miniconda3/envs/rag/lib/python3.10/site-packages/bitsandbytes/backends/cuda/ops.py:957: UserWarning: inner dimension (4304) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.
+  warn(
+peak GPU memory this batch: 18.52 GB
+[TIME] 2026-08-28 16:02:19 | batch 32/32 done, (99 samples) -> Time for processing the batch | stage took    52.6s | elapsed since start  1733.7s
+[TIME] 2026-08-28 16:02:19 | pipeline ended -> total runtime 28.9 min
+==============================================================
+ finished    : 2026-08-28 16:02:21
+ results     : /truenas/home/sdolev/FacialExpressionsDolev/experiments/generator_comparison/runs/qwen_3_32b_instruct/zero_shot_qwen_3_32b_instruct_8729.csv
+==============================================================
