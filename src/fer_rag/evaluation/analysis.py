@@ -5,44 +5,57 @@ error analysis, RAG vs zero-shot on retrieval failures, and retrieval tie statis
 Working copy of the functions in ablation/visualize_results_part2.py. The originals stay
 frozen under ablation/ because they produced the figures in the submitted draft.
 
-Every function takes dataframes (not paths) except validate_dfs, and writes its figures
-to a relative "figures" folder, so the output lands next to whichever experiment script
-called it.
+Every function takes dataframes (not paths), and writes its figures to a relative
+"figures" folder, so the output lands next to whichever experiment script called it.
+Validate each results CSV with validate_results_df() before passing it in, and use
+is_same_dataset() to confirm two results dataframes cover the same samples.
 """
 
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score
 import matplotlib.pyplot as plt
 import os
+import warnings
 
-from .vis_results import validate_results, plot_confusion_matrix
+from .vis_results import plot_confusion_matrix
 
 
-def validate_dfs(with_dup_path, no_dup_path):
+def is_same_dataset(df_a, df_b, name_a="", name_b=""):
     """
-    get the results with duplicates and without duplicates, validate each dataset and validate the file paths are
-    in the same order across these results CSVs.
-    :param with_dup_path:
-    :param no_dup_path:
-    :return:
+    check that two results dataframes cover the same samples, by comparing their sets of
+    "file_path" values. a mismatch warns, since comparisons that merge the two on
+    "file_path" silently drop the unmatched rows.
+    df_a, df_b (DataFrame): results dataframes, must contain "file_path".
+    name_a, name_b (String): labels for the printed output only.
+    returns: True if both hold the same set of file paths.
     """
-    # retriever compared to RAG
-    df_with_dup = pd.read_csv(with_dup_path)
-    df_no_dup = pd.read_csv(no_dup_path)
+    label_a = name_a or "first dataframe"
+    label_b = name_b or "second dataframe"
 
-    # validate results
-    print("before duplicate removal:")
-    df_with_dup = validate_results(df_with_dup)
-    print("after duplicate removal:")
-    df_no_dup = validate_results(df_no_dup)
+    paths_a = set(df_a["file_path"])
+    paths_b = set(df_b["file_path"])
+    is_match = paths_a == paths_b
 
-    # validate both datasets are the same
-    is_math=  set(df_with_dup["file_path"]) == set(df_no_dup["file_path"])
-    print(f"does both dataframes before and after duplicates are match? {is_math}")
+    print(f"do '{label_a}' ({len(df_a)} rows) and '{label_b}' ({len(df_b)} rows) "
+          f"cover the same set of file paths? {is_match}")
 
-    return df_with_dup, df_no_dup
+    if is_match:
+        print("note: this only confirms both dataframes hold the exact same file paths. "
+              "row order and duplicated file paths are not checked - "
+              "if either matters for your comparison, check it yourself.")
 
+    if not is_match:
+        only_a = sorted(paths_a - paths_b)
+        only_b = sorted(paths_b - paths_a)
+        warnings.warn(
+            f"'{label_a}' and '{label_b}' do not cover the same samples - comparisons that "
+            f"merge them on 'file_path' will drop those rows. "
+            f"file paths that are only in '{label_a}' ({len(only_a)}): {only_a}. "
+            f"file paths that are only in '{label_b}' ({len(only_b)}): {only_b}.",
+            UserWarning,
+        )
 
+    return is_match
 
 
 def cosine_tie_stats(df, dataset_name=""):
@@ -79,8 +92,6 @@ def cosine_tie_stats(df, dataset_name=""):
         "count_diff_labels_in_ties": count_diff_labels_in_ties,
         "pct_diff_labels_in_ties": pct_diff_labels_in_ties,
     }
-
-
 
 
 def compare_retriever_rag(dfs, dataset_name=""):

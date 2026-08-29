@@ -19,25 +19,85 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import random
 import textwrap
+import warnings
 
 
 
 def validate_results(df):
-    # validate results
-    # if anger is in prediction, normalize to angry
-    df.loc[df["prediction"] == "anger", "prediction"] = "angry"
-    # check if all predictions are valid
-    print(f"label list: {sorted(df['true_label'].unique().tolist())}")
-    print(f"prediction list: {sorted(df['prediction'].unique().tolist())}")
-    print(f"same unique labels? {set(df['true_label'].dropna().unique()) == set(df['prediction'].dropna().unique())}")
+    """
+    Sanity-checks a results dataframe before it is used for metrics/plots.
+    Normalizes the prediction "anger" to "angry" (in place) and reports what it found.
+    Raises a UserWarning for anything that would invalidate downstream metrics: predictions
+    outside the true-label set, nulls, duplicated file paths, or file_path/query_file_path
+    mismatches.
+    df (DataFrame): must contain the columns "true_label", "prediction",
+                    "file_path" and "query_file_path".
+    returns: the same dataframe, with "anger" predictions rewritten to "angry".
+    """
+    n_rows = len(df)
+
+    # what the results file contains
+    print(f"columns in the results file: {df.columns.tolist()}")
+
+    # the label vocabulary on both sides
+    label_set = set(df["true_label"].dropna().unique())
+    print(f"label list: {sorted(df['true_label'].dropna().unique().tolist())}")
+    print(f"prediction list: {sorted(df['prediction'].dropna().unique().tolist())}")
+    print(f"predicted values are exactly the same set as the true labels? "
+          f"{label_set == set(df['prediction'].dropna().unique())}")
+
+    # if anger is in prediction, normalize to angry (before checking the label vocabulary,
+    # otherwise every "anger" row is reported as an unexpected prediction)
+    anger_mask = df["prediction"] == "anger"
+    n_anger = int(anger_mask.sum())
+    df.loc[anger_mask, "prediction"] = "angry"
+    print(f"rewrote prediction 'anger' -> 'angry' in {n_anger} of {n_rows} rows")
+
+    # check if all predictions are valid, i.e. taken from the true label set
+    unexpected = sorted(set(df["prediction"].dropna().unique()) - label_set)
+    n_unexpected = int(df["prediction"].isin(unexpected).sum())
+
     # are there nulls?
-    print(f"are there nulls in true label? {df['true_label'].isna().any()}")
-    print(f"are there nulls in prediction? {df['prediction'].isna().any()}")
-    # print columns
-    print(f"columns: {df.columns.tolist()}")
+    n_null_true = int(df["true_label"].isna().sum())
+    n_null_pred = int(df["prediction"].isna().sum())
+
+    # is every sample present exactly once?
+    duplicated = df.loc[df["file_path"].duplicated(keep=False), "file_path"].value_counts()
+    n_duplicated_rows = int(duplicated.sum())
+
     # validate file paths
-    all_match = (df["file_path"].astype(str) == df["query_file_path"].astype(str)).all()
-    print(f"does file paths match? {all_match}")
+    n_mismatch = int((df["file_path"].astype(str) != df["query_file_path"].astype(str)).sum())
+
+    # everything above only reports, warnings come last
+    if unexpected:
+        warnings.warn(
+            f"{n_unexpected} of {n_rows} rows have a prediction that is not one of the "
+            f"true labels. unexpected predictions: {unexpected}",
+            UserWarning,
+        )
+    if n_null_true:
+        warnings.warn(
+            f"'true_label' has {n_null_true} null values out of {n_rows} rows.",
+            UserWarning,
+        )
+    if n_null_pred:
+        warnings.warn(
+            f"'prediction' has {n_null_pred} null values out of {n_rows} rows.",
+            UserWarning,
+        )
+    if n_duplicated_rows:
+        warnings.warn(
+            f"'file_path' is not unique: {n_duplicated_rows} of {n_rows} rows share a path "
+            f"with another row, so some samples are counted more than once. duplicated "
+            f"file paths (path: number of rows): {duplicated.to_dict()}",
+            UserWarning,
+        )
+    if n_mismatch:
+        warnings.warn(
+            f"'file_path' differs from 'query_file_path' in {n_mismatch} of {n_rows} rows - "
+            f"predictions may not line up with the images they are stored next to.",
+            UserWarning,
+        )
 
     return df
 
