@@ -25,11 +25,13 @@ checkpoint. Resolving the concrete model and processor classes is therefore dele
 """
 
 import copy
+import gc
 import re
 
 import torch
 
-from .constants import DEFAULT_MAX_NEW_TOKENS, GENERATION_ARGS, QUANTIZATION
+from .constants import (DEFAULT_MAX_NEW_TOKENS, GENERATION_ARGS, OOM_RETRY_CACHE,
+                        QUANTIZATION)
 
 
 # --------------------------------------------------------------------------------------
@@ -302,8 +304,11 @@ def generate_prediction(model, processor, conversation, images, spec, enable_thi
     ``stats`` holds the per-call diagnostics (device and token counts, and why generation
     stopped: ``finish_reason`` is "stop" when the model ended the turn itself, "length" when
     max_new_tokens cut it off, and "unknown" for a checkpoint that declares no stop token,
-    which cannot be told apart). They are returned rather than printed: this is library
-    code, so the calling pipeline decides whether and how often to report them.
+    which cannot be told apart). ``cache_mode`` is "gpu" for a sample that generated within
+    the device's memory and "offloaded" for one that only finished because its KV cache was
+    moved to host RAM, so a run can report how many samples needed that. They are returned
+    rather than printed: this is library code, so the calling pipeline decides whether and
+    how often to report them.
 
     ``check_truncation`` can be switched off by a pipeline that has already learned what
     it needs, which is the case once a run has been told the checkpoint declares no stop
@@ -365,8 +370,29 @@ def generate_prediction(model, processor, conversation, images, spec, enable_thi
     else:
         max_new_tokens = spec.get("max_new_tokens", DEFAULT_MAX_NEW_TOKENS)
 
+    # a reasoning run whose chain of thought grows far past the usual length can fill the
+    # device with KV cache alone, so a generation that runs out of memory is retried with
+    # the cache held in host RAM instead of on the card. Only the storage location of the
+    # cache changes, so the retry produces the same tokens the first attempt was heading
+    # for, at the cost of moving it back and forth once per layer per token.
+    cache_mode = "gpu"
+    out_of_memory = False
     with torch.no_grad():
-        output = model.generate(**inputs, max_new_tokens=max_new_tokens, **GENERATION_ARGS)
+        try:
+            output = model.generate(**inputs, max_new_tokens=max_new_tokens, **GENERATION_ARGS)
+        except torch.cuda.OutOfMemoryError:
+            out_of_memory = True
+
+        # the retry happens outside the except block on purpose: while the exception is
+        # being handled its traceback still references generate()'s frames, and those
+        # reference the cache that filled the device, so freeing it has to wait until the
+        # handler has been left.
+        if out_of_memory:
+            gc.collect()
+            torch.cuda.empty_cache()
+            output = model.generate(**inputs, max_new_tokens=max_new_tokens,
+                                    cache_implementation=OOM_RETRY_CACHE, **GENERATION_ARGS)
+            cache_mode = OOM_RETRY_CACHE
 
     prompt_len = inputs["input_ids"].shape[-1]
     gen_ids = output[0][prompt_len:]
@@ -393,6 +419,7 @@ def generate_prediction(model, processor, conversation, images, spec, enable_thi
         "thinking_on": thinking_on,
         "max_new_tokens": max_new_tokens,
         "finish_reason": finish_reason,
+        "cache_mode": cache_mode,
         "generation_args": GENERATION_ARGS,
     }
 

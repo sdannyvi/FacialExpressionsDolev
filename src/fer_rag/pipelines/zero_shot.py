@@ -171,6 +171,7 @@ num_batches = (num_samples + batch_size - 1) // batch_size
 
 check_output_truncation = True
 truncated_count = 0
+offloaded_count = 0
 for curr_batch, batch_start in enumerate(range(start_row, len(test_df), batch_size)):
     batch_end = min(batch_start + batch_size, len(test_df))
     batch_df = test_df.iloc[batch_start:batch_end].copy()
@@ -237,7 +238,16 @@ for curr_batch, batch_start in enumerate(range(start_row, len(test_df), batch_si
             print(f'thinking: {thinking!r}')
             print_debug = False
 
-        # generation that ran out of budget (max new tokens) rather than finishing its answer. 
+        # generation that did not fit in device memory and only finished because its KV
+        # cache was moved to host RAM. The prediction is unaffected, the sample was slower.
+        if gen_stats["cache_mode"] != "gpu":
+            offloaded_count += 1
+            if offloaded_count == 1:
+                print(f"[WARNING] pipelines.zero_shot: the generation ran out of GPU memory and "
+                      f"was retried with the KV cache offloaded to host RAM. The prediction is "
+                      f"unchanged but the sample was much slower. query: {query_path}")
+
+        # generation that ran out of budget (max new tokens) rather than finishing its answer.
         if gen_stats["finish_reason"] == "length":
             truncated_count += 1
             if truncated_count == 1:
@@ -285,6 +295,13 @@ if truncated_count:
     print(f"[WARNING] pipelines.zero_shot: {truncated_count} of {num_samples} samples were "
           f"truncated before the model finished its answer. Consider raising max_new_tokens for "
           f"'{generator_id}'.")
+
+# the offloaded samples are the ones that would have ended the run before this retry
+# existed. Their predictions are comparable to the rest, their timings are not.
+if offloaded_count:
+    print(f"[WARNING] pipelines.zero_shot: {offloaded_count} of {num_samples} samples did not "
+          f"fit in GPU memory and were generated with the KV cache offloaded to host RAM. Their "
+          f"predictions are unaffected, their runtimes are not comparable to the rest.")
 
 print(f"[TIME] {now_str()} | pipeline ended -> total runtime "
       f"{(time.perf_counter()-_T0)/60:.1f} min", flush=True)
