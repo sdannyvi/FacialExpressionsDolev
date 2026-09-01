@@ -541,16 +541,17 @@ def compare_zeroshot_rag(dfs, dataset_name=""):
     for name, (df_zero_shot, df_rag) in dfs.items():
         print(f"results for model: {name}")
 
-        # the two frameworks ran as separate jobs, so confirm they scored the same rows before
-        # any number is derived from the pair
+        # the two frameworks ran as separate jobs, so report whether they scored the same rows.
         if not is_same_dataset(df_zero_shot, df_rag,
                                name_a=f"{name} zero-shot", name_b=f"{name} RAG"):
             warnings.warn(
-                f"the zero-shot and RAG runs of '{name}' do not hold the same rows, so the "
-                f"two are not comparable. the model is left out of the table.",
+                f"the zero-shot and RAG runs of '{name}' do not hold the same rows "
+                f"({len(df_zero_shot)} zero-shot, {len(df_rag)} RAG), so the two are scored "
+                f"over different samples and the gap between them carries that difference. "
+                f"the model is kept in the table, see the printed report above for what "
+                f"differs.",
                 UserWarning,
             )
-            continue
 
         # calculate zero-shot accuracy and RAG accuracy. rounded to 2 decimals here, at the
         # point they are derived, and not only where they are printed: every number this

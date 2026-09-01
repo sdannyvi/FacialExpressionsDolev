@@ -1,53 +1,127 @@
 
-=================== validating: llava_next_34b ===================
+=================== validating: rag llava_next_34b ===================
 columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
 label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
 prediction list: ['anger', 'angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
 predicted values are exactly the same set as the true labels? False
 rewrote prediction 'anger' -> 'angry' in 4 of 3199 rows
+rewrote prediction 'surprised' -> 'surprise' in 0 of 3199 rows
+every prediction is one of the true labels
 predicted values are exactly the same set as the true labels? True
 
-=================== validating: gemma_3_27b ===================
+=================== validating: zero-shot llava_next_34b ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path']
+label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+prediction list: ['anger', 'angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+predicted values are exactly the same set as the true labels? False
+rewrote prediction 'anger' -> 'angry' in 17 of 3199 rows
+rewrote prediction 'surprised' -> 'surprise' in 0 of 3199 rows
+every prediction is one of the true labels
+predicted values are exactly the same set as the true labels? True
+
+=================== validating: rag gemma_3_27b ===================
 columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
 label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
 prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
 predicted values are exactly the same set as the true labels? True
 rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
+rewrote prediction 'surprised' -> 'surprise' in 0 of 3199 rows
+every prediction is one of the true labels
 predicted values are exactly the same set as the true labels? True
 
-=================== validating: gemma_4_31b_no_thinking ===================
-columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
+=================== validating: zero-shot gemma_3_27b ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path']
 label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
-prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
-predicted values are exactly the same set as the true labels? True
-rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
-predicted values are exactly the same set as the true labels? True
-
-=================== validating: gemma_4_31b_thinking ===================
-columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'thinking', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
-label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
-prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
-predicted values are exactly the same set as the true labels? True
-rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
-predicted values are exactly the same set as the true labels? True
-
-=================== validating: qwen_3_32b_instruct ===================
-columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
-label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
-prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
-predicted values are exactly the same set as the true labels? True
-rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
-predicted values are exactly the same set as the true labels? True
-
-=================== validating: qwen_3_32b_thinking_resume_run ===================
-columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'thinking', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
-label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
-prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
-predicted values are exactly the same set as the true labels? True
-rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
-predicted values are exactly the same set as the true labels? True
-/truenas/home/sdolev/FacialExpressionsDolev/src/fer_rag/evaluation/vis_results.py:86: UserWarning: 'prediction' has 1 null values out of 3199 rows.
+prediction list: ['anger', 'angry', 'contempt', 'disgust', 'fear', 'frustration', 'happy', 'neutral', 'sad', 'surprise', 'surprised', 'thinking']
+predicted values are exactly the same set as the true labels? False
+rewrote prediction 'anger' -> 'angry' in 4 of 3199 rows
+rewrote prediction 'surprised' -> 'surprise' in 1 of 3199 rows
+predictions that are not in the allowed list: 3199: {'frustration': 2, 'thinking': 2}
+predicted values are exactly the same set as the true labels? False
+/truenas/home/sdolev/FacialExpressionsDolev/src/fer_rag/evaluation/vis_results.py:96: UserWarning: 4 of 3199 rows have a prediction that is not one of the true labels. unexpected predictions: ['frustration', 'thinking']
   warnings.warn(
+
+=================== validating: rag gemma_4_31b_no_thinking ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
+label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+predicted values are exactly the same set as the true labels? True
+rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
+rewrote prediction 'surprised' -> 'surprise' in 0 of 3199 rows
+every prediction is one of the true labels
+predicted values are exactly the same set as the true labels? True
+
+=================== validating: zero-shot gemma_4_31b_no_thinking ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path']
+label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+predicted values are exactly the same set as the true labels? True
+rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
+rewrote prediction 'surprised' -> 'surprise' in 0 of 3199 rows
+every prediction is one of the true labels
+predicted values are exactly the same set as the true labels? True
+
+=================== validating: rag gemma_4_31b_thinking ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'thinking', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
+label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+predicted values are exactly the same set as the true labels? True
+rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
+rewrote prediction 'surprised' -> 'surprise' in 0 of 3199 rows
+every prediction is one of the true labels
+predicted values are exactly the same set as the true labels? True
+
+=================== validating: zero-shot gemma_4_31b_thinking ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'thinking']
+label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+predicted values are exactly the same set as the true labels? True
+rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
+rewrote prediction 'surprised' -> 'surprise' in 0 of 3199 rows
+every prediction is one of the true labels
+predicted values are exactly the same set as the true labels? True
+
+=================== validating: rag qwen_3_32b_instruct ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
+label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+predicted values are exactly the same set as the true labels? True
+rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
+rewrote prediction 'surprised' -> 'surprise' in 0 of 3199 rows
+every prediction is one of the true labels
+predicted values are exactly the same set as the true labels? True
+
+=================== validating: zero-shot qwen_3_32b_instruct ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path']
+label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+predicted values are exactly the same set as the true labels? True
+rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
+rewrote prediction 'surprised' -> 'surprise' in 0 of 3199 rows
+every prediction is one of the true labels
+predicted values are exactly the same set as the true labels? True
+
+=================== validating: rag qwen_3_32b_thinking ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'thinking', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
+label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+predicted values are exactly the same set as the true labels? True
+rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
+rewrote prediction 'surprised' -> 'surprise' in 0 of 3199 rows
+every prediction is one of the true labels
+predicted values are exactly the same set as the true labels? True
+/truenas/home/sdolev/FacialExpressionsDolev/src/fer_rag/evaluation/vis_results.py:107: UserWarning: 'prediction' has 1 null values out of 3199 rows.
+  warnings.warn(
+
+=================== validating: zero-shot qwen_3_32b_thinking ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'thinking']
+label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+predicted values are exactly the same set as the true labels? True
+rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
+rewrote prediction 'surprised' -> 'surprise' in 0 of 3199 rows
+every prediction is one of the true labels
+predicted values are exactly the same set as the true labels? True
 
 =================== retriever vs RAG ===================
 results for run: llava_next_34b
@@ -245,7 +319,7 @@ sad:
 surprise:
 [0.02892, 0.0, 0.0, 0.00723, 0.01687, 0.00964, 0.00723, 0.93012]
 Saved: figures/FER+ - qwen_3_32b_instruct - RAG confusion matrix.pdf
-results for run: qwen_3_32b_thinking_resume_run
+results for run: qwen_3_32b_thinking
 retriever accuracy: 0.854284 (85.43%)
 rag accuracy: 0.802064 (80.206%)
 retriever Macro F1: 0.701308 (70.13%)
@@ -266,7 +340,7 @@ sad:
 [0.01709, 0.00285, 0.00285, 0.0114, 0.0057, 0.17949, 0.76923, 0.0114]
 surprise:
 [0.01928, 0.0, 0.0, 0.0241, 0.03133, 0.02892, 0.00482, 0.89157]
-Saved: figures/FER+ - qwen_3_32b_thinking_resume_run - Retriever confusion matrix.pdf
+Saved: figures/FER+ - qwen_3_32b_thinking - Retriever confusion matrix.pdf
 angry:
 [0.8676, 0.00348, 0.01394, 0.01045, 0.01394, 0.02787, 0.02787, 0.03484]
 contempt:
@@ -283,18 +357,236 @@ sad:
 [0.04558, 0.00855, 0.0, 0.0114, 0.02564, 0.04274, 0.83761, 0.02849]
 surprise:
 [0.01928, 0.0, 0.0, 0.01205, 0.02892, 0.01205, 0.00964, 0.91807]
-Saved: figures/FER+ - qwen_3_32b_thinking_resume_run - RAG confusion matrix.pdf
-               Method                             Run  Accuracy  Macro F1
-0   Retriever (Top-1)                  llava_next_34b     85.43     70.13
-1                 RAG                  llava_next_34b     86.15     73.57
-2   Retriever (Top-1)                     gemma_3_27b     85.43     70.13
-3                 RAG                     gemma_3_27b     83.71     69.00
-4   Retriever (Top-1)         gemma_4_31b_no_thinking     85.43     70.13
-5                 RAG         gemma_4_31b_no_thinking     85.00     71.01
-6   Retriever (Top-1)            gemma_4_31b_thinking     85.43     70.13
-7                 RAG            gemma_4_31b_thinking     83.31     69.46
-8   Retriever (Top-1)             qwen_3_32b_instruct     85.43     70.13
-9                 RAG             qwen_3_32b_instruct     74.12     60.16
-10  Retriever (Top-1)  qwen_3_32b_thinking_resume_run     85.43     70.13
-11                RAG  qwen_3_32b_thinking_resume_run     80.21     65.10
+Saved: figures/FER+ - qwen_3_32b_thinking - RAG confusion matrix.pdf
+               Method                      Run  Accuracy  Macro F1
+0   Retriever (Top-1)           llava_next_34b     85.43     70.13
+1                 RAG           llava_next_34b     86.15     73.57
+2   Retriever (Top-1)              gemma_3_27b     85.43     70.13
+3                 RAG              gemma_3_27b     83.71     69.00
+4   Retriever (Top-1)  gemma_4_31b_no_thinking     85.43     70.13
+5                 RAG  gemma_4_31b_no_thinking     85.00     71.01
+6   Retriever (Top-1)     gemma_4_31b_thinking     85.43     70.13
+7                 RAG     gemma_4_31b_thinking     83.31     69.46
+8   Retriever (Top-1)      qwen_3_32b_instruct     85.43     70.13
+9                 RAG      qwen_3_32b_instruct     74.12     60.16
+10  Retriever (Top-1)      qwen_3_32b_thinking     85.43     70.13
+11                RAG      qwen_3_32b_thinking     80.21     65.10
 Saved: figures/FER+ - Retriever and RAG comparison.pdf
+
+=================== retrieval cases: llava_next_34b ===================
+Sum of all cases: 3199
+Total: 3199
+Case A1 (Top-1 correct, Top-2 correct, generator correct): 78.34 %
+Case A2 (Top-1 correct, Top-2 correct, generator incorrect): 1.13 %
+Case B1 (Top-1 correct, Top-2 incorrect, generator correct): 3.47 %
+Case B2 (Top-1 correct, Top-2 incorrect, generator incorrect): 2.5 %
+Case C1 (Top-1 incorrect, Top-2 correct, generator correct): 3.63 %
+Case C2 (Top-1 incorrect, Top-2 correct, generator incorrect): 2.66 %
+Case D1 (Top-1 incorrect, Top-2 incorrect, generator correct): 0.72 %
+Case D2 (Top-1 incorrect, Top-2 incorrect, generator incorrect): 7.56 %
+  Case  ...                                     Interpretation
+0   A1  ...               Retriever and generator both correct
+1   A2  ...  Generator failed despite both retrieved labels...
+2   B1  ...       Generator correct when only Top-1 is correct
+3   B2  ...   Generator failed despite correct Top-1 retrieval
+4   C1  ...       Generator correct when only Top-2 is correct
+5   C2  ...   Generator failed despite correct Top-2 retrieval
+6   D1  ...      Generator correct despite incorrect retrieval
+7   D2  ...                Both retriever and generator failed
+
+[8 rows x 6 columns]
+Saved: figures/FER+ - llava_next_34b- Error_analysis_8_cases.pdf
+
+=================== retrieval cases: gemma_3_27b ===================
+Sum of all cases: 3199
+Total: 3199
+Case A1 (Top-1 correct, Top-2 correct, generator correct): 77.43 %
+Case A2 (Top-1 correct, Top-2 correct, generator incorrect): 2.03 %
+Case B1 (Top-1 correct, Top-2 incorrect, generator correct): 2.88 %
+Case B2 (Top-1 correct, Top-2 incorrect, generator incorrect): 3.09 %
+Case C1 (Top-1 incorrect, Top-2 correct, generator correct): 3.16 %
+Case C2 (Top-1 incorrect, Top-2 correct, generator incorrect): 3.13 %
+Case D1 (Top-1 incorrect, Top-2 incorrect, generator correct): 0.25 %
+Case D2 (Top-1 incorrect, Top-2 incorrect, generator incorrect): 8.03 %
+  Case  ...                                     Interpretation
+0   A1  ...               Retriever and generator both correct
+1   A2  ...  Generator failed despite both retrieved labels...
+2   B1  ...       Generator correct when only Top-1 is correct
+3   B2  ...   Generator failed despite correct Top-1 retrieval
+4   C1  ...       Generator correct when only Top-2 is correct
+5   C2  ...   Generator failed despite correct Top-2 retrieval
+6   D1  ...      Generator correct despite incorrect retrieval
+7   D2  ...                Both retriever and generator failed
+
+[8 rows x 6 columns]
+Saved: figures/FER+ - gemma_3_27b- Error_analysis_8_cases.pdf
+
+=================== retrieval cases: gemma_4_31b_no_thinking ===================
+Sum of all cases: 3199
+Total: 3199
+Case A1 (Top-1 correct, Top-2 correct, generator correct): 75.77 %
+Case A2 (Top-1 correct, Top-2 correct, generator incorrect): 3.69 %
+Case B1 (Top-1 correct, Top-2 incorrect, generator correct): 4.19 %
+Case B2 (Top-1 correct, Top-2 incorrect, generator incorrect): 1.78 %
+Case C1 (Top-1 incorrect, Top-2 correct, generator correct): 3.06 %
+Case C2 (Top-1 incorrect, Top-2 correct, generator incorrect): 3.22 %
+Case D1 (Top-1 incorrect, Top-2 incorrect, generator correct): 1.97 %
+Case D2 (Top-1 incorrect, Top-2 incorrect, generator incorrect): 6.31 %
+  Case  ...                                     Interpretation
+0   A1  ...               Retriever and generator both correct
+1   A2  ...  Generator failed despite both retrieved labels...
+2   B1  ...       Generator correct when only Top-1 is correct
+3   B2  ...   Generator failed despite correct Top-1 retrieval
+4   C1  ...       Generator correct when only Top-2 is correct
+5   C2  ...   Generator failed despite correct Top-2 retrieval
+6   D1  ...      Generator correct despite incorrect retrieval
+7   D2  ...                Both retriever and generator failed
+
+[8 rows x 6 columns]
+Saved: figures/FER+ - gemma_4_31b_no_thinking- Error_analysis_8_cases.pdf
+
+=================== retrieval cases: gemma_4_31b_thinking ===================
+Sum of all cases: 3199
+Total: 3199
+Case A1 (Top-1 correct, Top-2 correct, generator correct): 74.43 %
+Case A2 (Top-1 correct, Top-2 correct, generator incorrect): 5.03 %
+Case B1 (Top-1 correct, Top-2 incorrect, generator correct): 3.69 %
+Case B2 (Top-1 correct, Top-2 incorrect, generator incorrect): 2.28 %
+Case C1 (Top-1 incorrect, Top-2 correct, generator correct): 3.13 %
+Case C2 (Top-1 incorrect, Top-2 correct, generator incorrect): 3.16 %
+Case D1 (Top-1 incorrect, Top-2 incorrect, generator correct): 2.06 %
+Case D2 (Top-1 incorrect, Top-2 incorrect, generator incorrect): 6.22 %
+  Case  ...                                     Interpretation
+0   A1  ...               Retriever and generator both correct
+1   A2  ...  Generator failed despite both retrieved labels...
+2   B1  ...       Generator correct when only Top-1 is correct
+3   B2  ...   Generator failed despite correct Top-1 retrieval
+4   C1  ...       Generator correct when only Top-2 is correct
+5   C2  ...   Generator failed despite correct Top-2 retrieval
+6   D1  ...      Generator correct despite incorrect retrieval
+7   D2  ...                Both retriever and generator failed
+
+[8 rows x 6 columns]
+Saved: figures/FER+ - gemma_4_31b_thinking- Error_analysis_8_cases.pdf
+
+=================== retrieval cases: qwen_3_32b_instruct ===================
+Sum of all cases: 3199
+Total: 3199
+Case A1 (Top-1 correct, Top-2 correct, generator correct): 65.33 %
+Case A2 (Top-1 correct, Top-2 correct, generator incorrect): 14.13 %
+Case B1 (Top-1 correct, Top-2 incorrect, generator correct): 3.41 %
+Case B2 (Top-1 correct, Top-2 incorrect, generator incorrect): 2.56 %
+Case C1 (Top-1 incorrect, Top-2 correct, generator correct): 2.88 %
+Case C2 (Top-1 incorrect, Top-2 correct, generator incorrect): 3.41 %
+Case D1 (Top-1 incorrect, Top-2 incorrect, generator correct): 2.5 %
+Case D2 (Top-1 incorrect, Top-2 incorrect, generator incorrect): 5.78 %
+  Case  ...                                     Interpretation
+0   A1  ...               Retriever and generator both correct
+1   A2  ...  Generator failed despite both retrieved labels...
+2   B1  ...       Generator correct when only Top-1 is correct
+3   B2  ...   Generator failed despite correct Top-1 retrieval
+4   C1  ...       Generator correct when only Top-2 is correct
+5   C2  ...   Generator failed despite correct Top-2 retrieval
+6   D1  ...      Generator correct despite incorrect retrieval
+7   D2  ...                Both retriever and generator failed
+
+[8 rows x 6 columns]
+Saved: figures/FER+ - qwen_3_32b_instruct- Error_analysis_8_cases.pdf
+
+=================== retrieval cases: qwen_3_32b_thinking ===================
+Sum of all cases: 3198
+Total: 3198
+Case A1 (Top-1 correct, Top-2 correct, generator correct): 71.7 %
+Case A2 (Top-1 correct, Top-2 correct, generator incorrect): 7.79 %
+Case B1 (Top-1 correct, Top-2 incorrect, generator correct): 3.53 %
+Case B2 (Top-1 correct, Top-2 incorrect, generator incorrect): 2.41 %
+Case C1 (Top-1 incorrect, Top-2 correct, generator correct): 2.94 %
+Case C2 (Top-1 incorrect, Top-2 correct, generator incorrect): 3.35 %
+Case D1 (Top-1 incorrect, Top-2 incorrect, generator correct): 2.03 %
+Case D2 (Top-1 incorrect, Top-2 incorrect, generator incorrect): 6.25 %
+  Case  ...                                     Interpretation
+0   A1  ...               Retriever and generator both correct
+1   A2  ...  Generator failed despite both retrieved labels...
+2   B1  ...       Generator correct when only Top-1 is correct
+3   B2  ...   Generator failed despite correct Top-1 retrieval
+4   C1  ...       Generator correct when only Top-2 is correct
+5   C2  ...   Generator failed despite correct Top-2 retrieval
+6   D1  ...      Generator correct despite incorrect retrieval
+7   D2  ...                Both retriever and generator failed
+
+[8 rows x 6 columns]
+Saved: figures/FER+ - qwen_3_32b_thinking- Error_analysis_8_cases.pdf
+
+=================== zero-shot vs RAG ===================
+results for model: llava_next_34b
+are 'llava_next_34b zero-shot' (3199 rows) and 'llava_next_34b RAG' (3199 rows) the exact same dataset? True
+they match: same number of rows (3199), same set of file paths, and the file paths are in the same order.
+zero-shot accuracy: 78.87%
+rag accuracy: 86.15%
+zero-shot Macro F1: 57.53%
+rag Macro F1: 73.57%
+RAG - zero-shot: 7.28 accuracy points, 16.04 macro F1 points
+results for model: gemma_3_27b
+are 'gemma_3_27b zero-shot' (3199 rows) and 'gemma_3_27b RAG' (3199 rows) the exact same dataset? True
+they match: same number of rows (3199), same set of file paths, and the file paths are in the same order.
+zero-shot accuracy: 53.83%
+rag accuracy: 83.71%
+zero-shot Macro F1: 30.87%
+rag Macro F1: 69.0%
+RAG - zero-shot: 29.88 accuracy points, 38.13 macro F1 points
+results for model: gemma_4_31b_no_thinking
+are 'gemma_4_31b_no_thinking zero-shot' (3199 rows) and 'gemma_4_31b_no_thinking RAG' (3199 rows) the exact same dataset? True
+they match: same number of rows (3199), same set of file paths, and the file paths are in the same order.
+zero-shot accuracy: 78.15%
+rag accuracy: 85.0%
+zero-shot Macro F1: 59.6%
+rag Macro F1: 71.01%
+RAG - zero-shot: 6.85 accuracy points, 11.41 macro F1 points
+results for model: gemma_4_31b_thinking
+are 'gemma_4_31b_thinking zero-shot' (3199 rows) and 'gemma_4_31b_thinking RAG' (3199 rows) the exact same dataset? True
+they match: same number of rows (3199), same set of file paths, and the file paths are in the same order.
+zero-shot accuracy: 76.06%
+rag accuracy: 83.31%
+zero-shot Macro F1: 57.35%
+rag Macro F1: 69.46%
+RAG - zero-shot: 7.25 accuracy points, 12.11 macro F1 points
+results for model: qwen_3_32b_instruct
+are 'qwen_3_32b_instruct zero-shot' (3199 rows) and 'qwen_3_32b_instruct RAG' (3199 rows) the exact same dataset? True
+they match: same number of rows (3199), same set of file paths, and the file paths are in the same order.
+zero-shot accuracy: 70.43%
+rag accuracy: 74.12%
+zero-shot Macro F1: 51.96%
+rag Macro F1: 60.16%
+RAG - zero-shot: 3.69 accuracy points, 8.2 macro F1 points
+results for model: qwen_3_32b_thinking
+are 'qwen_3_32b_thinking zero-shot' (3199 rows) and 'qwen_3_32b_thinking RAG' (3198 rows) the exact same dataset? False
+the number of rows differs: 'qwen_3_32b_thinking zero-shot' has 3199 rows, 'qwen_3_32b_thinking RAG' has 3198 rows.
+file paths that are only in 'qwen_3_32b_thinking zero-shot' (1): ['data/fer2013/PublicTest/happy/happy_PublicTest_31314.png']
+file paths that are only in 'qwen_3_32b_thinking RAG' (0): []
+the first row where the file paths differ is row 2319: 'qwen_3_32b_thinking zero-shot' has 'data/fer2013/PublicTest/happy/happy_PublicTest_31314.png', 'qwen_3_32b_thinking RAG' has 'data/fer2013/PublicTest/neutral/neutral_PublicTest_31315.png'
+rows where the file paths differ (879 of the 3198 rows the two dataframes share): [2319, 2320, 2321, 2322, 2323, 2324, 2325, 2326, 2327, 2328, 2329, 2330, 2331, 2332, 2333, 2334, 2335, 2336, 2337, 2338, 2339, 2340, 2341, 2342, 2343, 2344, 2345, 2346, 2347, 2348, 2349, 2350, 2351, 2352, 2353, 2354, 2355, 2356, 2357, 2358, 2359, 2360, 2361, 2362, 2363, 2364, 2365, 2366, 2367, 2368] ...and 829 more
+/truenas/home/sdolev/FacialExpressionsDolev/src/fer_rag/evaluation/analysis.py:112: UserWarning: 'qwen_3_32b_thinking zero-shot' and 'qwen_3_32b_thinking RAG' are not the same dataset - comparisons that merge them on 'file_path' will drop the unmatched rows, and comparisons that line them up by position will compare different samples. row counts: 3199 and 3198. file paths only in 'qwen_3_32b_thinking zero-shot': 1. file paths only in 'qwen_3_32b_thinking RAG': 0. rows in a different order: 879. see the printed output above.
+  warnings.warn(
+/truenas/home/sdolev/FacialExpressionsDolev/src/fer_rag/evaluation/analysis.py:547: UserWarning: the zero-shot and RAG runs of 'qwen_3_32b_thinking' do not hold the same rows (3199 zero-shot, 3198 RAG), so the two are scored over different samples and the gap between them carries that difference. the model is kept in the table, see the printed report above for what differs.
+  warnings.warn(
+zero-shot accuracy: 71.33%
+rag accuracy: 80.21%
+zero-shot Macro F1: 51.11%
+rag Macro F1: 65.1%
+RAG - zero-shot: 8.88 accuracy points, 13.99 macro F1 points
+                      Model  ... Macro F1 gap\n(RAG - Zero-shot)
+0            llava_next_34b  ...                                
+1            llava_next_34b  ...                           16.04
+2               gemma_3_27b  ...                                
+3               gemma_3_27b  ...                           38.13
+4   gemma_4_31b_no_thinking  ...                                
+5   gemma_4_31b_no_thinking  ...                           11.41
+6      gemma_4_31b_thinking  ...                                
+7      gemma_4_31b_thinking  ...                           12.11
+8       qwen_3_32b_instruct  ...                                
+9       qwen_3_32b_instruct  ...                             8.2
+10      qwen_3_32b_thinking  ...                                
+11      qwen_3_32b_thinking  ...                           13.99
+
+[12 rows x 6 columns]
+Saved: figures/FER+ - Zero-shot and RAG comparison.pdf

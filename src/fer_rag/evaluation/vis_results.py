@@ -26,13 +26,15 @@ import warnings
 def validate_results(df):
     """
     Sanity-checks a results dataframe before it is used for metrics/plots.
-    Normalizes the prediction "anger" to "angry" (in place) and reports what it found.
+    Normalizes the predictions "anger" to "angry" and "surprised" to "surprise" (in place)
+    and reports what it found.
     Raises a UserWarning for anything that would invalidate downstream metrics: predictions
     outside the true-label set, nulls, duplicated file paths, or file_path/query_file_path
     mismatches.
     df (DataFrame): must contain the columns "true_label", "prediction",
                     "file_path" and "query_file_path".
-    returns: the same dataframe, with "anger" predictions rewritten to "angry".
+    returns: the same dataframe, with "anger" predictions rewritten to "angry" and
+             "surprised" rewritten to "surprise".
     """
     n_rows = len(df)
 
@@ -52,6 +54,25 @@ def validate_results(df):
     n_anger = int(anger_mask.sum())
     df.loc[anger_mask, "prediction"] = "angry"
     print(f"rewrote prediction 'anger' -> 'angry' in {n_anger} of {n_rows} rows")
+
+    # same for surprised, the adjective the generator sometimes answers with instead of the
+    # label "surprise". a spelling of the right class, not a different prediction, so it is
+    # normalized rather than counted as wrong
+    surprised_mask = df["prediction"] == "surprised"
+    n_surprised = int(surprised_mask.sum())
+    df.loc[surprised_mask, "prediction"] = "surprise"
+    print(f"rewrote prediction 'surprised' -> 'surprise' in {n_surprised} of {n_rows} rows")
+
+    # how many rows each prediction outside the true label set accounts for, one count per
+    # value, so a single stray answer is told apart from a systematic failure. counted after
+    # the rewrites above, so a normalized spelling is not reported here
+    prediction_counts = df["prediction"].value_counts()
+    unexpected_counts = prediction_counts[~prediction_counts.index.isin(label_set)]
+    if len(unexpected_counts):
+        print(f"predictions that are not in the allowed list: {n_rows}: {unexpected_counts.to_dict()}")
+    else:
+        print(f"every prediction is one of the true labels")
+
     print(f"predicted values are exactly the same set as the true labels? "
         f"{label_set == set(df['prediction'].dropna().unique())}")
 
