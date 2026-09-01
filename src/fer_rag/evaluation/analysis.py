@@ -7,8 +7,9 @@ frozen under ablation/ because they produced the figures in the submitted draft.
 
 Every function takes dataframes (not paths), and writes its figures to a relative
 "figures" folder, so the output lands next to whichever experiment script called it.
-Validate each results CSV with validate_results_df() before passing it in, and use
-is_same_dataset() to confirm two results dataframes cover the same samples.
+Validate each results CSV with validate_results() (in vis_results) before passing it in,
+and use is_same_dataset() to confirm two dataframes hold the exact same rows, in the
+same order.
 """
 
 import pandas as pd
@@ -20,42 +21,105 @@ import warnings
 from .vis_results import plot_confusion_matrix
 
 
-def is_same_dataset(df_a, df_b, name_a="", name_b=""):
+def _head(items, max_report):
     """
-    check that two results dataframes cover the same samples, by comparing their sets of
-    "file_path" values. a mismatch warns, since comparisons that merge the two on
-    "file_path" silently drop the unmatched rows.
-    df_a, df_b (DataFrame): results dataframes, must contain "file_path".
+    format a list for printing, capped at max_report entries, so a pair of dataframes that
+    have nothing in common does not dump thousands of lines. the caller prints the full count.
+    items (list): the values to print.
+    max_report (int): how many entries to show.
+    returns: a String, with "...and N more" appended when the list was cut.
+    """
+    shown = list(items[:max_report])
+    if len(items) > max_report:
+        return f"{shown} ...and {len(items) - max_report} more"
+    return f"{shown}"
+
+
+def is_same_dataset(df_a, df_b, name_a="", name_b="", max_report=50):
+    """
+    check that two dataframes hold the exact same rows, using "file_path" as the row id.
+    three checks, and every one that fails is reported: both hold the same number of rows,
+    both hold the same set of file paths (checked in both directions), and the file paths sit
+    in the same order row by row. a mismatch warns, since comparisons that merge the two on
+    "file_path" silently drop the unmatched rows, and comparisons that line the two up by
+    position silently compare different samples.
+    df_a, df_b (DataFrame): dataframes to compare, must contain "file_path".
     name_a, name_b (String): labels for the printed output only.
-    returns: True if both hold the same set of file paths.
+    max_report (int): how many entries of each reported list to print. the counts are always
+                      printed in full, only the listings are capped.
+    returns: True only if all three checks pass.
     """
     label_a = name_a or "first dataframe"
     label_b = name_b or "second dataframe"
 
+    for df, label in ((df_a, label_a), (df_b, label_b)):
+        if "file_path" not in df.columns:
+            raise KeyError(f"'{label}' has no 'file_path' column, so its rows cannot be "
+                           f"identified. columns found: {df.columns.tolist()}")
+
+    # check 1: the same number of rows
+    same_length = len(df_a) == len(df_b)
+
+    # check 2: the same set of file paths
     paths_a = set(df_a["file_path"])
     paths_b = set(df_b["file_path"])
-    is_match = paths_a == paths_b
+    same_paths = paths_a == paths_b
 
-    print(f"do '{label_a}' ({len(df_a)} rows) and '{label_b}' ({len(df_b)} rows) "
-          f"cover the same set of file paths? {is_match}")
+    # the file paths behind a set mismatch, in both directions, for the report below
+    only_a = sorted(paths_a - paths_b)
+    only_b = sorted(paths_b - paths_a)
+
+    # check 3: the same order. compared by position (the index is dropped, so a non-default
+    # index cannot make identical files look different), over the rows both dataframes have,
+    # so a length mismatch still reports the order of the rows they share
+    list_a = df_a["file_path"].reset_index(drop=True).tolist()
+    list_b = df_b["file_path"].reset_index(drop=True).tolist()
+    n_shared = min(len(list_a), len(list_b))
+    row_matches = [list_a[row] == list_b[row] for row in range(n_shared)]
+    same_order = all(row_matches)
+
+    # the row numbers behind an order mismatch, for the report below
+    mismatched_rows = [row for row, is_row_match in enumerate(row_matches) if not is_row_match]
+
+    is_match = same_length and same_paths and same_order
+
+    print(f"are '{label_a}' ({len(df_a)} rows) and '{label_b}' ({len(df_b)} rows) the exact "
+          f"same dataset? {is_match}")
 
     if is_match:
-        print("note: this only confirms both dataframes hold the exact same file paths. "
-              "row order and duplicated file paths are not checked - "
-              "if either matters for your comparison, check it yourself.")
+        print(f"they match: same number of rows ({len(df_a)}), same set of file paths, and "
+              f"the file paths are in the same order.")
+        return True
 
-    if not is_match:
-        only_a = sorted(paths_a - paths_b)
-        only_b = sorted(paths_b - paths_a)
-        warnings.warn(
-            f"'{label_a}' and '{label_b}' do not cover the same samples - comparisons that "
-            f"merge them on 'file_path' will drop those rows. "
-            f"file paths that are only in '{label_a}' ({len(only_a)}): {only_a}. "
-            f"file paths that are only in '{label_b}' ({len(only_b)}): {only_b}.",
-            UserWarning,
-        )
+    # report every check that failed
+    if not same_length:
+        print(f"the number of rows differs: '{label_a}' has {len(df_a)} rows, "
+              f"'{label_b}' has {len(df_b)} rows.")
 
-    return is_match
+    if not same_paths:
+        print(f"file paths that are only in '{label_a}' ({len(only_a)}): "
+              f"{_head(only_a, max_report)}")
+        print(f"file paths that are only in '{label_b}' ({len(only_b)}): "
+              f"{_head(only_b, max_report)}")
+
+    if not same_order:
+        first_row = mismatched_rows[0]
+        print(f"the first row where the file paths differ is row {first_row}: "
+              f"'{label_a}' has '{list_a[first_row]}', '{label_b}' has '{list_b[first_row]}'")
+        print(f"rows where the file paths differ ({len(mismatched_rows)} of the {n_shared} "
+              f"rows the two dataframes share): {_head(mismatched_rows, max_report)}")
+
+    warnings.warn(
+        f"'{label_a}' and '{label_b}' are not the same dataset - comparisons that merge them "
+        f"on 'file_path' will drop the unmatched rows, and comparisons that line them up by "
+        f"position will compare different samples. row counts: {len(df_a)} and {len(df_b)}. "
+        f"file paths only in '{label_a}': {len(only_a)}. "
+        f"file paths only in '{label_b}': {len(only_b)}. "
+        f"rows in a different order: {len(mismatched_rows)}. see the printed output above.",
+        UserWarning,
+    )
+
+    return False
 
 
 def cosine_tie_stats(df, dataset_name=""):

@@ -59,3 +59,7 @@ docs/
 
 # debug
 debug/
+
+req-local.txt
+
+/env-manifests
