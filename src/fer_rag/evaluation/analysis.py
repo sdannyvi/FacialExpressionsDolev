@@ -96,11 +96,19 @@ def cosine_tie_stats(df, dataset_name=""):
 
 def compare_retriever_rag(dfs, dataset_name=""):
     """
-    gets a dictionary with keys (names of figures) values (datasets).
-    calculate accuracy and macro F1 of the retriever classifier and RAG.
-    creates confusion metrix for each and saves under figure folder.
-    :param dfs:
-    :return:
+    compare the retriever used as a 1-NN classifier (its top-1 retrieved label) against the
+    full RAG pipeline (the generator prediction), across one or more runs. the two compared
+    methods are fixed and only the runs vary, so any ablation whose results are RAG CSVs fits
+    here (duplicate removal, top-k, thresholds...).
+    for each run, derives accuracy and macro F1, and saves a confusion matrix for both methods.
+    dfs (dict): {run name: rag results dataframe}. the key labels the run, e.g. "before
+                duplicate removal" / "after duplicate removal", or "top-1" / "top-2". it is
+                used for output only, so it must be safe to put in a file name.
+                each dataframe must contain "true_label", "top_label_1" and "prediction" cols.
+    dataset_name (String): the dataset the runs come from, e.g. "FER+". every file written
+                starts with it, so all the figures of one dataset sort and scan together.
+    returns: nothing. writes 2 confusion matrices per run plus one comparison table, all as
+             pdf files under "figures".
     """
     # calculate retriever and generator performance
     rows = []
@@ -114,7 +122,7 @@ def compare_retriever_rag(dfs, dataset_name=""):
         rows.append(["Retriever (Top-1)", name, retriever_acc * 100, retriever_f1 * 100])
         rows.append(["RAG", name, rag_acc * 100, rag_f1 * 100])
         # print results
-        print(name)
+        print(f"results for run: {name}")
         print(f"retriever accuracy: {retriever_acc:.6f} ({retriever_acc*100:.2f}%)")
         print(f"rag accuracy: {rag_acc:.6f} ({rag_acc*100:.3f}%)")
         print(f"retriever Macro F1: {retriever_f1:.6f} ({retriever_f1*100:.2f}%)")
@@ -122,21 +130,15 @@ def compare_retriever_rag(dfs, dataset_name=""):
 
         # retriever confusion matrix
         plot_confusion_matrix(true_classes=df["true_label"],pred_classes=df["top_label_1"],formats=("pdf",),
-                              plot_name=f"{name}-{dataset_name} - Retriever confusion matrix")
+                              plot_name=f"{dataset_name} - {name} - Retriever confusion matrix")
 
         # RAG confusion matrix
         plot_confusion_matrix(true_classes=df["true_label"],pred_classes=df["prediction"],formats=("pdf",),
-                              plot_name=f"{name}-{dataset_name} - RAG confusion matrix")
+                              plot_name=f"{dataset_name} - {name} - RAG confusion matrix")
 
     # visualize table
     # create dataframe
-    table_df = pd.DataFrame(rows, columns=["Method", "Duplicate removal", "Accuracy", "Macro F1"])
-
-    # create duplicate-removal column
-    #table_df["Duplicate removal"] = table_df["Duplicate removal"].replace({
-    #    "before duplicate removal": "-",
-    #    "after duplicate removal": "V"
-    #})
+    table_df = pd.DataFrame(rows, columns=["Method", "Run", "Accuracy", "Macro F1"])
 
     # round numeric columns
     table_df["Accuracy"] = table_df["Accuracy"].round(2)
@@ -166,7 +168,7 @@ def compare_retriever_rag(dfs, dataset_name=""):
 
     # save only pdf
     os.makedirs("figures", exist_ok=True)
-    out_path = os.path.join("figures", f"{dataset_name}- Retriever and RAG comparison (before and after duplicates).pdf")
+    out_path = os.path.join("figures", f"{dataset_name} - Retriever and RAG comparison.pdf")
     fig.savefig(out_path, bbox_inches="tight", pad_inches=0.3)
 
     print(f"Saved: {out_path}")
