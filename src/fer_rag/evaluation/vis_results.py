@@ -52,6 +52,8 @@ def validate_results(df):
     n_anger = int(anger_mask.sum())
     df.loc[anger_mask, "prediction"] = "angry"
     print(f"rewrote prediction 'anger' -> 'angry' in {n_anger} of {n_rows} rows")
+    print(f"predicted values are exactly the same set as the true labels? "
+        f"{label_set == set(df['prediction'].dropna().unique())}")
 
     # check if all predictions are valid, i.e. taken from the true label set
     unexpected = sorted(set(df["prediction"].dropna().unique()) - label_set)

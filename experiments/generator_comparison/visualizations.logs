@@ -1,0 +1,300 @@
+
+=================== validating: llava_next_34b ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
+label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+prediction list: ['anger', 'angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+predicted values are exactly the same set as the true labels? False
+rewrote prediction 'anger' -> 'angry' in 4 of 3199 rows
+predicted values are exactly the same set as the true labels? True
+
+=================== validating: gemma_3_27b ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
+label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+predicted values are exactly the same set as the true labels? True
+rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
+predicted values are exactly the same set as the true labels? True
+
+=================== validating: gemma_4_31b_no_thinking ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
+label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+predicted values are exactly the same set as the true labels? True
+rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
+predicted values are exactly the same set as the true labels? True
+
+=================== validating: gemma_4_31b_thinking ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'thinking', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
+label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+predicted values are exactly the same set as the true labels? True
+rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
+predicted values are exactly the same set as the true labels? True
+
+=================== validating: qwen_3_32b_instruct ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
+label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+predicted values are exactly the same set as the true labels? True
+rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
+predicted values are exactly the same set as the true labels? True
+
+=================== validating: qwen_3_32b_thinking_resume_run ===================
+columns in the results file: ['file_path', 'true_label', 'coded_true_label', 'votes_percentage', 'prediction', 'query_file_path', 'thinking', 'top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
+label list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+prediction list: ['angry', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+predicted values are exactly the same set as the true labels? True
+rewrote prediction 'anger' -> 'angry' in 0 of 3199 rows
+predicted values are exactly the same set as the true labels? True
+/truenas/home/sdolev/FacialExpressionsDolev/src/fer_rag/evaluation/vis_results.py:86: UserWarning: 'prediction' has 1 null values out of 3199 rows.
+  warnings.warn(
+
+=================== retriever vs RAG ===================
+results for run: llava_next_34b
+retriever accuracy: 0.854329 (85.43%)
+rag accuracy: 0.861519 (86.152%)
+retriever Macro F1: 0.701323 (70.13%)
+rag Macro F1: 0.735704 (73.570%)
+angry:
+[0.81533, 0.0, 0.01394, 0.01394, 0.02091, 0.06272, 0.04181, 0.03136]
+contempt:
+[0.0, 0.53846, 0.15385, 0.0, 0.07692, 0.15385, 0.07692, 0.0]
+disgust:
+[0.33333, 0.0, 0.33333, 0.04167, 0.0, 0.08333, 0.20833, 0.0]
+fear:
+[0.06452, 0.01613, 0.0, 0.51613, 0.0, 0.0, 0.14516, 0.25806]
+happy:
+[0.00694, 0.00116, 0.0, 0.00231, 0.94451, 0.03121, 0.00231, 0.01156]
+neutral:
+[0.01607, 0.00677, 0.00085, 0.00423, 0.04315, 0.84179, 0.07191, 0.01523]
+sad:
+[0.01709, 0.00285, 0.00285, 0.0114, 0.0057, 0.17949, 0.76923, 0.0114]
+surprise:
+[0.01928, 0.0, 0.0, 0.0241, 0.03133, 0.02892, 0.00482, 0.89157]
+Saved: figures/FER+ - llava_next_34b - Retriever confusion matrix.pdf
+angry:
+[0.82927, 0.00348, 0.01045, 0.00348, 0.02091, 0.02787, 0.02091, 0.08362]
+contempt:
+[0.0, 0.61538, 0.15385, 0.0, 0.07692, 0.07692, 0.07692, 0.0]
+disgust:
+[0.375, 0.0, 0.45833, 0.0, 0.0, 0.08333, 0.04167, 0.04167]
+fear:
+[0.03226, 0.0, 0.0, 0.45161, 0.0, 0.0, 0.06452, 0.45161]
+happy:
+[0.00231, 0.00116, 0.0, 0.0, 0.96185, 0.02197, 0.00231, 0.0104]
+neutral:
+[0.01523, 0.00592, 0.0, 0.0, 0.04399, 0.79865, 0.1066, 0.02961]
+sad:
+[0.01994, 0.0057, 0.00285, 0.00855, 0.01709, 0.05128, 0.849, 0.04558]
+surprise:
+[0.00964, 0.0, 0.0, 0.00241, 0.0241, 0.00723, 0.0, 0.95663]
+Saved: figures/FER+ - llava_next_34b - RAG confusion matrix.pdf
+results for run: gemma_3_27b
+retriever accuracy: 0.854329 (85.43%)
+rag accuracy: 0.837137 (83.714%)
+retriever Macro F1: 0.701323 (70.13%)
+rag Macro F1: 0.690046 (69.005%)
+angry:
+[0.81533, 0.0, 0.01394, 0.01394, 0.02091, 0.06272, 0.04181, 0.03136]
+contempt:
+[0.0, 0.53846, 0.15385, 0.0, 0.07692, 0.15385, 0.07692, 0.0]
+disgust:
+[0.33333, 0.0, 0.33333, 0.04167, 0.0, 0.08333, 0.20833, 0.0]
+fear:
+[0.06452, 0.01613, 0.0, 0.51613, 0.0, 0.0, 0.14516, 0.25806]
+happy:
+[0.00694, 0.00116, 0.0, 0.00231, 0.94451, 0.03121, 0.00231, 0.01156]
+neutral:
+[0.01607, 0.00677, 0.00085, 0.00423, 0.04315, 0.84179, 0.07191, 0.01523]
+sad:
+[0.01709, 0.00285, 0.00285, 0.0114, 0.0057, 0.17949, 0.76923, 0.0114]
+surprise:
+[0.01928, 0.0, 0.0, 0.0241, 0.03133, 0.02892, 0.00482, 0.89157]
+Saved: figures/FER+ - gemma_3_27b - Retriever confusion matrix.pdf
+angry:
+[0.82578, 0.0, 0.01742, 0.01742, 0.03484, 0.02787, 0.04181, 0.03484]
+contempt:
+[0.0, 0.30769, 0.15385, 0.0, 0.15385, 0.15385, 0.15385, 0.07692]
+disgust:
+[0.29167, 0.0, 0.375, 0.04167, 0.04167, 0.08333, 0.16667, 0.0]
+fear:
+[0.04839, 0.0, 0.0, 0.58065, 0.01613, 0.0, 0.1129, 0.24194]
+happy:
+[0.00694, 0.00116, 0.0, 0.00116, 0.95607, 0.01965, 0.00347, 0.01156]
+neutral:
+[0.03384, 0.00169, 0.00254, 0.00592, 0.06176, 0.75973, 0.12014, 0.01438]
+sad:
+[0.02564, 0.0, 0.00285, 0.01425, 0.03134, 0.08547, 0.83476, 0.0057]
+surprise:
+[0.01928, 0.0, 0.0, 0.02892, 0.02892, 0.01687, 0.00482, 0.9012]
+Saved: figures/FER+ - gemma_3_27b - RAG confusion matrix.pdf
+results for run: gemma_4_31b_no_thinking
+retriever accuracy: 0.854329 (85.43%)
+rag accuracy: 0.849953 (84.995%)
+retriever Macro F1: 0.701323 (70.13%)
+rag Macro F1: 0.710144 (71.014%)
+angry:
+[0.81533, 0.0, 0.01394, 0.01394, 0.02091, 0.06272, 0.04181, 0.03136]
+contempt:
+[0.0, 0.53846, 0.15385, 0.0, 0.07692, 0.15385, 0.07692, 0.0]
+disgust:
+[0.33333, 0.0, 0.33333, 0.04167, 0.0, 0.08333, 0.20833, 0.0]
+fear:
+[0.06452, 0.01613, 0.0, 0.51613, 0.0, 0.0, 0.14516, 0.25806]
+happy:
+[0.00694, 0.00116, 0.0, 0.00231, 0.94451, 0.03121, 0.00231, 0.01156]
+neutral:
+[0.01607, 0.00677, 0.00085, 0.00423, 0.04315, 0.84179, 0.07191, 0.01523]
+sad:
+[0.01709, 0.00285, 0.00285, 0.0114, 0.0057, 0.17949, 0.76923, 0.0114]
+surprise:
+[0.01928, 0.0, 0.0, 0.0241, 0.03133, 0.02892, 0.00482, 0.89157]
+Saved: figures/FER+ - gemma_4_31b_no_thinking - Retriever confusion matrix.pdf
+angry:
+[0.83275, 0.0, 0.03136, 0.01742, 0.02787, 0.02787, 0.02439, 0.03833]
+contempt:
+[0.0, 0.46154, 0.07692, 0.0, 0.07692, 0.15385, 0.15385, 0.07692]
+disgust:
+[0.125, 0.04167, 0.66667, 0.04167, 0.0, 0.04167, 0.04167, 0.04167]
+fear:
+[0.01613, 0.0, 0.0, 0.66129, 0.0, 0.01613, 0.06452, 0.24194]
+happy:
+[0.00347, 0.00116, 0.00231, 0.00116, 0.95376, 0.02197, 0.00116, 0.01503]
+neutral:
+[0.02538, 0.00677, 0.01015, 0.01015, 0.03553, 0.77919, 0.09475, 0.03807]
+sad:
+[0.01425, 0.00285, 0.01994, 0.01709, 0.02849, 0.09117, 0.80912, 0.01709]
+surprise:
+[0.01687, 0.0, 0.0, 0.01928, 0.01446, 0.00964, 0.00723, 0.93253]
+Saved: figures/FER+ - gemma_4_31b_no_thinking - RAG confusion matrix.pdf
+results for run: gemma_4_31b_thinking
+retriever accuracy: 0.854329 (85.43%)
+rag accuracy: 0.833073 (83.307%)
+retriever Macro F1: 0.701323 (70.13%)
+rag Macro F1: 0.694562 (69.456%)
+angry:
+[0.81533, 0.0, 0.01394, 0.01394, 0.02091, 0.06272, 0.04181, 0.03136]
+contempt:
+[0.0, 0.53846, 0.15385, 0.0, 0.07692, 0.15385, 0.07692, 0.0]
+disgust:
+[0.33333, 0.0, 0.33333, 0.04167, 0.0, 0.08333, 0.20833, 0.0]
+fear:
+[0.06452, 0.01613, 0.0, 0.51613, 0.0, 0.0, 0.14516, 0.25806]
+happy:
+[0.00694, 0.00116, 0.0, 0.00231, 0.94451, 0.03121, 0.00231, 0.01156]
+neutral:
+[0.01607, 0.00677, 0.00085, 0.00423, 0.04315, 0.84179, 0.07191, 0.01523]
+sad:
+[0.01709, 0.00285, 0.00285, 0.0114, 0.0057, 0.17949, 0.76923, 0.0114]
+surprise:
+[0.01928, 0.0, 0.0, 0.0241, 0.03133, 0.02892, 0.00482, 0.89157]
+Saved: figures/FER+ - gemma_4_31b_thinking - Retriever confusion matrix.pdf
+angry:
+[0.86411, 0.0, 0.02091, 0.01742, 0.01742, 0.01394, 0.02091, 0.0453]
+contempt:
+[0.07692, 0.38462, 0.07692, 0.0, 0.07692, 0.15385, 0.15385, 0.07692]
+disgust:
+[0.16667, 0.0, 0.58333, 0.04167, 0.0, 0.04167, 0.125, 0.04167]
+fear:
+[0.01613, 0.0, 0.01613, 0.6129, 0.0, 0.0, 0.06452, 0.29032]
+happy:
+[0.00462, 0.00116, 0.00116, 0.00116, 0.95954, 0.01387, 0.0, 0.0185]
+neutral:
+[0.04738, 0.00423, 0.00677, 0.01184, 0.05245, 0.72166, 0.11168, 0.04399]
+sad:
+[0.03134, 0.0057, 0.0114, 0.02564, 0.02564, 0.05698, 0.82051, 0.02279]
+surprise:
+[0.01687, 0.0, 0.0, 0.01446, 0.01687, 0.00964, 0.00482, 0.93735]
+Saved: figures/FER+ - gemma_4_31b_thinking - RAG confusion matrix.pdf
+results for run: qwen_3_32b_instruct
+retriever accuracy: 0.854329 (85.43%)
+rag accuracy: 0.741169 (74.117%)
+retriever Macro F1: 0.701323 (70.13%)
+rag Macro F1: 0.601621 (60.162%)
+angry:
+[0.81533, 0.0, 0.01394, 0.01394, 0.02091, 0.06272, 0.04181, 0.03136]
+contempt:
+[0.0, 0.53846, 0.15385, 0.0, 0.07692, 0.15385, 0.07692, 0.0]
+disgust:
+[0.33333, 0.0, 0.33333, 0.04167, 0.0, 0.08333, 0.20833, 0.0]
+fear:
+[0.06452, 0.01613, 0.0, 0.51613, 0.0, 0.0, 0.14516, 0.25806]
+happy:
+[0.00694, 0.00116, 0.0, 0.00231, 0.94451, 0.03121, 0.00231, 0.01156]
+neutral:
+[0.01607, 0.00677, 0.00085, 0.00423, 0.04315, 0.84179, 0.07191, 0.01523]
+sad:
+[0.01709, 0.00285, 0.00285, 0.0114, 0.0057, 0.17949, 0.76923, 0.0114]
+surprise:
+[0.01928, 0.0, 0.0, 0.0241, 0.03133, 0.02892, 0.00482, 0.89157]
+Saved: figures/FER+ - qwen_3_32b_instruct - Retriever confusion matrix.pdf
+angry:
+[0.89199, 0.01394, 0.01394, 0.00697, 0.01394, 0.00348, 0.01045, 0.0453]
+contempt:
+[0.07692, 0.46154, 0.0, 0.0, 0.07692, 0.15385, 0.15385, 0.07692]
+disgust:
+[0.5, 0.0, 0.41667, 0.0, 0.0, 0.0, 0.08333, 0.0]
+fear:
+[0.06452, 0.0, 0.01613, 0.48387, 0.03226, 0.0, 0.06452, 0.33871]
+happy:
+[0.01618, 0.01618, 0.00116, 0.0, 0.93179, 0.01503, 0.00462, 0.01503]
+neutral:
+[0.14467, 0.02284, 0.00254, 0.00846, 0.03807, 0.53299, 0.19797, 0.05245]
+sad:
+[0.17379, 0.0114, 0.00285, 0.01994, 0.03419, 0.02849, 0.7037, 0.02564]
+surprise:
+[0.02892, 0.0, 0.0, 0.00723, 0.01687, 0.00964, 0.00723, 0.93012]
+Saved: figures/FER+ - qwen_3_32b_instruct - RAG confusion matrix.pdf
+results for run: qwen_3_32b_thinking_resume_run
+retriever accuracy: 0.854284 (85.43%)
+rag accuracy: 0.802064 (80.206%)
+retriever Macro F1: 0.701308 (70.13%)
+rag Macro F1: 0.650972 (65.097%)
+angry:
+[0.81533, 0.0, 0.01394, 0.01394, 0.02091, 0.06272, 0.04181, 0.03136]
+contempt:
+[0.0, 0.53846, 0.15385, 0.0, 0.07692, 0.15385, 0.07692, 0.0]
+disgust:
+[0.33333, 0.0, 0.33333, 0.04167, 0.0, 0.08333, 0.20833, 0.0]
+fear:
+[0.06452, 0.01613, 0.0, 0.51613, 0.0, 0.0, 0.14516, 0.25806]
+happy:
+[0.00694, 0.00116, 0.0, 0.00231, 0.94451, 0.03121, 0.00231, 0.01156]
+neutral:
+[0.01609, 0.00677, 0.00085, 0.00423, 0.04318, 0.84166, 0.07197, 0.01524]
+sad:
+[0.01709, 0.00285, 0.00285, 0.0114, 0.0057, 0.17949, 0.76923, 0.0114]
+surprise:
+[0.01928, 0.0, 0.0, 0.0241, 0.03133, 0.02892, 0.00482, 0.89157]
+Saved: figures/FER+ - qwen_3_32b_thinking_resume_run - Retriever confusion matrix.pdf
+angry:
+[0.8676, 0.00348, 0.01394, 0.01045, 0.01394, 0.02787, 0.02787, 0.03484]
+contempt:
+[0.0, 0.38462, 0.07692, 0.0, 0.15385, 0.15385, 0.15385, 0.07692]
+disgust:
+[0.5, 0.0, 0.375, 0.0, 0.0, 0.04167, 0.08333, 0.0]
+fear:
+[0.03226, 0.0, 0.01613, 0.46774, 0.0, 0.0, 0.06452, 0.41935]
+happy:
+[0.00578, 0.00231, 0.0, 0.00116, 0.95723, 0.0185, 0.00231, 0.01272]
+neutral:
+[0.05419, 0.00847, 0.00508, 0.00423, 0.04826, 0.65199, 0.17358, 0.05419]
+sad:
+[0.04558, 0.00855, 0.0, 0.0114, 0.02564, 0.04274, 0.83761, 0.02849]
+surprise:
+[0.01928, 0.0, 0.0, 0.01205, 0.02892, 0.01205, 0.00964, 0.91807]
+Saved: figures/FER+ - qwen_3_32b_thinking_resume_run - RAG confusion matrix.pdf
+               Method                             Run  Accuracy  Macro F1
+0   Retriever (Top-1)                  llava_next_34b     85.43     70.13
+1                 RAG                  llava_next_34b     86.15     73.57
+2   Retriever (Top-1)                     gemma_3_27b     85.43     70.13
+3                 RAG                     gemma_3_27b     83.71     69.00
+4   Retriever (Top-1)         gemma_4_31b_no_thinking     85.43     70.13
+5                 RAG         gemma_4_31b_no_thinking     85.00     71.01
+6   Retriever (Top-1)            gemma_4_31b_thinking     85.43     70.13
+7                 RAG            gemma_4_31b_thinking     83.31     69.46
+8   Retriever (Top-1)             qwen_3_32b_instruct     85.43     70.13
+9                 RAG             qwen_3_32b_instruct     74.12     60.16
+10  Retriever (Top-1)  qwen_3_32b_thinking_resume_run     85.43     70.13
+11                RAG  qwen_3_32b_thinking_resume_run     80.21     65.10
+Saved: figures/FER+ - Retriever and RAG comparison.pdf

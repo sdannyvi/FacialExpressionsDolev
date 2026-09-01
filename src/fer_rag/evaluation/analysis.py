@@ -514,3 +514,112 @@ def compare_rag_vs_zeroshot_on_failure(df_rag, df_zero_shot, dataset_name=""):
 
     print(f"Saved: {out_path}")
     plt.close(fig)
+
+
+def compare_zeroshot_rag(dfs, dataset_name=""):
+    """
+    compare zero-shot against the full RAG pipeline for the same generator, across one or more
+    models. the two compared methods are fixed and only the models vary, so any pair of runs
+    that differ in nothing but the framework fits here.
+    for each model, derives accuracy and macro F1 of both frameworks and the gap between them,
+    always RAG minus zero-shot, so a positive gap means retrieval helped and a reader can see
+    at a glance which generators retrieval helps and which it hurts. the gap is written on the
+    RAG row of the pair, the row it is measured from.
+    the two runs of a pair are separate jobs over the same test set, so they are checked with
+    is_same_dataset() first: a pair whose rows do not line up is reported and skipped, since
+    scoring it would compare two different sample sets and read as a difference in framework.
+    dfs (dict): {model name: (zero-shot dataframe, rag dataframe)}. the key labels the model,
+                e.g. "gemma_3_27b" / "llava_next_34b". it is used for output only, so it must
+                be safe to put in a file name. both dataframes must contain "true_label",
+                "prediction" and "file_path".
+    dataset_name (String): the dataset the runs come from, e.g. "FER+". every file written
+                starts with it, so all the figures of one dataset sort and scan together.
+    returns: nothing. writes one comparison table as a pdf file under "figures".
+    """
+    # calculate zero-shot and RAG performance
+    rows = []
+    for name, (df_zero_shot, df_rag) in dfs.items():
+        print(f"results for model: {name}")
+
+        # the two frameworks ran as separate jobs, so confirm they scored the same rows before
+        # any number is derived from the pair
+        if not is_same_dataset(df_zero_shot, df_rag,
+                               name_a=f"{name} zero-shot", name_b=f"{name} RAG"):
+            warnings.warn(
+                f"the zero-shot and RAG runs of '{name}' do not hold the same rows, so the "
+                f"two are not comparable. the model is left out of the table.",
+                UserWarning,
+            )
+            continue
+
+        # calculate zero-shot accuracy and RAG accuracy. rounded to 2 decimals here, at the
+        # point they are derived, and not only where they are printed: every number this
+        # function reports is then the same number, so the gap below is exactly the difference
+        # between the two values the table shows, and a reader recomputing it by hand agrees.
+        zero_shot_acc = round(accuracy_score(df_zero_shot["true_label"],
+                                             df_zero_shot["prediction"]) * 100, 2)
+        rag_acc = round(accuracy_score(df_rag["true_label"], df_rag["prediction"]) * 100, 2)
+        zero_shot_f1 = round(f1_score(df_zero_shot["true_label"], df_zero_shot["prediction"],
+                                      average="macro") * 100, 2)
+        rag_f1 = round(f1_score(df_rag["true_label"], df_rag["prediction"],
+                                average="macro") * 100, 2)
+
+        # what retrieval was worth for this generator, always RAG minus zero-shot, so a positive
+        # gap means retrieval helped and the sign is the point. rounded again because
+        # subtracting two rounded values can leave a float artefact (0.1+0.2 is not 0.3)
+        acc_gap = round(rag_acc - zero_shot_acc, 2)
+        f1_gap = round(rag_f1 - zero_shot_f1, 2)
+
+        # append results to table. the gap belongs to the pair rather than to either row, so it
+        # is written on the RAG row, the one it is measured from, and left blank on the
+        # zero-shot row instead of repeating the same value twice
+        rows.append([name, "Zero-shot", zero_shot_acc, zero_shot_f1, "", ""])
+        rows.append([name, "RAG", rag_acc, rag_f1, acc_gap, f1_gap])
+
+        # print results
+        print(f"zero-shot accuracy: {zero_shot_acc}%")
+        print(f"rag accuracy: {rag_acc}%")
+        print(f"zero-shot Macro F1: {zero_shot_f1}%")
+        print(f"rag Macro F1: {rag_f1}%")
+        print(f"RAG - zero-shot: {acc_gap} accuracy points, {f1_gap} macro F1 points")
+
+    if not rows:
+        warnings.warn("no model could be scored, so no table was written.", UserWarning)
+        return
+
+    # visualize table
+    # create dataframe
+    # the values were rounded where they were derived, so nothing is rounded here
+    table_df = pd.DataFrame(rows, columns=["Model", "Method", "Accuracy", "Macro F1",
+                                           "Accuracy gap\n(RAG - Zero-shot)",
+                                           "Macro F1 gap\n(RAG - Zero-shot)"])
+
+    print(table_df)
+
+    # visualize table and save as pdf
+    fig, ax = plt.subplots(figsize=(14, 2.2 + 0.8 * len(table_df)))
+    ax.axis("off")
+
+    tbl = ax.table(
+        cellText=table_df.values,
+        colLabels=table_df.columns,
+        loc="center",
+        cellLoc="center"
+    )
+
+    tbl.auto_set_font_size(False)
+    tbl.set_fontsize(13)
+    tbl.scale(1.1, 2.4)
+
+    # optional: make header a bit bolder
+    for (row, col), cell in tbl.get_celld().items():
+        if row == 0:
+            cell.set_text_props(weight="bold")
+
+    # save only pdf
+    os.makedirs("figures", exist_ok=True)
+    out_path = os.path.join("figures", f"{dataset_name} - Zero-shot and RAG comparison.pdf")
+    fig.savefig(out_path, bbox_inches="tight", pad_inches=0.3)
+
+    print(f"Saved: {out_path}")
+    plt.close(fig)
