@@ -275,6 +275,7 @@ print_debug = True
 
 check_output_truncation = True
 truncated_count = 0
+offloaded_count = 0
 # looping through batch 0 to the last batch
 for curr_batch in range(num_batches):
     # initialize start batch and end batch
@@ -453,7 +454,16 @@ for curr_batch in range(num_batches):
             f"and {gen_stats['max_new_tokens']} max_new_tokens limit, against a context window of "
             f"{context_window} for model checkpoint: '{generator_id}'. Predictions may be unreliable. ")
 
-        # generation that ran out of budget (max new tokens) rather than finishing its answer. 
+        # generation that did not fit in device memory and only finished because its KV
+        # cache was moved to host RAM. The prediction is unaffected, the sample was slower.
+        if gen_stats["cache_mode"] != "gpu":
+            offloaded_count += 1
+            if offloaded_count == 1:
+                print(f"[WARNING] pipelines.rag: the generation ran out of GPU memory and was "
+                      f"retried with the KV cache offloaded to host RAM. The prediction is "
+                      f"unchanged but the sample was much slower. query: {query_path}")
+
+        # generation that ran out of budget (max new tokens) rather than finishing its answer.
         if gen_stats["finish_reason"] == "length":
             truncated_count += 1
             if truncated_count == 1:
@@ -512,6 +522,13 @@ if truncated_count:
     print(f"[WARNING] pipelines.rag: {truncated_count} of {len(df)} samples were truncated "
           f"before the model finished its answer. Consider raising max_new_tokens for "
           f"'{generator_id}'.")
+
+# the offloaded samples are the ones that would have ended the run before this retry
+# existed. Their predictions are comparable to the rest, their timings are not.
+if offloaded_count:
+    print(f"[WARNING] pipelines.rag: {offloaded_count} of {len(df)} samples did not fit in "
+          f"GPU memory and were generated with the KV cache offloaded to host RAM. Their "
+          f"predictions are unaffected, their runtimes are not comparable to the rest.")
 
 print(f"[TIME] {now_str()} | pipeline ended -> total runtime "
       f"{(time.perf_counter()-_T0)/60:.1f} min", flush=True)

@@ -70,6 +70,8 @@ model_checkpoints = [
     "google/gemma-4-31B-it",
     "Qwen/Qwen3-VL-32B-Instruct",
     "Qwen/Qwen3-VL-32B-Thinking",
+    "OpenGVLab/InternVL3-38B-hf",
+    "OpenGVLab/InternVL3_5-38B-HF",
 ]
 
 output_path = "chat_template_defaults.txt"

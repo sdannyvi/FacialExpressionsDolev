@@ -18,6 +18,12 @@ GENERATION_ARGS = {
 # Fallback when a registry entry does not override it.
 DEFAULT_MAX_NEW_TOKENS = 20
 
+# Cache implementation used to retry a generation that ran the GPU out of memory. The KV
+# cache is kept in host RAM and only the layer currently computing is brought back to the
+# device, which trades transfer time for VRAM. It is a pure change of where the cache is
+# stored, so the retried generation is bit-identical to one that had the room to run.
+OOM_RETRY_CACHE = "offloaded"
+
 # configure quantization to load models 
 QUANTIZATION = BitsAndBytesConfig(
     load_in_4bit=True,

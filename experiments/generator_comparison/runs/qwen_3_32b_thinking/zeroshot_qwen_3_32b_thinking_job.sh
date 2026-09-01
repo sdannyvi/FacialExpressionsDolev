@@ -27,7 +27,7 @@
 #SBATCH --partition=vilenchik_part
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=45000M
+#SBATCH --mem=50000M
 #SBATCH --time=35:00:00
 
 # No --error line on purpose: without it SLURM merges stderr into stdout, so
