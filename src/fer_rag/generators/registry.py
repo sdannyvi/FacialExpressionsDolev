@@ -104,6 +104,32 @@ MODELS = {
         # token instead; </think> is a single token here
         "thinking_end_token": "</think>",
     },
+    "OpenGVLab/InternVL3-38B-hf": {
+        # the transformers-format conversion, whose config declares model_type "internvl";
+        # AutoModelForMultimodalLM resolves it, so no loader and no trust_remote_code
+        "style": "one_step",
+        # the chat template is a bare ChatML loop that emits <|im_start|>{role} for any
+        # role it is handed, with no allowlist and no alternating-role check, so the
+        # system role is kept and consecutive user messages are allowed
+        "supports_system": True,
+        # the model card's "Inference on a single image" example, the one that matches
+        # how the pipelines call this checkpoint
+        "max_new_tokens": 50,
+    },
+    "OpenGVLab/InternVL3_5-38B-HF": {
+        # same template, byte for byte, as InternVL3-38B-hf
+        "style": "one_step",
+        "supports_system": True,
+        # no transformers quickstart of its own: the card defers to the official InternVL
+        # docs, whose single-image example uses this budget
+        "max_new_tokens": 50,
+        # deliberately no "thinking" key, though this checkpoint does reason. Its card
+        # turns thinking on by setting the system prompt to R1_SYSTEM_PROMPT, not by an
+        # enable_thinking argument the template reads, so it is neither "optional" (there
+        # is nothing to pass) nor "always" (it does not reason unprompted). The card also
+        # pairs that mode with do_sample=True and temperature=0.6, which contradicts the
+        # deterministic GENERATION_ARGS in constants.py.
+    },
 }
 
 AVAILABLE_MODELS = sorted(MODELS)
