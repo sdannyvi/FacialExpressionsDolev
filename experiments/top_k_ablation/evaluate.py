@@ -13,20 +13,20 @@ The 8-case error table is replaced by the evidence-regime table: enumerating eve
 the retrieved labels needs 2^k * 2 rows, which is readable at k=2 and useless by k=5.
 
 The ablation varies ONE thing: how many retrieved neighbours the generator sees
-(top_k = 2, 3, 4, 5). Generator, knowledge base and test set are identical in all four runs, so a
+(top_k = 2 through 8). Generator, knowledge base and test set are identical in all seven runs, so a
 difference between two rows of any table below is a difference caused by k and by nothing else.
 
 k=2 is the original run from generator_comparison rather than a run made for this ablation - it is
 the same generator on the same test set and knowledge base, with the same lda reduction, prompt
 and greedy decoding, so it belongs in the series and re-running it would only add sampling noise.
 It is the k the earlier "RAG barely beats the retriever" reading was based on, which makes it the
-point the other three have to be read against.
+point the other six have to be read against.
 
 RUNS lists every run by name, and holds the two csvs of that run - the RAG one and the zero-shot
 one - in the same entry, so the two are paired by where they are written and not by a name parsed
 out of a file name.
 
-The zero-shot side is deliberately the SAME csv in all four entries: zero-shot never retrieves,
+The zero-shot side is deliberately the SAME csv in all seven entries: zero-shot never retrieves,
 so it has no k to vary, and re-running it per k would only add sampling noise to a baseline that
 is by construction constant. It therefore lives in generator_comparison (where it was produced)
 and is reused from here - which is why every path in RUNS is project-relative rather than relative
@@ -61,7 +61,7 @@ DATASET_NAME = "FER+"
 # [0.80, 1.00], so the two rules agree almost everywhere.
 KNN_VOTING = "cosine"
 
-# the zero-shot baseline shared by all four runs - same generator, no retrieval, so no k.
+# the zero-shot baseline shared by all seven runs - same generator, no retrieval, so no k.
 ZERO_SHOT_CSV = ("experiments/generator_comparison/runs/gemma_4_31b/"
                  "zero_shot_gemma_4_31b_no_thinking_8734.csv")
 
@@ -83,6 +83,18 @@ RUNS = {
     },
     "top_k_5": {
         "rag": "experiments/top_k_ablation/runs/rag_gemma_4_31b_no_thinking_top_k_5_8829.csv",
+        "zero-shot": ZERO_SHOT_CSV,
+    },
+    "top_k_6": {
+        "rag": "experiments/top_k_ablation/runs/rag_gemma_4_31b_no_thinking_top_k_6_8851.csv",
+        "zero-shot": ZERO_SHOT_CSV,
+    },
+    "top_k_7": {
+        "rag": "experiments/top_k_ablation/runs/rag_gemma_4_31b_no_thinking_top_k_7_8852.csv",
+        "zero-shot": ZERO_SHOT_CSV,
+    },
+    "top_k_8": {
+        "rag": "experiments/top_k_ablation/runs/rag_gemma_4_31b_no_thinking_top_k_8_8853.csv",
         "zero-shot": ZERO_SHOT_CSV,
     },
 }

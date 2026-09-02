@@ -158,3 +158,66 @@ peak GPU memory this batch: 20.58 GB
 [TIME] 2026-09-02 12:38:20 | batch 2/32 done, (100 samples) -> Time for processing the batch | stage took   503.8s | elapsed since start  1310.6s
 peak GPU memory this batch: 20.58 GB
 [TIME] 2026-09-02 12:46:44 | batch 3/32 done, (100 samples) -> Time for processing the batch | stage took   504.3s | elapsed since start  1814.9s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 12:55:09 | batch 4/32 done, (100 samples) -> Time for processing the batch | stage took   504.3s | elapsed since start  2319.2s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 13:03:33 | batch 5/32 done, (100 samples) -> Time for processing the batch | stage took   504.0s | elapsed since start  2823.1s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 13:11:56 | batch 6/32 done, (100 samples) -> Time for processing the batch | stage took   503.6s | elapsed since start  3326.7s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 13:20:20 | batch 7/32 done, (100 samples) -> Time for processing the batch | stage took   504.0s | elapsed since start  3830.7s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 13:28:44 | batch 8/32 done, (100 samples) -> Time for processing the batch | stage took   503.5s | elapsed since start  4334.2s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 13:37:08 | batch 9/32 done, (100 samples) -> Time for processing the batch | stage took   503.9s | elapsed since start  4838.1s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 13:45:32 | batch 10/32 done, (100 samples) -> Time for processing the batch | stage took   504.3s | elapsed since start  5342.4s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 13:53:56 | batch 11/32 done, (100 samples) -> Time for processing the batch | stage took   503.7s | elapsed since start  5846.1s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 14:02:19 | batch 12/32 done, (100 samples) -> Time for processing the batch | stage took   503.6s | elapsed since start  6349.7s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 14:10:42 | batch 13/32 done, (100 samples) -> Time for processing the batch | stage took   503.1s | elapsed since start  6852.7s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 14:19:06 | batch 14/32 done, (100 samples) -> Time for processing the batch | stage took   503.8s | elapsed since start  7356.5s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 14:27:29 | batch 15/32 done, (100 samples) -> Time for processing the batch | stage took   503.5s | elapsed since start  7859.9s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 14:35:53 | batch 16/32 done, (100 samples) -> Time for processing the batch | stage took   504.0s | elapsed since start  8364.0s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 14:44:18 | batch 17/32 done, (100 samples) -> Time for processing the batch | stage took   504.1s | elapsed since start  8868.0s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 14:52:43 | batch 18/32 done, (100 samples) -> Time for processing the batch | stage took   505.0s | elapsed since start  9373.0s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 15:01:07 | batch 19/32 done, (100 samples) -> Time for processing the batch | stage took   504.4s | elapsed since start  9877.5s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 15:09:31 | batch 20/32 done, (100 samples) -> Time for processing the batch | stage took   504.4s | elapsed since start 10381.8s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 15:17:56 | batch 21/32 done, (100 samples) -> Time for processing the batch | stage took   504.2s | elapsed since start 10886.1s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 15:26:20 | batch 22/32 done, (100 samples) -> Time for processing the batch | stage took   504.8s | elapsed since start 11390.9s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 15:34:45 | batch 23/32 done, (100 samples) -> Time for processing the batch | stage took   504.6s | elapsed since start 11895.5s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 15:43:09 | batch 24/32 done, (100 samples) -> Time for processing the batch | stage took   504.4s | elapsed since start 12399.8s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 15:51:33 | batch 25/32 done, (100 samples) -> Time for processing the batch | stage took   504.2s | elapsed since start 12904.0s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 15:59:57 | batch 26/32 done, (100 samples) -> Time for processing the batch | stage took   503.8s | elapsed since start 13407.8s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 16:08:21 | batch 27/32 done, (100 samples) -> Time for processing the batch | stage took   503.4s | elapsed since start 13911.2s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 16:16:45 | batch 28/32 done, (100 samples) -> Time for processing the batch | stage took   504.0s | elapsed since start 14415.2s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 16:25:08 | batch 29/32 done, (100 samples) -> Time for processing the batch | stage took   503.6s | elapsed since start 14918.8s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 16:33:31 | batch 30/32 done, (100 samples) -> Time for processing the batch | stage took   502.4s | elapsed since start 15421.2s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 16:41:53 | batch 31/32 done, (100 samples) -> Time for processing the batch | stage took   501.9s | elapsed since start 15923.1s
+peak GPU memory this batch: 20.58 GB
+[TIME] 2026-09-02 16:50:10 | batch 32/32 done, (99 samples) -> Time for processing the batch | stage took   496.9s | elapsed since start 16420.0s
+[TIME] 2026-09-02 16:50:10 | pipeline ended -> total runtime 273.7 min
+==============================================================
+ finished    : 2026-09-02 16:50:12
+ results     : /truenas/home/sdolev/FacialExpressionsDolev/experiments/top_k_ablation/runs/rag_gemma_4_31b_no_thinking_top_k_8_8853.csv
+==============================================================
