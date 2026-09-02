@@ -247,101 +247,261 @@ Saved: figures/FER+ - top_k_5 - RAG confusion matrix.pdf
 7                RAG  top_k_5     87.03     76.71
 Saved: figures/FER+ - Retriever and RAG comparison.pdf
 
-=================== retrieval cases: top_k_2 ===================
-Sum of all cases: 3199
-Total: 3199
-Case A1 (Top-1 correct, Top-2 correct, generator correct): 75.77 %
-Case A2 (Top-1 correct, Top-2 correct, generator incorrect): 3.69 %
-Case B1 (Top-1 correct, Top-2 incorrect, generator correct): 4.19 %
-Case B2 (Top-1 correct, Top-2 incorrect, generator incorrect): 1.78 %
-Case C1 (Top-1 incorrect, Top-2 correct, generator correct): 3.06 %
-Case C2 (Top-1 incorrect, Top-2 correct, generator incorrect): 3.22 %
-Case D1 (Top-1 incorrect, Top-2 incorrect, generator correct): 1.97 %
-Case D2 (Top-1 incorrect, Top-2 incorrect, generator incorrect): 6.31 %
+=================== k-NN retriever vs RAG ===================
+results for run: top_k_2  (k=2, voting=cosine)
+2-NN retriever accuracy: 0.854329 (85.43%)
+1-NN retriever accuracy: 0.854329 (85.43%)
+rag accuracy: 0.849953 (84.995%)
+2-NN retriever Macro F1: 0.701323 (70.13%)
+1-NN retriever Macro F1: 0.701323 (70.13%)
+rag Macro F1: 0.710144 (71.014%)
+RAG agrees with the 2-NN vote on 87.31% of rows
+angry:
+[0.81533, 0.0, 0.01394, 0.01394, 0.02091, 0.06272, 0.04181, 0.03136]
+contempt:
+[0.0, 0.53846, 0.15385, 0.0, 0.07692, 0.15385, 0.07692, 0.0]
+disgust:
+[0.33333, 0.0, 0.33333, 0.04167, 0.0, 0.08333, 0.20833, 0.0]
+fear:
+[0.06452, 0.01613, 0.0, 0.51613, 0.0, 0.0, 0.14516, 0.25806]
+happy:
+[0.00694, 0.00116, 0.0, 0.00231, 0.94451, 0.03121, 0.00231, 0.01156]
+neutral:
+[0.01607, 0.00677, 0.00085, 0.00423, 0.04315, 0.84179, 0.07191, 0.01523]
+sad:
+[0.01709, 0.00285, 0.00285, 0.0114, 0.0057, 0.17949, 0.76923, 0.0114]
+surprise:
+[0.01928, 0.0, 0.0, 0.0241, 0.03133, 0.02892, 0.00482, 0.89157]
+Saved: figures/FER+ - top_k_2 - 2-NN retriever confusion matrix.pdf
+angry:
+[0.83275, 0.0, 0.03136, 0.01742, 0.02787, 0.02787, 0.02439, 0.03833]
+contempt:
+[0.0, 0.46154, 0.07692, 0.0, 0.07692, 0.15385, 0.15385, 0.07692]
+disgust:
+[0.125, 0.04167, 0.66667, 0.04167, 0.0, 0.04167, 0.04167, 0.04167]
+fear:
+[0.01613, 0.0, 0.0, 0.66129, 0.0, 0.01613, 0.06452, 0.24194]
+happy:
+[0.00347, 0.00116, 0.00231, 0.00116, 0.95376, 0.02197, 0.00116, 0.01503]
+neutral:
+[0.02538, 0.00677, 0.01015, 0.01015, 0.03553, 0.77919, 0.09475, 0.03807]
+sad:
+[0.01425, 0.00285, 0.01994, 0.01709, 0.02849, 0.09117, 0.80912, 0.01709]
+surprise:
+[0.01687, 0.0, 0.0, 0.01928, 0.01446, 0.00964, 0.00723, 0.93253]
+Saved: figures/FER+ - top_k_2 - RAG confusion matrix.pdf
+results for run: top_k_3  (k=3, voting=cosine)
+3-NN retriever accuracy: 0.877149 (87.71%)
+1-NN retriever accuracy: 0.854329 (85.43%)
+rag accuracy: 0.865896 (86.590%)
+3-NN retriever Macro F1: 0.736058 (73.61%)
+1-NN retriever Macro F1: 0.701323 (70.13%)
+rag Macro F1: 0.730590 (73.059%)
+RAG agrees with the 3-NN vote on 88.81% of rows
+angry:
+[0.83972, 0.0, 0.01742, 0.01045, 0.01394, 0.0453, 0.04878, 0.02439]
+contempt:
+[0.0, 0.53846, 0.07692, 0.0, 0.07692, 0.07692, 0.23077, 0.0]
+disgust:
+[0.25, 0.0, 0.45833, 0.04167, 0.0, 0.08333, 0.16667, 0.0]
+fear:
+[0.03226, 0.03226, 0.0, 0.54839, 0.0, 0.0, 0.1129, 0.27419]
+happy:
+[0.00462, 0.00231, 0.0, 0.00231, 0.95491, 0.02543, 0.00231, 0.00809]
+neutral:
+[0.00846, 0.00508, 0.00085, 0.00338, 0.04315, 0.86548, 0.06091, 0.01269]
+sad:
+[0.01425, 0.00855, 0.00285, 0.0114, 0.00855, 0.13675, 0.80912, 0.00855]
+surprise:
+[0.02169, 0.0, 0.0, 0.00723, 0.02892, 0.02169, 0.00482, 0.91566]
+Saved: figures/FER+ - top_k_3 - 3-NN retriever confusion matrix.pdf
+angry:
+[0.86411, 0.0, 0.02439, 0.02091, 0.02091, 0.02091, 0.01742, 0.03136]
+contempt:
+[0.0, 0.61538, 0.07692, 0.0, 0.07692, 0.15385, 0.0, 0.07692]
+disgust:
+[0.20833, 0.04167, 0.58333, 0.04167, 0.0, 0.04167, 0.04167, 0.04167]
+fear:
+[0.01613, 0.01613, 0.01613, 0.67742, 0.0, 0.0, 0.08065, 0.19355]
+happy:
+[0.00231, 0.0, 0.00231, 0.00116, 0.95954, 0.01734, 0.00231, 0.01503]
+neutral:
+[0.01692, 0.00846, 0.00677, 0.00846, 0.03384, 0.79949, 0.08968, 0.03638]
+sad:
+[0.01709, 0.0057, 0.0114, 0.03419, 0.02849, 0.07123, 0.82051, 0.0114]
+surprise:
+[0.00964, 0.0, 0.0, 0.00964, 0.01687, 0.00964, 0.00241, 0.95181]
+Saved: figures/FER+ - top_k_3 - RAG confusion matrix.pdf
+results for run: top_k_4  (k=4, voting=cosine)
+4-NN retriever accuracy: 0.879337 (87.93%)
+1-NN retriever accuracy: 0.854329 (85.43%)
+rag accuracy: 0.874023 (87.402%)
+4-NN retriever Macro F1: 0.747457 (74.75%)
+1-NN retriever Macro F1: 0.701323 (70.13%)
+rag Macro F1: 0.754128 (75.413%)
+RAG agrees with the 4-NN vote on 90.56% of rows
+angry:
+[0.83972, 0.0, 0.02091, 0.01045, 0.00348, 0.05575, 0.05226, 0.01742]
+contempt:
+[0.0, 0.53846, 0.07692, 0.0, 0.07692, 0.07692, 0.23077, 0.0]
+disgust:
+[0.20833, 0.0, 0.54167, 0.0, 0.0, 0.08333, 0.16667, 0.0]
+fear:
+[0.03226, 0.01613, 0.0, 0.54839, 0.0, 0.01613, 0.1129, 0.27419]
+happy:
+[0.00347, 0.00231, 0.0, 0.00231, 0.95491, 0.02543, 0.00231, 0.00925]
+neutral:
+[0.00677, 0.00508, 0.00169, 0.00254, 0.04315, 0.86717, 0.06261, 0.011]
+sad:
+[0.01425, 0.00855, 0.00285, 0.00855, 0.00855, 0.1339, 0.81766, 0.0057]
+surprise:
+[0.01928, 0.0, 0.0, 0.00482, 0.03133, 0.0241, 0.00482, 0.91566]
+Saved: figures/FER+ - top_k_4 - 4-NN retriever confusion matrix.pdf
+angry:
+[0.8676, 0.00348, 0.02091, 0.01394, 0.01045, 0.03484, 0.02787, 0.02091]
+contempt:
+[0.0, 0.46154, 0.0, 0.0, 0.07692, 0.15385, 0.23077, 0.07692]
+disgust:
+[0.125, 0.04167, 0.66667, 0.0, 0.0, 0.08333, 0.08333, 0.0]
+fear:
+[0.0, 0.0, 0.0, 0.69355, 0.0, 0.0, 0.08065, 0.22581]
+happy:
+[0.00462, 0.0, 0.00116, 0.00116, 0.95723, 0.01965, 0.00116, 0.01503]
+neutral:
+[0.01861, 0.00508, 0.00423, 0.00338, 0.03215, 0.83164, 0.08037, 0.02453]
+sad:
+[0.01425, 0.00285, 0.0057, 0.01709, 0.02564, 0.11396, 0.80912, 0.0114]
+surprise:
+[0.01446, 0.0, 0.0, 0.01687, 0.01928, 0.01446, 0.00241, 0.93253]
+Saved: figures/FER+ - top_k_4 - RAG confusion matrix.pdf
+results for run: top_k_5  (k=5, voting=cosine)
+5-NN retriever accuracy: 0.884964 (88.50%)
+1-NN retriever accuracy: 0.854329 (85.43%)
+rag accuracy: 0.870272 (87.027%)
+5-NN retriever Macro F1: 0.766177 (76.62%)
+1-NN retriever Macro F1: 0.701323 (70.13%)
+rag Macro F1: 0.767143 (76.714%)
+RAG agrees with the 5-NN vote on 90.97% of rows
+angry:
+[0.85714, 0.0, 0.01742, 0.01045, 0.00697, 0.05226, 0.04181, 0.01394]
+contempt:
+[0.0, 0.53846, 0.07692, 0.0, 0.07692, 0.15385, 0.15385, 0.0]
+disgust:
+[0.20833, 0.0, 0.625, 0.04167, 0.0, 0.08333, 0.04167, 0.0]
+fear:
+[0.04839, 0.01613, 0.0, 0.58065, 0.0, 0.01613, 0.1129, 0.22581]
+happy:
+[0.00347, 0.00116, 0.0, 0.00231, 0.95954, 0.02197, 0.00231, 0.00925]
+neutral:
+[0.00931, 0.00508, 0.00169, 0.00338, 0.04146, 0.86887, 0.05922, 0.011]
+sad:
+[0.0114, 0.00285, 0.00285, 0.0114, 0.0114, 0.1396, 0.81197, 0.00855]
+surprise:
+[0.01928, 0.0, 0.0, 0.00723, 0.02651, 0.01687, 0.00241, 0.92771]
+Saved: figures/FER+ - top_k_5 - 5-NN retriever confusion matrix.pdf
+angry:
+[0.85017, 0.00348, 0.02091, 0.01394, 0.00697, 0.04181, 0.03136, 0.03136]
+contempt:
+[0.0, 0.46154, 0.0, 0.0, 0.0, 0.30769, 0.15385, 0.07692]
+disgust:
+[0.08333, 0.0, 0.79167, 0.04167, 0.0, 0.04167, 0.04167, 0.0]
+fear:
+[0.03226, 0.0, 0.0, 0.75806, 0.0, 0.0, 0.08065, 0.12903]
+happy:
+[0.00231, 0.0, 0.00116, 0.00116, 0.95491, 0.02081, 0.00116, 0.0185]
+neutral:
+[0.01861, 0.00423, 0.00169, 0.00508, 0.03384, 0.82149, 0.08883, 0.02623]
+sad:
+[0.01709, 0.0057, 0.00855, 0.01425, 0.01425, 0.12251, 0.80342, 0.01425]
+surprise:
+[0.01687, 0.0, 0.0, 0.02169, 0.01446, 0.00964, 0.0, 0.93735]
+Saved: figures/FER+ - top_k_5 - RAG confusion matrix.pdf
+                      Method      Run  Accuracy  Macro F1
+0   Retriever (2-NN, cosine)  top_k_2     85.43     70.13
+1           Retriever (1-NN)  top_k_2     85.43     70.13
+2                        RAG  top_k_2     85.00     71.01
+3   Retriever (3-NN, cosine)  top_k_3     87.71     73.61
+4           Retriever (1-NN)  top_k_3     85.43     70.13
+5                        RAG  top_k_3     86.59     73.06
+6   Retriever (4-NN, cosine)  top_k_4     87.93     74.75
+7           Retriever (1-NN)  top_k_4     85.43     70.13
+8                        RAG  top_k_4     87.40     75.41
+9   Retriever (5-NN, cosine)  top_k_5     88.50     76.62
+10          Retriever (1-NN)  top_k_5     85.43     70.13
+11                       RAG  top_k_5     87.03     76.71
+Saved: figures/FER+ - kNN retriever and RAG comparison.pdf
+
+=================== evidence regimes: top_k_2 ===================
+FER+ - top_k_2 - evidence regimes at k=2
+Rows with evidence: 3199 of 3199
+  High retrieval: 2542 rows (79.46% of all), generator correct on 95.36% of them
+  Conflicting: 392 rows (12.25% of all), generator correct on 59.18% of them
+  Low retrieval: 265 rows (8.28% of all), generator correct on 23.77% of them
+  (of Low retrieval: 222 rows unanimously wrong, generator correct on 22.07% | 43 rows scattered wrong, generator correct on 32.56%)
   Case  ...                                     Interpretation
-0   A1  ...               Retriever and generator both correct
-1   A2  ...  Generator failed despite both retrieved labels...
-2   B1  ...       Generator correct when only Top-1 is correct
-3   B2  ...   Generator failed despite correct Top-1 retrieval
-4   C1  ...       Generator correct when only Top-2 is correct
-5   C2  ...   Generator failed despite correct Top-2 retrieval
-6   D1  ...      Generator correct despite incorrect retrieval
-7   D2  ...                Both retriever and generator failed
+0   H1  ...  Generator kept the answer the evidence already...
+1   H2  ...  Generator lost an answer that every example ha...
+2   K1  ...          Generator resolved the conflict correctly
+3   K2  ...  Generator was pulled off by the contradicting ...
+4   L1  ...  Generator overrode the evidence and was right ...
+5   L2  ...  Generator followed evidence that did not conta...
 
-[8 rows x 6 columns]
-Saved: figures/FER+ - top_k_2- Error_analysis_8_cases.pdf
+[6 rows x 7 columns]
+Saved: figures/FER+ - top_k_2- Evidence_regimes.pdf
 
-=================== retrieval cases: top_k_3 ===================
-Sum of all cases: 3199
-Total: 3199
-Case A1 (Top-1 correct, Top-2 correct, generator correct): 76.43 %
-Case A2 (Top-1 correct, Top-2 correct, generator incorrect): 3.03 %
-Case B1 (Top-1 correct, Top-2 incorrect, generator correct): 4.0 %
-Case B2 (Top-1 correct, Top-2 incorrect, generator incorrect): 1.97 %
-Case C1 (Top-1 incorrect, Top-2 correct, generator correct): 3.88 %
-Case C2 (Top-1 incorrect, Top-2 correct, generator incorrect): 2.41 %
-Case D1 (Top-1 incorrect, Top-2 incorrect, generator correct): 2.28 %
-Case D2 (Top-1 incorrect, Top-2 incorrect, generator incorrect): 6.0 %
+=================== evidence regimes: top_k_3 ===================
+FER+ - top_k_3 - evidence regimes at k=3
+Rows with evidence: 3199 of 3199
+  High retrieval: 2409 rows (75.3% of all), generator correct on 97.3% of them
+  Conflicting: 581 rows (18.16% of all), generator correct on 64.89% of them
+  Low retrieval: 209 rows (6.53% of all), generator correct on 23.44% of them
+  (of Low retrieval: 161 rows unanimously wrong, generator correct on 24.22% | 48 rows scattered wrong, generator correct on 20.83%)
   Case  ...                                     Interpretation
-0   A1  ...               Retriever and generator both correct
-1   A2  ...  Generator failed despite both retrieved labels...
-2   B1  ...       Generator correct when only Top-1 is correct
-3   B2  ...   Generator failed despite correct Top-1 retrieval
-4   C1  ...       Generator correct when only Top-2 is correct
-5   C2  ...   Generator failed despite correct Top-2 retrieval
-6   D1  ...      Generator correct despite incorrect retrieval
-7   D2  ...                Both retriever and generator failed
+0   H1  ...  Generator kept the answer the evidence already...
+1   H2  ...  Generator lost an answer that every example ha...
+2   K1  ...          Generator resolved the conflict correctly
+3   K2  ...  Generator was pulled off by the contradicting ...
+4   L1  ...  Generator overrode the evidence and was right ...
+5   L2  ...  Generator followed evidence that did not conta...
 
-[8 rows x 6 columns]
-Saved: figures/FER+ - top_k_3- Error_analysis_8_cases.pdf
+[6 rows x 7 columns]
+Saved: figures/FER+ - top_k_3- Evidence_regimes.pdf
 
-=================== retrieval cases: top_k_4 ===================
-Sum of all cases: 3199
-Total: 3199
-Case A1 (Top-1 correct, Top-2 correct, generator correct): 76.68 %
-Case A2 (Top-1 correct, Top-2 correct, generator incorrect): 2.78 %
-Case B1 (Top-1 correct, Top-2 incorrect, generator correct): 4.25 %
-Case B2 (Top-1 correct, Top-2 incorrect, generator incorrect): 1.72 %
-Case C1 (Top-1 incorrect, Top-2 correct, generator correct): 4.28 %
-Case C2 (Top-1 incorrect, Top-2 correct, generator incorrect): 2.0 %
-Case D1 (Top-1 incorrect, Top-2 incorrect, generator correct): 2.19 %
-Case D2 (Top-1 incorrect, Top-2 incorrect, generator incorrect): 6.1 %
+=================== evidence regimes: top_k_4 ===================
+FER+ - top_k_4 - evidence regimes at k=4
+Rows with evidence: 3199 of 3199
+  High retrieval: 2310 rows (72.21% of all), generator correct on 99.26% of them
+  Conflicting: 712 rows (22.26% of all), generator correct on 67.84% of them
+  Low retrieval: 177 rows (5.53% of all), generator correct on 11.3% of them
+  (of Low retrieval: 129 rows unanimously wrong, generator correct on 9.3% | 48 rows scattered wrong, generator correct on 16.67%)
   Case  ...                                     Interpretation
-0   A1  ...               Retriever and generator both correct
-1   A2  ...  Generator failed despite both retrieved labels...
-2   B1  ...       Generator correct when only Top-1 is correct
-3   B2  ...   Generator failed despite correct Top-1 retrieval
-4   C1  ...       Generator correct when only Top-2 is correct
-5   C2  ...   Generator failed despite correct Top-2 retrieval
-6   D1  ...      Generator correct despite incorrect retrieval
-7   D2  ...                Both retriever and generator failed
+0   H1  ...  Generator kept the answer the evidence already...
+1   H2  ...  Generator lost an answer that every example ha...
+2   K1  ...          Generator resolved the conflict correctly
+3   K2  ...  Generator was pulled off by the contradicting ...
+4   L1  ...  Generator overrode the evidence and was right ...
+5   L2  ...  Generator followed evidence that did not conta...
 
-[8 rows x 6 columns]
-Saved: figures/FER+ - top_k_4- Error_analysis_8_cases.pdf
+[6 rows x 7 columns]
+Saved: figures/FER+ - top_k_4- Evidence_regimes.pdf
 
-=================== retrieval cases: top_k_5 ===================
-Sum of all cases: 3199
-Total: 3199
-Case A1 (Top-1 correct, Top-2 correct, generator correct): 76.68 %
-Case A2 (Top-1 correct, Top-2 correct, generator incorrect): 2.78 %
-Case B1 (Top-1 correct, Top-2 incorrect, generator correct): 3.97 %
-Case B2 (Top-1 correct, Top-2 incorrect, generator incorrect): 2.0 %
-Case C1 (Top-1 incorrect, Top-2 correct, generator correct): 4.22 %
-Case C2 (Top-1 incorrect, Top-2 correct, generator incorrect): 2.06 %
-Case D1 (Top-1 incorrect, Top-2 incorrect, generator correct): 2.16 %
-Case D2 (Top-1 incorrect, Top-2 incorrect, generator incorrect): 6.13 %
+=================== evidence regimes: top_k_5 ===================
+FER+ - top_k_5 - evidence regimes at k=5
+Rows with evidence: 3199 of 3199
+  High retrieval: 2224 rows (69.52% of all), generator correct on 99.51% of them
+  Conflicting: 827 rows (25.85% of all), generator correct on 67.47% of them
+  Low retrieval: 148 rows (4.63% of all), generator correct on 8.78% of them
+  (of Low retrieval: 105 rows unanimously wrong, generator correct on 5.71% | 43 rows scattered wrong, generator correct on 16.28%)
   Case  ...                                     Interpretation
-0   A1  ...               Retriever and generator both correct
-1   A2  ...  Generator failed despite both retrieved labels...
-2   B1  ...       Generator correct when only Top-1 is correct
-3   B2  ...   Generator failed despite correct Top-1 retrieval
-4   C1  ...       Generator correct when only Top-2 is correct
-5   C2  ...   Generator failed despite correct Top-2 retrieval
-6   D1  ...      Generator correct despite incorrect retrieval
-7   D2  ...                Both retriever and generator failed
+0   H1  ...  Generator kept the answer the evidence already...
+1   H2  ...  Generator lost an answer that every example ha...
+2   K1  ...          Generator resolved the conflict correctly
+3   K2  ...  Generator was pulled off by the contradicting ...
+4   L1  ...  Generator overrode the evidence and was right ...
+5   L2  ...  Generator followed evidence that did not conta...
 
-[8 rows x 6 columns]
-Saved: figures/FER+ - top_k_5- Error_analysis_8_cases.pdf
+[6 rows x 7 columns]
+Saved: figures/FER+ - top_k_5- Evidence_regimes.pdf
 
 =================== zero-shot vs RAG ===================
 results for model: top_k_2
