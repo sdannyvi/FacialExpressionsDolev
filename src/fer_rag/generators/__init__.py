@@ -19,9 +19,17 @@ pipeline needs to know about reasoning, and neither requires it to read a regist
 
 ``thinking_models(mode)`` names the checkpoints of one kind ("optional" or "always"), for
 help text.
+
+The frameworks (``frameworks/registry.py``) also need token log-probabilities, and run on
+llava-hf/llava-v1.6-34b-hf only:
+
+    generate_with_logprobs(...)  greedy generation + log-prob of every generated token
+    score_labels(...)            log-probs of each label's tokens, teacher forced after the prompt
 """
 
+from .constants import DEFAULT_MAX_NEW_TOKENS, REASONING_MAX_NEW_TOKENS
 from .core import generate_prediction, resolve_thinking, get_context_window
+from .scoring import generate_with_logprobs, score_labels
 from .registry import (
     AVAILABLE_MODELS,
     get_model_spec,
@@ -41,4 +49,8 @@ __all__ = [
     "validate_thinking_request",
     "validate_prompt_request",
     "get_context_window",
+    "generate_with_logprobs",
+    "score_labels",
+    "DEFAULT_MAX_NEW_TOKENS",
+    "REASONING_MAX_NEW_TOKENS",
 ]

@@ -11,6 +11,7 @@ from config import resolve_path, validate_image_paths
 
 from ..generators import (AVAILABLE_MODELS, get_model_spec, load_generator, generate_prediction,
                           resolve_thinking, thinking_models, validate_thinking_request)
+from .prompts import build_zero_shot_conversation
 import time
 from datetime import datetime
 
@@ -190,25 +191,8 @@ for curr_batch, batch_start in enumerate(range(start_row, len(test_df), batch_si
             query_image = im.convert("RGB")
 
 
-        conversation = []
-        # system role
-        conversation.append({
-            "role": "system",
-            "content": [
-                {"type": "text",
-                 "text": f"You are an expert in classifying emotions from facial expressions in images.\n"
-                         f"You are given a query image. Analyze the facial expression in the query image and classify the emotion.\n"
-                         f"Follow the user's requested output format."
-                 }
-            ]
-        })
-
-        # user role
-        conversation.append({"role": "user",
-                             "content": [{
-                                 "type": "image"},
-                                 {"type": "text", "text": f"Classify the emotion shown in this image into one of the following emotions: {', '.join(classes_list)}.\n"
-                                                          f"Respond with only one word: the emotion label."}]})
+        # build the zero-shot prompt
+        conversation = build_zero_shot_conversation(classes_list)
 
         # process inputs
         if print_debug == True:

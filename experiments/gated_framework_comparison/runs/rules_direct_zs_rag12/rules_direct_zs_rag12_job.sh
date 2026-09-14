@@ -8,8 +8,8 @@
 #  Same stem, same job id - the log and the csv always pair up.
 #
 #  Run with:
-#      mkdir -p experiments/generator_comparison/runs
-#      sbatch --job-name=gemma_3 main_job.sh
+#      mkdir -p experiments/gated_framework_comparison/runs/rules_direct_zs_rag12
+#      sbatch experiments/gated_framework_comparison/runs/rules_direct_zs_rag12/rules_direct_zs_rag12_job.sh
 #
 #  TWO THINGS TO SET:
 #    1. run name  -> --job-name (below, or on the sbatch command line)
@@ -22,13 +22,13 @@
 #  !!     mkdir -p experiments/<EXP_GROUP>
 # =============================================================================
 
-#SBATCH --job-name=gemma_3
-#SBATCH --output=/truenas/home/sdolev/FacialExpressionsDolev/experiments/generator_comparison/runs/%x_%j.log
+#SBATCH --job-name=rules_direct_zs_rag12
+#SBATCH --output=/truenas/home/sdolev/FacialExpressionsDolev/experiments/gated_framework_comparison/runs/rules_direct_zs_rag12/%x_%j.log
 #SBATCH --partition=vilenchik_part
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=64G
-#SBATCH --time=12:00:00
+#SBATCH --mem=48000M
+#SBATCH --time=20:00:00
 
 # No --error line on purpose: without it SLURM merges stderr into stdout, so
 # prints + warnings + tracebacks all land in the ONE log file above.
@@ -46,24 +46,33 @@ CONDA_SH=/truenas/home/sdolev/miniconda3/etc/profile.d/conda.sh
 # ------------------------------------------------------------- PER-EXPERIMENT
 # Experiment group = the folder under experiments/.
 # MUST match the --output line above.
-EXP_GROUP="generator_comparison/runs"
+EXP_GROUP="gated_framework_comparison/runs/rules_direct_zs_rag12"
 
 # Which pipeline: zero_shot | rag
-PIPELINE="zero_shot"
+PIPELINE="rag"
 
 # Arguments for that pipeline. Use absolute paths ($PROJECT/...).
 # Do NOT pass --results_path here; it is derived from the job name.
 PIPELINE_ARGS=(
-  --test_path    "$PROJECT/data/RAFD/test_set_radboud.csv"
+  # the gated split of the validation set: every sample has different top-1 and top-2 labels
+  --test_path    "$PROJECT/experiments/gated_framework_comparison/gated_val_set/ferplus_val_gated.csv"
+  # frameworks run on llava-v1.6-34b only (checked by validate_framework_request before load)
   --generator_id "llava-hf/llava-v1.6-34b-hf"
 
   # --- rag.py only: uncomment when PIPELINE="rag" ---
-  # --knowledge_base_path "$PROJECT/data/RAFD/train_set_radboud.csv"
-  # --top_k         2
+  # same knowledge base as the original RAG run the split was made from
+  --knowledge_base_path "$PROJECT/ablation/cleaned_kb_sets/fer_plus_kb_50%.csv"
+  # the framework from src/fer_rag/frameworks/registry.py; must match this run folder's name
+  --framework    rules_direct_zs_rag12
+  # frameworks need --top_k 2 (the default); passed explicitly so the log records it
+  --top_k         2
+  # --enable_thinking is a bare on/off flag: present = thinking on, absent = off.
+  # llava-v1.6-34b has NO thinking key in the registry, and frameworks reject
+  # --enable_thinking before load. The results csv therefore has no thinking column.
+  # --enable_thinking
   # --dim_reduction lda
   # --prompt        single-user-message
   # --start_batch   0
-  # --framework     original   # or a name from src/fer_rag/frameworks/registry.py (needs top_k 2, llava-v1.6-34b)
 )
 # --------------------------------------------------------- END PER-EXPERIMENT
 
@@ -106,9 +115,16 @@ echo "=============================================================="
 # The pipelines use relative imports (from ..generators), so they must be run
 # as MODULES with src/ on PYTHONPATH - `python /path/to/zero_shot.py` fails.
 apptainer exec --nv --bind /truenas "$IMAGE" bash -lc "
-  set -euo pipefail
+  set -eo pipefail
   source '$CONDA_SH'
+  # conda's activate.d scripts read unset vars (qt-main_activate.sh line 5 reads
+  # QT_XCB_GL_INTEGRATION with no default), which is fatal under -u. Relax it just for
+  # the activation, then restore it so the pipeline command runs with the check on.
+  # NOTE: no dollar signs in this block - it is inside a double-quoted string, so the
+  # OUTER shell expands them before the container ever sees the text.
+  set +u
   conda activate '$CONDA_ENV'
+  set -u
   export PYTHONPATH='$PROJECT/src'
   export PYTHONUNBUFFERED=1
   cd '$PROJECT'

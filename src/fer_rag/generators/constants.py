@@ -18,6 +18,12 @@ GENERATION_ARGS = {
 # Fallback when a registry entry does not override it.
 DEFAULT_MAX_NEW_TOKENS = 20
 
+# Generation budget for a framework step that writes text beyond the label: chain-of-thought
+# reasoning, an explanation, or the aggregator's evaluation. The prompts ask for brief text, so
+# this is a cap rather than a target. A step that only writes the label keeps the model's
+# max_new_tokens.
+REASONING_MAX_NEW_TOKENS = 300
+
 # Cache implementation used to retry a generation that ran the GPU out of memory. The KV
 # cache is kept in host RAM and only the layer currently computing is brought back to the
 # device, which trades transfer time for VRAM. It is a pure change of where the cache is

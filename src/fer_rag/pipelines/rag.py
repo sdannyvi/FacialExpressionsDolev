@@ -16,6 +16,9 @@ from config import resolve_path, validate_image_paths
 from ..generators import (AVAILABLE_MODELS, get_model_spec, load_generator, generate_prediction,
                           resolve_thinking, thinking_models, validate_prompt_request,
                           validate_thinking_request, get_context_window)
+from ..frameworks.registry import (FRAMEWORKS, framework_columns, needs_new_framework, run_framework,
+                                   validate_framework_request)
+from .prompts import build_rag_conversation
 import time 
 from datetime import datetime
 
@@ -66,6 +69,11 @@ parser.add_argument("--enable_thinking", action="store_true",
                          "'thinking' column. Omitting the flag means no thinking. Only checkpoints "
                          f"whose chat template takes an enable_thinking argument support it: "
                          f"{', '.join(thinking_models('optional'))}.")
+parser.add_argument("--framework", type=str, default="original", choices=["original", *FRAMEWORKS],
+                    help="'original' runs the original RAG on every sample. A framework name sends every "
+                         "sample whose top-1 and top-2 retrieved labels differ to that framework, and the "
+                         "rest to the original RAG. Frameworks are defined in frameworks/registry.py and "
+                         "run with --top_k 2 on llava-hf/llava-v1.6-34b-hf.")
 
 args = parser.parse_args()
 
@@ -79,6 +87,7 @@ dim_reduction = args.dim_reduction
 prompt = args.prompt
 top_k = args.top_k
 enable_thinking = args.enable_thinking
+framework = args.framework
 
 print("Code running. CLI call:")
 for _k, _v in vars(args).items():
@@ -107,12 +116,18 @@ validate_thinking_request(generator_id, generator_spec, enable_thinking)
 thinking_on = resolve_thinking(generator_spec, enable_thinking)
 print(f"the run produces thinking text: {thinking_on}")
 
+# a framework runs only with the generator and retrieval settings it was written for - checked
+# before loading any weights
+if framework != "original":
+    validate_framework_request(framework, generator_id, top_k, enable_thinking)
+    print(f"framework: {framework} {FRAMEWORKS[framework]}")
+
 
 # read csv
 knowledge_base_set = pd.read_csv(knowledge_base_path)
 test_df = pd.read_csv(test_path)
 # create a list of classes out of the train_set
-classes_list = sorted(test_df['true_label'].unique().tolist())
+classes_list = sorted(knowledge_base_set['true_label'].unique().tolist())
 
 # validate image paths
 validate_image_paths(knowledge_base_set["file_path"].tolist(), knowledge_base_path)
@@ -228,6 +243,15 @@ vision_layers = Counter(
 )
 print(f"[generators.registry.load_generator] vision tower layers: {dict(vision_layers)}")
 
+# what a framework needs from this run; see run_framework in frameworks/registry.py
+framework_ctx = {"model": generator_model, "processor": generator_processor, "spec": generator_spec,
+                 "classes_list": classes_list, "prompt": prompt, "debug": True,
+                 "scoring_checked": False, "truncated_count": 0,
+                 "context_exceeded_count": 0, "largest_context_tokens": 0}
+# the framework columns exist only for a run that routes samples to a framework, the way the
+# thinking column exists only for a run that thinks
+framework_cols = (["route"] + framework_columns(framework, classes_list)) if framework != "original" else []
+framework_count = 0
 
 
 # create top K cols
@@ -248,8 +272,10 @@ if start_batch > 0:
 # else, create predictions column and copy full test set
 else:
     retrieval_dict = {col: None for col in all_retrieval_cols}
+    framework_dict = {col: None for col in framework_cols}
     results_df = test_df.copy(deep=True)
-    results_df = results_df.assign(prediction=None, query_file_path=None, **thinking_dict, **retrieval_dict)
+    results_df = results_df.assign(prediction=None, query_file_path=None, **thinking_dict, **retrieval_dict,
+                                   **framework_dict)
 
 
 results_df = results_df.reset_index(drop=True)
@@ -285,6 +311,7 @@ for curr_batch in range(num_batches):
 
     batch_predictions = []
     batch_thinking = []
+    batch_framework_rows = []
     # create datasets based  on k
     top_labels_df = pd.DataFrame(columns=label_cols)
     top_paths_df = pd.DataFrame(columns=path_cols)
@@ -342,78 +369,22 @@ for curr_batch in range(num_batches):
         top_paths_df.loc[len(top_paths_df)] = top_paths
         top_similarities_df.loc[len(top_similarities_df)] = top_similarities
 
-        # initialize vars for inference
-        conversation = []
-        images = []
-        # if prompt is multiple user message
-        if prompt == "multi-user-message":
-            # loop through examples
-            for _, example_row in top_examples.iterrows():
-                example_label = example_row['true_label']
-                example_image = Image.open(resolve_path(example_row['file_path'])).convert('RGB')
+        # route the sample: disagreeing top-1 and top-2 labels go to the framework, the rest to the
+        # original RAG below
+        if framework != "original":
+            if needs_new_framework(top_labels):
+                framework_row = run_framework(framework, query_image, top_examples, framework_ctx)
+                batch_framework_rows.append(framework_row)
+                batch_predictions.append(framework_row["prediction"])
+                batch_thinking.append(None)
+                framework_count += 1
+                del query_image, query_embedding, scores, ids, faiss_ids, top_similarities, kb_row_indices, top_examples
+                del top_labels, top_paths, framework_row
+                continue
+            batch_framework_rows.append({"route": "original"})
 
-                example_prompt_text = (f"Example: This image shows a person expressing the emotion: "
-                                       f"'{example_label}'.")
-                conversation.append(
-                    {"role": "user",
-                     "content": [
-                         {"type": "image"},
-                         {"type": "text", "text": example_prompt_text}
-                     ]}
-                )
-                images.append(example_image)
-
-            # query image prompt
-            query_prompt_text = (f"This image also shows a person expressing an emotion."
-                                 f"Based on the examples provided, please analyze the emotion in this image and "
-                                 f"select the best match from"
-                                 f"the following options: {', '.join(classes_list)}."
-                                 f"Respond with only one word: the emotion name.")
-
-            conversation.append(
-                {"role": "user",
-                 "content": [
-                     {"type": "image"},
-                     {"type": "text", "text": query_prompt_text}
-                 ]}
-            )
-            images.append(query_image)
-        elif prompt == "single-user-message":
-            # add a system message
-            conversation.append({
-                "role": "system",
-                "content": [
-                    {"type": "text",
-                     "text": f"You are an expert in classifying emotions from facial expressions in images.\n"
-                             f"You are given {top_k} example images with their corresponding emotion labels, followed by a query image.\n"
-                             f"Based on the examples provided, analyze the facial expression in the query "
-                             f"image and classify the emotion. Follow the user's requested output format."
-                     }
-                ]
-            })
-
-            content = []
-            user_text = [f"You are given {top_k} labeled examples and one query image, in the following order:"]
-
-            for i, example_row in enumerate(top_examples.itertuples(), start=1):
-                # add images to image list
-                example_label = example_row.true_label
-                example_image = Image.open(resolve_path(example_row.file_path)).convert('RGB')
-                images.append(example_image)
-
-                # add user text
-                content.append({"type": "image"})
-                user_text.append(f"Image {i} label: {example_row.true_label}")
-
-            # add query image
-            images.append(query_image)
-            content.append({"type": "image"})
-            user_text.append(f"Image {top_k + 1} is the query. Based on the examples, classify the emotion shown in this image into one of the following emotions: {', '.join(classes_list)}.")
-            user_text.append("Respond with only one word: the emotion label.")
-            # concat user text
-            user_text = "\n".join(user_text)
-            content.append({"type": "text", "text": user_text})
-            conversation.append({"role": "user", "content": content})
+        # build the original RAG prompt
+        conversation, images = build_rag_conversation(prompt, classes_list, top_examples, query_image)
 
         # process inputs
         if print_debug == True:
@@ -506,6 +477,11 @@ for curr_batch in range(num_batches):
     results_df.loc[curr_start_row:curr_end_row, label_cols] = top_labels_df.values
     results_df.loc[curr_start_row:curr_end_row, path_cols] = top_paths_df.values
     results_df.loc[curr_start_row:curr_end_row, cosine_cols] = top_similarities_df.values
+    # saving framework results; a row that did not pass the gate does not store additional columns 
+    if framework != "original":
+        framework_batch_df = pd.DataFrame(batch_framework_rows, columns=framework_cols)
+        results_df.loc[curr_start_row:curr_end_row, framework_cols] = framework_batch_df.values
+        del framework_batch_df
     del top_labels_df, top_paths_df, top_similarities_df, batch_df, batch_thinking
     # save results
     results_df.to_csv(results_path, index=False)
@@ -529,6 +505,19 @@ if offloaded_count:
     print(f"[WARNING] pipelines.rag: {offloaded_count} of {len(df)} samples did not fit in "
           f"GPU memory and were generated with the KV cache offloaded to host RAM. Their "
           f"predictions are unaffected, their runtimes are not comparable to the rest.")
+
+if framework != "original":
+    print(f"routing: {framework_count} of {len(df)} samples had different top-1 and top-2 labels and ran "
+          f"framework '{framework}'; the other {len(df) - framework_count} ran the original RAG.")
+    if framework_ctx["truncated_count"]:
+        print(f"[WARNING] pipelines.rag: {framework_ctx['truncated_count']} framework reasoning or explanation "
+              f"generations were cut off by max_new_tokens before they finished.")
+    if framework_ctx["context_exceeded_count"]:
+        print(f"[WARNING] pipelines.rag: {framework_ctx['context_exceeded_count']} framework generation calls "
+              f"used more tokens (prompt + generated) than the context window of "
+              f"{get_context_window(generator_model)} tokens for '{generator_id}' (largest: "
+              f"{framework_ctx['largest_context_tokens']} tokens). Their branches are not reliable; they have "
+              f"exceeds_context=True and their context size in the <branch>__context_tokens column.")
 
 print(f"[TIME] {now_str()} | pipeline ended -> total runtime "
       f"{(time.perf_counter()-_T0)/60:.1f} min", flush=True)
