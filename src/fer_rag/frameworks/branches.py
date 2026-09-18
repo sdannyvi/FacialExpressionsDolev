@@ -13,13 +13,19 @@ branch returns the same flat result (keys without the branch prefix; ``registry.
     exceeds_context   True when any of the branch's generation calls went past the model's context window,
                       so the branch's result is not reliable; None when the model declares no window
     reasoning         the generated reasoning ("cot_*" formats only)
-    explanation       the generated explanation ("answer_explain" only)
+    explanation       the generated explanation ("answer_explain" and "answer_explain_format" only)
+    response          the whole generation as the model wrote it (UNSCORED_FORMATS only)
     conf__<class>     exp(mean log-prob of the class label's tokens), teacher forced where the answer starts
     prob__<class>     conf__<class> divided by the sum of conf over all classes
 
 Class labels are scored as ``class_name.capitalize()``, the case LLaVA-34B writes its answer in.
 The class names themselves (column names, prompt text) always come from ``classes_list``.
+
+An UNSCORED_FORMATS branch has no confidence, n_answer_tokens, conf__ or prob__: its label is read
+from the "Answer:" field of the generated text, so no answer tokens or label position are known.
 """
+import re
+
 import numpy as np
 
 from ..generators import (DEFAULT_MAX_NEW_TOKENS, REASONING_MAX_NEW_TOKENS, generate_with_logprobs,
@@ -41,19 +47,34 @@ TEXT_COLUMN = {
     "cot_generic": "reasoning",
     "cot_task": "reasoning",
     "answer_explain": "explanation",
+    "answer_explain_format": "explanation",
 }
 
+# answer formats whose label is parsed from the text ("Answer: {}. Explanation: {}."), with no scores
+UNSCORED_FORMATS = {"answer_explain_format"}
 
-def branch_columns(text_column, classes_list):
+# the label: the first word after "Answer:", past any "**", "{", quotes or spaces the model wraps it in
+_ANSWER_FIELD = re.compile(r"answer\W*?:[\W_]*([a-z]+)", re.IGNORECASE)
+_EXPLANATION_FIELD = re.compile(r"explanation\W*?:[\s*]*(.*)", re.IGNORECASE | re.DOTALL)
+
+
+def branch_columns(text_column, classes_list, scored=True):
     """
     text_column: "reasoning", "explanation" or None.
+    scored: False for an UNSCORED_FORMATS branch, which has the raw response and no scores.
     returns: the result keys of one branch, in column order.
     """
-    columns = ["prediction", "confidence", "n_answer_tokens", "finish_reason", "context_tokens", "exceeds_context"]
+    columns = ["prediction"]
+    if scored:
+        columns += ["confidence", "n_answer_tokens"]
+    columns += ["finish_reason", "context_tokens", "exceeds_context"]
+    if not scored:
+        columns.append("response")
     if text_column is not None:
         columns.append(text_column)
-    columns += [f"conf__{class_name}" for class_name in classes_list]
-    columns += [f"prob__{class_name}" for class_name in classes_list]
+    if scored:
+        columns += [f"conf__{class_name}" for class_name in classes_list]
+        columns += [f"prob__{class_name}" for class_name in classes_list]
     return columns
 
 
@@ -188,6 +209,32 @@ def _answer_then_explain(name, conversation, images, ctx):
     return result
 
 
+def parse_answer_explanation(response):
+    """Read the "Answer: {}. Explanation: {}." fields of a response.
+
+    returns: (prediction in lower case, explanation). Either is "" when its field is missing, so a
+        response that does not follow the format has an empty prediction rather than a guessed one.
+    """
+    answer = _ANSWER_FIELD.search(response)
+    explanation = _EXPLANATION_FIELD.search(response)
+    return (answer.group(1).lower() if answer else "",
+            explanation.group(1).strip() if explanation else "")
+
+
+def answer_in_format(name, conversation, images, ctx):
+    """The answer and a step-by-step explanation in one generation; the label is parsed from the text.
+
+    Used by the branches and by the aggregator of an UNSCORED_FORMATS framework.
+    """
+    generation = _generate(f"{name} answer and explanation", conversation, images, REASONING_MAX_NEW_TOKENS, ctx)
+    response = generation["text"].strip()
+    prediction, explanation = parse_answer_explanation(response)
+    if ctx["debug"]:
+        print(f"[framework debug] {name} | parsed prediction: {prediction!r}")
+    return {"prediction": prediction, "finish_reason": generation["finish_reason"], **_context([generation]),
+            "response": response, "explanation": explanation}
+
+
 def run_branch(branch, answer_format, query_image, top_examples, ctx):
     """
     branch: a key of BRANCH_EXAMPLES.
@@ -215,6 +262,8 @@ def run_branch(branch, answer_format, query_image, top_examples, ctx):
 
     if answer_format == "direct":
         return _answer_directly(branch, conversation, images, ctx)
+    if answer_format in UNSCORED_FORMATS:
+        return answer_in_format(branch, conversation, images, ctx)
     if answer_format == "answer_explain":
         return _answer_then_explain(branch, conversation, images, ctx)
     return reason_then_answer(branch, conversation, images, ANSWER_FORMATS[answer_format]["reasoning_trigger"], ctx)

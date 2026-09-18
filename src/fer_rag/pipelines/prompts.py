@@ -171,6 +171,12 @@ ANSWER_FORMATS = {
     "answer_explain": {
         "instruction": "Respond with the emotion label first, then briefly explain why you chose it.",
     },
+    # the label is read from the "Answer:" field of the text, so this format has no class scores;
+    # the aggregator answers in it too (see build_aggregator_responses_conversation)
+    "answer_explain_format": {
+        "instruction": "Provide your answer and a step-by-step reasoning explanation.\n"
+                       "Please follow the format: Answer: {}. Explanation: {}.",
+    },
 }
 
 # continues the reasoning in the second stage, so the label the model writes next is its answer
@@ -300,4 +306,39 @@ def build_aggregator_conversation(classes_list, analyses, text_name):
                      {"type": "text", "text": f"Classify the emotion shown in this image into one of the following emotions: {', '.join(classes_list)}.\n\n"
                                               + "\n\n".join(blocks)
                                               + "\n\nBriefly evaluate each analysis against the image, then give the emotion label."}]},
+    ]
+
+
+def build_aggregator_responses_conversation(classes_list, responses, instruction):
+    """The aggregator's prompt that reads the agents' responses verbatim, without their examples.
+
+    responses: the raw text each agent generated ("Answer: ... Explanation: ..."), in branch order.
+    instruction: the output instruction the agents were given, so the aggregator answers in the same format.
+    """
+    agent_lines = []
+    for number, response in enumerate(responses, start=1):
+        response = response if isinstance(response, str) and response else "(none)"
+        agent_lines.append(f"Agent {number}: {response}")
+
+    return [
+        {"role": "system",
+         "content": [
+             {"type": "text",
+              "text": "You are an aggregator for facial expression recognition. You are given a query image and "
+                      "responses from multiple agents.\n"
+                      "Each agent's Answer is its predicted emotion label for the query image, and its Explanation "
+                      "describes the reasoning supporting that prediction.\n"
+                      "Compare the agents' predictions and explanations, evaluate them in relation to the query image, "
+                      "resolve any disagreement, and determine the final emotion label that best matches the query "
+                      "image. Follow the user's requested output format."
+              }
+         ]},
+        {"role": "user",
+         "content": [{"type": "image"},
+                     {"type": "text", "text": "Agent responses:\n"
+                                              + "\n".join(agent_lines)
+                                              + "\nBased on the query image and the agent responses, classify the "
+                                                f"emotion shown in the query image into one of the following emotions: "
+                                                f"{', '.join(classes_list)}.\n"
+                                              + instruction}]},
     ]

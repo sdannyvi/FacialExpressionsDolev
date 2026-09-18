@@ -7,7 +7,9 @@ to the framework, and every other sample to the original RAG. A framework is one
     answer_format   how every branch answers: "direct" is the original prompt; the others are defined
                     in pipelines/prompts.py, ANSWER_FORMATS
     combine         "rules": the branches' answers are combined by the decision rules
-                    "aggregator": the VLM reads the branches' analyses and gives the final answer
+                    "aggregator": the VLM reads the branches' analyses and gives the final answer. With an
+                    answer format of branches.UNSCORED_FORMATS it reads the branches' responses verbatim
+                    and answers in that same format; otherwise it reasons step by step (two stages)
     decision_rule   ("rules" only) the rule whose answer fills the ``prediction`` column. Every rule is
                     stored in its own ``rule__<rule>`` column either way.
 
@@ -17,8 +19,10 @@ Results columns of a framework sample: ``<branch>__<key>`` per branch (keys in b
 ``rule__<rule>`` for "rules", ``agg__<key>`` for "aggregator", and ``route``. The separator is a double
 underscore because branch names contain single ones.
 """
-from ..pipelines.prompts import AGGREGATOR_REASONING_TRIGGER, ANSWER_FORMATS, build_aggregator_conversation
-from .branches import TEXT_COLUMN, branch_columns, reason_then_answer, run_branch
+from ..pipelines.prompts import (AGGREGATOR_REASONING_TRIGGER, ANSWER_FORMATS, build_aggregator_conversation,
+                                 build_aggregator_responses_conversation)
+from .branches import (TEXT_COLUMN, UNSCORED_FORMATS, answer_in_format, branch_columns, reason_then_answer,
+                       run_branch)
 from .decision_rules import RULES, predict
 
 
@@ -76,6 +80,11 @@ FRAMEWORKS = {
         "answer_format": "answer_explain",
         "combine": "aggregator",
     },
+    "aggregator_answer_explain_format": {
+        "branches": ["zs", "rag_top1", "rag_top2"],
+        "answer_format": "answer_explain_format",
+        "combine": "aggregator",
+    },
 }
 
 
@@ -97,19 +106,25 @@ def validate_framework_request(framework, generator_id, top_k, enable_thinking):
     if config["combine"] == "aggregator" and answer_format not in TEXT_COLUMN:
         raise ValueError(f"framework '{framework}' combines with the aggregator, which reads the branches' "
                          f"reasoning or explanation, but its answer format '{answer_format}' writes neither.")
+    if config["combine"] == "rules" and answer_format in UNSCORED_FORMATS:
+        raise ValueError(f"framework '{framework}' combines with the decision rules, which need the branches' "
+                         f"confidence and class scores, but its answer format '{answer_format}' has none.")
 
 
 def framework_columns(framework, classes_list):
     """The results columns a framework adds, in order (``route`` is added by the pipeline)."""
     config = FRAMEWORKS[framework]
     text_column = TEXT_COLUMN.get(config["answer_format"])
+    scored = config["answer_format"] not in UNSCORED_FORMATS
     columns = []
     for branch in config["branches"]:
-        columns += [f"{branch}__{key}" for key in branch_columns(text_column, classes_list)]
+        columns += [f"{branch}__{key}" for key in branch_columns(text_column, classes_list, scored)]
     if config["combine"] == "rules":
         columns += [f"rule__{rule}" for rule in RULES]
-    else:
+    elif scored:
         columns += [f"{AGGREGATOR}__{key}" for key in branch_columns("reasoning", classes_list)]
+    else:
+        columns += [f"{AGGREGATOR}__{key}" for key in branch_columns(text_column, classes_list, scored=False)]
     return columns
 
 
@@ -143,6 +158,13 @@ def run_framework(framework, query_image, top_examples, ctx):
         for rule in RULES:
             row[f"rule__{rule}"] = predict(row, rule, config["branches"], classes_list)
         row["prediction"] = row[f"rule__{config['decision_rule']}"]
+    elif config["answer_format"] in UNSCORED_FORMATS:
+        responses = [result["response"] for result in branch_results.values()]
+        instruction = ANSWER_FORMATS[config["answer_format"]]["instruction"]
+        conversation = build_aggregator_responses_conversation(classes_list, responses, instruction)
+        result = answer_in_format(AGGREGATOR, conversation, [query_image], ctx)
+        row.update({f"{AGGREGATOR}__{key}": value for key, value in result.items()})
+        row["prediction"] = result["prediction"]
     else:
         text_column = TEXT_COLUMN[config["answer_format"]]
         analyses = [(result[text_column], result["prediction"]) for result in branch_results.values()]

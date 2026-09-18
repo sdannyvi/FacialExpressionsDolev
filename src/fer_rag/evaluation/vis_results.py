@@ -22,6 +22,10 @@ import textwrap
 import warnings
 
 
+# spellings the generator answers with instead of the label itself: a spelling of the right class, not a
+# different prediction, so every prediction column is normalized rather than counting them as wrong
+PREDICTION_SPELLINGS = {"anger": "angry", "surprised": "surprise"}
+
 
 def validate_results(df):
     """
@@ -48,20 +52,13 @@ def validate_results(df):
     print(f"predicted values are exactly the same set as the true labels? "
           f"{label_set == set(df['prediction'].dropna().unique())}")
 
-    # if anger is in prediction, normalize to angry (before checking the label vocabulary,
+    # normalize the spellings of PREDICTION_SPELLINGS (before checking the label vocabulary,
     # otherwise every "anger" row is reported as an unexpected prediction)
-    anger_mask = df["prediction"] == "anger"
-    n_anger = int(anger_mask.sum())
-    df.loc[anger_mask, "prediction"] = "angry"
-    print(f"rewrote prediction 'anger' -> 'angry' in {n_anger} of {n_rows} rows")
-
-    # same for surprised, the adjective the generator sometimes answers with instead of the
-    # label "surprise". a spelling of the right class, not a different prediction, so it is
-    # normalized rather than counted as wrong
-    surprised_mask = df["prediction"] == "surprised"
-    n_surprised = int(surprised_mask.sum())
-    df.loc[surprised_mask, "prediction"] = "surprise"
-    print(f"rewrote prediction 'surprised' -> 'surprise' in {n_surprised} of {n_rows} rows")
+    for written, normalized in PREDICTION_SPELLINGS.items():
+        spelling_mask = df["prediction"] == written
+        n_rewritten = int(spelling_mask.sum())
+        df.loc[spelling_mask, "prediction"] = normalized
+        print(f"rewrote prediction '{written}' -> '{normalized}' in {n_rewritten} of {n_rows} rows")
 
     # how many rows each prediction outside the true label set accounts for, one count per
     # value, so a single stray answer is told apart from a systematic failure. counted after
@@ -121,6 +118,212 @@ def validate_results(df):
             f"predictions may not line up with the images they are stored next to.",
             UserWarning,
         )
+
+    return df
+
+
+def validate_framework_results(df, classes_list=None, decision_rule="sum_class_prob"):
+    """
+    Sanity-checks the framework columns of a merged full-test-set results dataframe, after
+    validate_results() has checked the columns every results file has:
+        df = validate_framework_results(validate_results(pd.read_csv(path, float_precision="round_trip")))
+    Read the csv with float_precision="round_trip", otherwise the stored scores come back rounded and
+    the recomputed rules can differ from the run's.
+
+    Normalizes the predictions of PREDICTION_SPELLINGS in every label column of the framework (in place)
+    and recomputes "rule__sum_conf" from the normalized branch answers: the run summed the confidences
+    per exact answer text, so two branches that spelled one class differently split its vote. The other
+    rules cannot change: max_conf picks a branch by its confidence whatever it spelled, and the class
+    rules sum the conf__/prob__ columns, whose names come from classes_list.
+    Raises a UserWarning for anything that would invalidate downstream metrics: a route that does not
+    match the gate, framework values on a row the gate kept on the original RAG, nulls, predictions
+    outside the true-label set, branches that went past the model's context window, and a stored rule
+    the analysis code does not reproduce.
+
+    df (DataFrame): a merged framework results file; must contain "route", "true_label" and the
+                    framework columns (see frameworks/registry.py).
+    classes_list: the classes, in the order the rules use to break ties. Default: the sorted true labels.
+    decision_rule: the rule that filled "prediction" in this run, to check "prediction" against.
+                   None skips that check.
+    returns: the same dataframe, normalized, with "rule__sum_conf" recomputed.
+    """
+    # imported here: the framework code loads torch and the generator code, which the rest of this module
+    # does not need
+    from ..frameworks.branches import BRANCH_EXAMPLES
+    from ..frameworks.decision_rules import RULES, apply_rule
+    from ..frameworks.registry import AGGREGATOR
+    from .analysis import add_gate_column
+
+    if "route" not in df.columns:
+        raise ValueError("the results have no 'route' column, so they are not a run that routes samples to a "
+                         "framework. validate_results() alone covers an original RAG run.")
+
+    n_rows = len(df)
+    if classes_list is None:
+        classes_list = sorted(df["true_label"].dropna().unique().tolist())
+
+    # ---- the framework columns this run wrote, taken from the framework code, so a branch or a rule
+    # ---- added there is picked up here, and a column another framework writes is simply not found
+    branches = [branch for branch in BRANCH_EXAMPLES if f"{branch}__prediction" in df.columns]
+    label_columns = [f"{branch}__prediction" for branch in branches]
+    label_columns += [f"rule__{rule}" for rule in RULES if f"rule__{rule}" in df.columns]
+    if f"{AGGREGATOR}__prediction" in df.columns:
+        label_columns.append(f"{AGGREGATOR}__prediction")
+    # every column the framework writes, to check the rows the gate kept on the original RAG
+    framework_prefixes = tuple([f"{branch}__" for branch in branches] + ["rule__", f"{AGGREGATOR}__"])
+    framework_columns = [column for column in df.columns if column.startswith(framework_prefixes)]
+    print(f"branches in the results file: {branches}")
+    print(f"label columns of the framework: {label_columns}")
+    print(f"classes: {classes_list}")
+
+    # ---- routing: the framework rows are exactly the rows the gate lets through
+    framework_mask = df["route"] == "framework"
+    n_framework = int(framework_mask.sum())
+    original_mask = df["route"] == "original"
+    print(f"route: {n_framework} framework rows + {int(original_mask.sum())} original RAG rows of {n_rows} rows")
+    unexpected_routes = sorted(set(df["route"].dropna().unique()) - {"framework", "original"})
+    n_null_route = int(df["route"].isna().sum())
+    if unexpected_routes:
+        print(f"route values that are neither 'framework' nor 'original': {unexpected_routes}")
+
+    # the gate recomputed from the retrieved labels, the same gate the pipeline routed with
+    if {"top_label_1", "top_label_2"}.issubset(df.columns):
+        passed_gate = add_gate_column(df)["passed_gate"]
+        n_route_mismatch = int((passed_gate != framework_mask).sum())
+        print(f"rows whose route matches the gate recomputed from the retrieved labels: "
+              f"{n_rows - n_route_mismatch} of {n_rows}")
+    else:
+        n_route_mismatch = 0
+        print("no 'top_label_1'/'top_label_2' columns, so the route could not be checked against the gate")
+
+    # a row the gate kept on the original RAG holds no framework values
+    n_filled_original = int(df.loc[original_mask, framework_columns].notna().any(axis=1).sum())
+    print(f"original RAG rows that hold framework values: {n_filled_original} of {int(original_mask.sum())}")
+
+    # ---- nulls, before anything is recomputed from these values
+    framework_rows = df.loc[framework_mask]
+    null_labels = {column: int(framework_rows[column].isna().sum()) for column in label_columns}
+    null_labels = {column: count for column, count in null_labels.items() if count}
+    score_columns = [f"{branch}__{score}__{class_name}" for branch in branches for score in ("conf", "prob")
+                     for class_name in classes_list if f"{branch}__{score}__{class_name}" in df.columns]
+    null_scores = {column: int(framework_rows[column].isna().sum()) for column in score_columns}
+    null_scores = {column: count for column, count in null_scores.items() if count}
+    print(f"label columns with nulls in the framework rows: {null_labels if null_labels else 'none'}")
+    print(f"class score columns with nulls in the framework rows: {null_scores if null_scores else 'none'}")
+
+    # a branch whose generation went past the context window, and how the generations ended
+    exceeds_columns = [f"{branch}__exceeds_context" for branch in branches
+                       if f"{branch}__exceeds_context" in df.columns]
+    n_exceeds = 0
+    if exceeds_columns:
+        # the column holds True/False/None, and a csv read can give the strings
+        n_exceeds = int(framework_rows[exceeds_columns].isin([True, "True"]).any(axis=1).sum())
+        print(f"framework rows with a branch past the model's context window: {n_exceeds} of {n_framework}")
+    for branch in branches:
+        if f"{branch}__finish_reason" in df.columns:
+            print(f"{branch}__finish_reason: "
+                  f"{framework_rows[f'{branch}__finish_reason'].value_counts(dropna=False).to_dict()}")
+
+    # ---- the stored rules against the analysis code, on the values as the run wrote them
+    can_recompute = bool(branches) and all(f"{branch}__confidence" in df.columns for branch in branches)
+    n_rules_not_reproduced = {}
+    if can_recompute:
+        for rule in RULES:
+            if f"rule__{rule}" not in df.columns:
+                continue
+            recomputed = apply_rule(framework_rows, rule, branches, classes_list)
+            n_differ = int((framework_rows[f"rule__{rule}"].fillna("") != recomputed.fillna("")).sum())
+            if n_differ:
+                n_rules_not_reproduced[rule] = n_differ
+        print(f"stored rules the analysis code does not reproduce: "
+              f"{n_rules_not_reproduced if n_rules_not_reproduced else 'none'}")
+    else:
+        print("no branch prediction/confidence columns, so the rules could not be recomputed")
+
+    # ---- normalize every label column of the framework, the way validate_results normalizes "prediction"
+    n_rewritten_total = 0
+    for column in label_columns:
+        for written, normalized in PREDICTION_SPELLINGS.items():
+            spelling_mask = df[column] == written
+            n_rewritten = int(spelling_mask.sum())
+            if n_rewritten:
+                df.loc[spelling_mask, column] = normalized
+                n_rewritten_total += n_rewritten
+                print(f"rewrote {column} '{written}' -> '{normalized}' in {n_rewritten} of {n_rows} rows")
+    if not n_rewritten_total:
+        print(f"no spelling of {list(PREDICTION_SPELLINGS)} in any label column, nothing was rewritten")
+
+    # ---- sum_conf on the normalized answers: a class two branches spelled differently now gets one vote
+    n_sum_conf_changed = 0
+    if can_recompute and "rule__sum_conf" in df.columns:
+        stored_sum_conf = df.loc[framework_mask, "rule__sum_conf"]
+        recomputed_sum_conf = apply_rule(df.loc[framework_mask], "sum_conf", branches, classes_list)
+        n_sum_conf_changed = int((stored_sum_conf.fillna("") != recomputed_sum_conf.fillna("")).sum())
+        df.loc[framework_mask, "rule__sum_conf"] = recomputed_sum_conf
+        if n_sum_conf_changed:
+            print(f"'rule__sum_conf' was overwritten with the rule recomputed on the normalized answers: "
+                  f"{n_sum_conf_changed} of {n_framework} framework rows changed")
+        else:
+            print(f"'rule__sum_conf' recomputed on the normalized answers: no row changed, the run's values "
+                  f"already hold")
+
+    # ---- the label vocabulary, now that the spellings and sum_conf are final
+    label_set = set(classes_list)
+    framework_rows = df.loc[framework_mask]
+    unexpected_by_column = {}
+    for column in label_columns:
+        counts = framework_rows[column].value_counts()
+        unexpected_counts = counts[~counts.index.isin(label_set)]
+        if len(unexpected_counts):
+            unexpected_by_column[column] = unexpected_counts.to_dict()
+    if unexpected_by_column:
+        print(f"label columns with predictions that are not in the allowed list: {unexpected_by_column}")
+    else:
+        print("every value of every label column is one of the true labels")
+
+    # "prediction" of a framework row is the answer of the run's decision rule
+    n_prediction_mismatch = 0
+    rule_column = f"rule__{decision_rule}" if decision_rule else None
+    if rule_column and rule_column in df.columns:
+        n_prediction_mismatch = int((framework_rows["prediction"].fillna("")
+                                     != framework_rows[rule_column].fillna("")).sum())
+        print(f"framework rows whose 'prediction' is the answer of '{rule_column}': "
+              f"{n_framework - n_prediction_mismatch} of {n_framework}")
+    elif rule_column:
+        print(f"no '{rule_column}' column, so 'prediction' could not be checked against the decision rule")
+
+    # ---- everything above only reports, warnings come last
+    if unexpected_routes:
+        warnings.warn(f"'route' holds values that are neither 'framework' nor 'original': {unexpected_routes}.",
+                      UserWarning)
+    if n_null_route:
+        warnings.warn(f"'route' has {n_null_route} null values out of {n_rows} rows, so those rows cannot be "
+                      f"told apart by the method that produced them.", UserWarning)
+    if n_route_mismatch:
+        warnings.warn(f"{n_route_mismatch} of {n_rows} rows have a 'route' that does not match the gate "
+                      f"recomputed from their top-1/top-2 retrieved labels.", UserWarning)
+    if n_filled_original:
+        warnings.warn(f"{n_filled_original} rows the gate kept on the original RAG hold framework values, so "
+                      f"the two sides of the merge are not clean.", UserWarning)
+    if null_labels:
+        warnings.warn(f"label columns have null values in the framework rows (column: number of rows): "
+                      f"{null_labels}.", UserWarning)
+    if null_scores:
+        warnings.warn(f"class score columns have null values in the framework rows, so the class rules had "
+                      f"nothing to decide on there (column: number of rows): {null_scores}.", UserWarning)
+    if n_exceeds:
+        warnings.warn(f"{n_exceeds} of {n_framework} framework rows have a branch whose generation went past "
+                      f"the model's context window, so those branches' results are not reliable.", UserWarning)
+    if n_rules_not_reproduced:
+        warnings.warn(f"stored rule columns that the analysis code does not reproduce from the run's own "
+                      f"values (rule: number of rows): {n_rules_not_reproduced}. The run and the analysis "
+                      f"disagree, which is not a spelling difference.", UserWarning)
+    if unexpected_by_column:
+        warnings.warn(f"label columns hold predictions that are not one of the true labels "
+                      f"(column: value: number of rows): {unexpected_by_column}.", UserWarning)
+    if n_prediction_mismatch:
+        warnings.warn(f"{n_prediction_mismatch} of {n_framework} framework rows have a 'prediction' that is "
+                      f"not the answer of '{rule_column}'.", UserWarning)
 
     return df
 

@@ -12,6 +12,7 @@ and use is_same_dataset() to confirm two dataframes hold the exact same rows, in
 same order.
 """
 
+import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score
 import matplotlib.pyplot as plt
@@ -987,3 +988,147 @@ def compare_knn_retriever_rag(dfs, dataset_name="", voting="cosine", top_k=None,
     plt.close(fig)
 
     return table_df
+
+
+RETRIEVAL_CASES = ["High", "Only_top1_correct", "Only_top2_correct", "Low"]
+
+
+def split_by_retrieval_case(rag_df, true_col="true_label", top1_col="top_label_1", top2_col="top_label_2"):
+    """Return a copy of rag_df with a 'retrieval_case' column:
+    High (both neighbours correct), Only_top1_correct, Only_top2_correct,
+    Low (both wrong)."""
+    df = rag_df.copy()
+    top1_correct = df[top1_col] == df[true_col]
+    top2_correct = df[top2_col] == df[true_col]
+
+    conditions = [
+        top1_correct & top2_correct,
+        top1_correct & ~top2_correct,
+        ~top1_correct & top2_correct,
+        ~top1_correct & ~top2_correct,
+    ]
+    df["retrieval_case"] = pd.Categorical(np.select(conditions, RETRIEVAL_CASES), categories=RETRIEVAL_CASES, ordered=True)
+    return df
+
+
+TABLE_LEVELS = {
+    "High": "Both correct",
+    "Only_top1_correct": "Top-1 only correct",
+    "Only_top2_correct": "Top-2 only correct",
+    "Low": "Neither correct",
+}
+TABLE_COLUMNS = ["Retrieval level", "Share of test set",
+                 "ZS ✓ RAG ✓", "ZS ✓ RAG ✗", "ZS ✗ RAG ✓", "ZS ✗ RAG ✗"]
+TEXT_SIZE = 14
+
+
+def table_override_rescue(df, zs_df, figures_dir, title="Override and rescue by retrieval case - table",
+                          total=None, true_col="true_label", pred_col="prediction", id_col="file_path"):
+    """Per retrieval case (and all samples), a table with 'percentage (count)' in every cell.
+    Every percentage is out of the whole test set: share of the case and the four ZS / RAG right-wrong combinations.
+    total: the denominator of every percentage; None = the number of samples in df (after merging with zs_df).
+    Pass a larger total (e.g. the full results' length) when df is a subset.
+    df must have a 'retrieval_case' column (split_by_retrieval_case). Saved as <figures_dir>/<title>.pdf."""
+    merged = df.merge(zs_df[[id_col, pred_col]], on=id_col, suffixes=("", "_zs"))
+    rag_right = merged[pred_col] == merged[true_col]
+    zs_right = merged[pred_col + "_zs"] == merged[true_col]
+    if total is None:
+        total = len(merged)
+
+    def share_cell(mask):
+        return f"{100 * mask.sum() / total:.1f}% ({mask.sum():,})"
+
+    rows = []
+    for level, in_level in [(TABLE_LEVELS[case], merged["retrieval_case"] == case) for case in RETRIEVAL_CASES] + \
+                           [("All", pd.Series(True, index=merged.index))]:
+        rows.append([
+            level,
+            share_cell(in_level),
+            share_cell(in_level & zs_right & rag_right),
+            share_cell(in_level & zs_right & ~rag_right),
+            share_cell(in_level & ~zs_right & rag_right),
+            share_cell(in_level & ~zs_right & ~rag_right),
+        ])
+
+    fig, ax = plt.subplots(figsize=(12, 3))
+    ax.axis("off")
+    table = ax.table(cellText=rows, colLabels=TABLE_COLUMNS, loc="center", cellLoc="left", colLoc="left")
+    table.auto_set_font_size(False)
+    table.set_fontsize(TEXT_SIZE)
+    table.auto_set_column_width(col=list(range(len(TABLE_COLUMNS))))
+    table.scale(1, 2.4)
+    for (row, col), cell in table.get_celld().items():
+        # only horizontal lines between rows, like the reference table
+        cell.visible_edges = "BT" if row == 0 else "B"
+        cell.set_edgecolor("#d9d9d9")
+        cell.PAD = 0.08
+
+    # save only pdf
+    os.makedirs(figures_dir, exist_ok=True)
+    out_path = os.path.join(figures_dir, f"{title}.pdf")
+    fig.savefig(out_path, bbox_inches="tight", pad_inches=0.05)
+
+    print(f"Saved: {out_path}")
+    plt.close(fig)
+
+
+GATE_TABLE_COLUMNS = ["Retrieval condition", "Routed to original RAG", "Routed to alternative method"]
+
+
+def add_gate_column(df, top1_col="top_label_1", top2_col="top_label_2", id_col="file_path"):
+    """Return a copy of df with a boolean 'passed_gate' column, using the pipeline's own gate:
+    True = top-1 and top-2 labels differ (routed to the alternative method),
+    False = they agree (kept on the original RAG). Nothing is saved."""
+    # imported here: the registry loads torch and the generator code, which the other analysis functions do not need
+    from ..frameworks.registry import needs_new_framework
+
+    if df[id_col].duplicated().any():
+        raise ValueError(f"df has duplicated {id_col} rows.")
+    if df[[top1_col, top2_col]].isna().any().any():
+        raise ValueError("df has rows without a top-1 or top-2 label; it must come from a finished run with top_k=2.")
+
+    df = df.copy()
+    df["passed_gate"] = [needs_new_framework([top1, top2]) for top1, top2 in zip(df[top1_col], df[top2_col])]
+    return df
+
+
+def table_gate_routing(df, figures_dir, title="Gate routing by retrieval case - table"):
+    """Per retrieval case, a table with 'percentage (count)' in every cell: the samples kept on the original RAG
+    and the samples routed to the alternative method, out of the retrieval case's own samples.
+    df needs a 'passed_gate' column (see add_gate_column). The pdf is saved as figures_dir/<title>.pdf."""
+    df = split_by_retrieval_case(df)
+    passed = df["passed_gate"]
+
+    def share_cell(mask, denominator):
+        return f"{100 * mask.sum() / denominator:.1f}% ({mask.sum():,})" if denominator else "–"
+
+    rows = []
+    for case in RETRIEVAL_CASES:
+        in_case = df["retrieval_case"] == case
+        case_size = in_case.sum()
+        rows.append([
+            TABLE_LEVELS[case],
+            share_cell(in_case & ~passed, case_size),
+            share_cell(in_case & passed, case_size),
+        ])
+
+    fig, ax = plt.subplots(figsize=(10, 2.6))
+    ax.axis("off")
+    table = ax.table(cellText=rows, colLabels=GATE_TABLE_COLUMNS, loc="center", cellLoc="left", colLoc="left")
+    table.auto_set_font_size(False)
+    table.set_fontsize(TEXT_SIZE)
+    table.auto_set_column_width(col=list(range(len(GATE_TABLE_COLUMNS))))
+    table.scale(1, 2.4)
+    for (row, col), cell in table.get_celld().items():
+        # only horizontal lines between rows, like the reference table
+        cell.visible_edges = "BT" if row == 0 else "B"
+        cell.set_edgecolor("#d9d9d9")
+        cell.PAD = 0.08
+
+    # save only pdf
+    os.makedirs(figures_dir, exist_ok=True)
+    out_path = os.path.join(figures_dir, f"{title}.pdf")
+    fig.savefig(out_path, bbox_inches="tight", pad_inches=0.05)
+
+    print(f"Saved: {out_path}")
+    plt.close(fig)
