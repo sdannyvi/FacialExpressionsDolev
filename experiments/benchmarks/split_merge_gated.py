@@ -19,8 +19,8 @@ The gate is imported from fer_rag, so the split can never disagree with what the
 Run as a module from the project root, so that config and fer_rag both import:
     PYTHONPATH=src python -m experiments.gated_framework_comparison.split_merge_gated split \\
         --rag_results <original rag results.csv> --test_path <test.csv> \\
-        --output_path experiments/gated_framework_comparison/gated_val_set/<dataset>_val_gated.csv
-    (without --output_path the split csv is written to gated_val_set/ferplus_val_gated.csv)
+        --output_path experiments/gated_framework_comparison/gated_test_sets/<dataset>_val_gated.csv
+    (without --output_path the split csv is written to gated_test_sets/ferplus_val_gated.csv)
     PYTHONPATH=src python -m experiments.gated_framework_comparison.split_merge_gated merge \\
         --framework_results runs/<framework>/<results.csv> --rag_results <original rag results.csv> \\
         --output_path full_val_set_results/<framework>.csv
@@ -34,7 +34,7 @@ import pandas as pd
 from fer_rag.frameworks.registry import needs_new_framework
 
 # where every split csv of this experiment is stored; the default --output_path is in it
-GATED_VAL_SET_DIR = Path(__file__).resolve().parent / "gated_val_set"
+GATED_TEST_SETS_DIR = Path(__file__).resolve().parent / "gated_test_sets"
 
 
 def split_gated_samples(rag_results_path, test_path, output_path):
@@ -146,10 +146,10 @@ if __name__ == "__main__":
     split_parser = commands.add_parser("split", help="write the gated rows of a test csv.")
     split_parser.add_argument("--rag_results", required=True, help="original RAG results csv (top_k=2) of the test set.")
     split_parser.add_argument("--test_path", required=True, help="the test csv to split.")
-    split_parser.add_argument("--output_path", default=str(GATED_VAL_SET_DIR / "ferplus_val_gated.csv"),
-                              help=f"full path of the gated test csv, in the gated_val_set folder, e.g. "
-                                   f"{GATED_VAL_SET_DIR / 'fer_plus_gated.csv'}. "
-                                   f"Default: {GATED_VAL_SET_DIR / 'ferplus_val_gated.csv'}")
+    split_parser.add_argument("--output_path", default=str(GATED_TEST_SETS_DIR / "ferplus_val_gated.csv"),
+                              help=f"full path of the gated test csv, in the gated_test_sets folder, e.g. "
+                                   f"{GATED_TEST_SETS_DIR / 'fer_plus_gated.csv'}. "
+                                   f"Default: {GATED_TEST_SETS_DIR / 'ferplus_val_gated.csv'}")
 
     merge_parser = commands.add_parser("merge", help="merge a gated framework run with the original RAG results.")
     merge_parser.add_argument("--framework_results", required=True, help="rag.py --framework results on the gated test csv.")

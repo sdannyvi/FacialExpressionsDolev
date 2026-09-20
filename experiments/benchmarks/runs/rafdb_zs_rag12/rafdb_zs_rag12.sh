@@ -8,8 +8,8 @@
 #  Same stem, same job id - the log and the csv always pair up.
 #
 #  Run with:
-#      mkdir -p experiments/benchmarks/runs/affectnet
-#      sbatch experiments/benchmarks/runs/affectnet/affectnet_full_data_zs_rag1_rag2.sh
+#      mkdir -p experiments/benchmarks/runs/rafdb_zs_rag12
+#      sbatch experiments/benchmarks/runs/rafdb_zs_rag12/rafdb_zs_rag12.sh
 #
 #  TWO THINGS TO SET:
 #    1. run name  -> --job-name (below, or on the sbatch command line)
@@ -22,8 +22,8 @@
 #  !!     mkdir -p experiments/<EXP_GROUP>
 # =============================================================================
 
-#SBATCH --job-name=affectnet_full_data_zs_rag1_rag2
-#SBATCH --output=/truenas/home/sdolev/FacialExpressionsDolev/experiments/benchmarks/runs/affectnet/%x_%j.log
+#SBATCH --job-name=rafdb_zs_rag12
+#SBATCH --output=/truenas/home/sdolev/FacialExpressionsDolev/experiments/benchmarks/runs/rafdb_zs_rag12/%x_%j.log
 #SBATCH --partition=vilenchik_part
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
@@ -46,7 +46,7 @@ CONDA_SH=/truenas/home/sdolev/miniconda3/etc/profile.d/conda.sh
 # ------------------------------------------------------------- PER-EXPERIMENT
 # Experiment group = the folder under experiments/.
 # MUST match the --output line above.
-EXP_GROUP="benchmarks/runs/affectnet"
+EXP_GROUP="benchmarks/runs/rafdb_zs_rag12"
 
 # Which pipeline: zero_shot | rag
 PIPELINE="rag"
@@ -54,17 +54,18 @@ PIPELINE="rag"
 # Arguments for that pipeline. Use absolute paths ($PROJECT/...).
 # Do NOT pass --results_path here; it is derived from the job name.
 PIPELINE_ARGS=(
-  # the full AffectNet validation set (used as the test set); the gate sends samples with
-  # different top-1 and top-2 labels to the framework and the rest to the original RAG
-  --test_path    "$PROJECT/data/affectnet/train_test_set/validation_set.csv"
+  # only the gated rows of the RAF-DB test set (split_merge_gated.py split): every sample here has
+  # different top-1 and top-2 labels, so the gate sends all of them to the framework. The remaining
+  # test samples keep their original RAG predictions and are merged back afterwards
+  --test_path    "$PROJECT/experiments/benchmarks/gated_test_sets/rafdb_gated_test.csv"
   # frameworks run on llava-v1.6-34b only (checked by validate_framework_request before load)
   --generator_id "llava-hf/llava-v1.6-34b-hf"
 
   # --- rag.py only: uncomment when PIPELINE="rag" ---
-  # the full AffectNet training set as the knowledge base
-  --knowledge_base_path "$PROJECT/data/affectnet/train_test_set/train_set.csv"
+  # the RAF-DB train set as the knowledge base - the same one the original RAG run used
+  --knowledge_base_path "$PROJECT/data/raf-db/train_test_sets/train_set.csv"
   # the framework from src/fer_rag/frameworks/registry.py
-  --framework    rules_direct_zs_rag1_rag2
+  --framework    rules_direct_zs_rag12
   # frameworks need --top_k 2 (the default); passed explicitly so the log records it
   --top_k         2
   # --enable_thinking is a bare on/off flag: present = thinking on, absent = off.
