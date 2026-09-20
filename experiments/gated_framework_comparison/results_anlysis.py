@@ -5,7 +5,8 @@ against the original RAG run the merge took its non-gated rows from.
 Run from the project root:
     PYTHONPATH=src python -m experiments.gated_framework_comparison.results_anlysis \
         --gated_framework experiments/gated_framework_comparison/full_val_set_results/<framework>.csv
-    (without --original_framework the llava-next-34b RAG run of the full validation set is used)
+    (without --original_framework the llava-next-34b RAG run of the full validation set is used,
+     and without --zs_path its zero-shot run)
 """
 
 import argparse
@@ -17,7 +18,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score
 
-from fer_rag.evaluation.analysis import TEXT_SIZE, is_same_dataset
+from fer_rag.evaluation.analysis import TEXT_SIZE, is_same_dataset, split_by_retrieval_case, table_override_rescue
 from fer_rag.evaluation.vis_results import validate_framework_results, validate_results
 from fer_rag.frameworks.branches import BRANCH_EXAMPLES
 from fer_rag.frameworks.decision_rules import RULES, apply_rule
@@ -28,6 +29,11 @@ FIGURES_DIR = EXP_DIR / "figures"
 # the original RAG run of the full validation set: the run the merge took the non-gated rows from
 ORIGINAL_RAG_RESULTS = ("/truenas/home/sdolev/FacialExpressionsDolev/experiments/generator_comparison/runs/"
                         "llava_next_34b/rag_llava_next_34b_8704.csv")
+# the zero-shot run of the same model over the same test set, the ZS side of the override / rescue table
+ZERO_SHOT_RESULTS = ("/truenas/home/sdolev/FacialExpressionsDolev/experiments/generator_comparison/runs/"
+                     "llava_next_34b/zero_shot_llava_next_34b_8730.csv")
+# the decision rule whose answer is the prediction of the gated samples in the override / rescue table
+OVERRIDE_RESCUE_RULE = "sum_class_conf"
 
 COMPARISON_COLUMNS = ["Method", "Accuracy (%)", "Accuracy gap", "Macro F1 (%)", "Macro F1 gap"]
 
@@ -37,6 +43,8 @@ parser.add_argument("--gated_framework", required=True,
 parser.add_argument("--original_framework", default=ORIGINAL_RAG_RESULTS,
                     help=f"Path to the original RAG results CSV of the same test set. "
                          f"Default: {ORIGINAL_RAG_RESULTS}")
+parser.add_argument("--zs_path", default=ZERO_SHOT_RESULTS,
+                    help=f"Path to the zero-shot results CSV of the same test set. Default: {ZERO_SHOT_RESULTS}")
 args = parser.parse_args()
 
 
@@ -45,6 +53,7 @@ args = parser.parse_args()
 # run's own values and a rule recomputed from them gives the run's answer
 gated_df = pd.read_csv(args.gated_framework, float_precision="round_trip")
 original_df = pd.read_csv(args.original_framework, float_precision="round_trip")
+zs_df = pd.read_csv(args.zs_path, float_precision="round_trip")
 
 # plot_metrics and plot_classification_report write to a relative "figures" folder, put it next to this
 # script. after the reads above, whose paths are relative to the project root the script is run from
@@ -195,9 +204,40 @@ def compare_rules_to_rag(gated_df, original_df, figures_dir, title, classes_list
     return pd.DataFrame(rows, columns=COMPARISON_COLUMNS)
 
 
+def override_rescue_on_gated(gated_df, zs_df, figures_dir, title, rule=OVERRIDE_RESCUE_RULE):
+    """
+    The override / rescue table (table_override_rescue) over the gated samples only: the rows the gate
+    routed to the framework, with the decision rule's answer as their prediction. Every percentage is out
+    of the whole test set, so each cell is accuracy points of the full set.
+
+    gated_df (DataFrame): a merged framework results file, validated with validate_framework_results.
+    zs_df (DataFrame): the zero-shot results of the same test set, validated with validate_results.
+    figures_dir: where the pdf is written.
+    title (String): the table's file name without ".pdf", saved as <figures_dir>/<title>.pdf
+    rule: the decision rule whose column, rule__<rule>, is the prediction of the gated samples.
+    """
+    rule_column = f"rule__{rule}"
+    if rule_column not in gated_df.columns:
+        raise ValueError(f"the gated framework results hold no '{rule_column}' column.")
+
+    framework_rows = gated_df[gated_df["route"] == "framework"].copy()
+    # a row the rule did not answer would be counted as wrong by the table, so it stops the table instead
+    n_missing = int(framework_rows[rule_column].isna().sum())
+    if n_missing:
+        raise ValueError(f"'{rule_column}' has no answer in {n_missing} of {len(framework_rows)} gated rows.")
+    framework_rows["prediction"] = framework_rows[rule_column]
+    print(f"gated samples: {len(framework_rows)} of {len(gated_df)}, predicted by '{rule_column}'")
+
+    table_override_rescue(split_by_retrieval_case(framework_rows), zs_df, figures_dir, title=title,
+                          total=len(gated_df))
+
+
 # the original RAG run has no framework columns, so only the checks every results file gets
 print(f"\n=================== validating: original RAG ===================")
 original_df = validate_results(original_df)
+
+print(f"\n=================== validating: zero-shot ===================")
+zs_df = validate_results(zs_df)
 
 # the columns every results file has, then the framework's own columns: the second normalizes the label
 # columns of the branches and the rules, and recomputes rule__sum_conf on the normalized answers
@@ -207,3 +247,7 @@ gated_df = validate_framework_results(gated_df)
 
 print(f"\n=================== original RAG vs the decision rules ===================")
 compare_rules_to_rag(gated_df, original_df, FIGURES_DIR, title=Path(args.gated_framework).stem)
+
+print(f"\n=================== override / rescue on the gated samples ===================")
+override_rescue_on_gated(gated_df, zs_df, FIGURES_DIR,
+                         title=f"{Path(args.gated_framework).stem} - Override rescue table out of total samples")

@@ -16,8 +16,8 @@ from config import resolve_path, validate_image_paths
 from ..generators import (AVAILABLE_MODELS, get_model_spec, load_generator, generate_prediction,
                           resolve_thinking, thinking_models, validate_prompt_request,
                           validate_thinking_request, get_context_window)
-from ..frameworks.registry import (FRAMEWORKS, framework_columns, needs_new_framework, run_framework,
-                                   validate_framework_request)
+from ..frameworks.registry import (FRAMEWORKS, framework_columns, needs_new_framework,
+                                   oracle_needs_new_framework, run_framework, validate_framework_request)
 from .prompts import build_rag_conversation
 import time 
 from datetime import datetime
@@ -74,6 +74,12 @@ parser.add_argument("--framework", type=str, default="original", choices=["origi
                          "sample whose top-1 and top-2 retrieved labels differ to that framework, and the "
                          "rest to the original RAG. Frameworks are defined in frameworks/registry.py and "
                          "run with --top_k 2 on llava-hf/llava-v1.6-34b-hf.")
+parser.add_argument("--gate", type=str, default="gate", choices=["gate", "oracle"],
+                    help="How a framework run routes the samples. 'gate' (default) is the inference-time gate: "
+                         "different top-1 and top-2 labels go to the framework. 'oracle' is a perfect gate for "
+                         "the oracle experiment: samples whose top-1 and top-2 labels are both the true label "
+                         "(High retrieval) keep the original RAG, all the others (Conflicting and Low "
+                         "retrieval) go to the framework. Used only with --framework.")
 
 args = parser.parse_args()
 
@@ -88,6 +94,7 @@ prompt = args.prompt
 top_k = args.top_k
 enable_thinking = args.enable_thinking
 framework = args.framework
+gate = args.gate
 
 print("Code running. CLI call:")
 for _k, _v in vars(args).items():
@@ -121,6 +128,11 @@ print(f"the run produces thinking text: {thinking_on}")
 if framework != "original":
     validate_framework_request(framework, generator_id, top_k, enable_thinking)
     print(f"framework: {framework} {FRAMEWORKS[framework]}")
+    print(f"gate: {gate}")
+# the oracle gate routes samples to a framework, so a run without one has nothing to route
+elif gate == "oracle":
+    raise ValueError("--gate oracle needs a --framework: with --framework original every sample runs the "
+                     "original RAG and there is nothing to route.")
 
 
 # read csv
@@ -132,6 +144,9 @@ classes_list = sorted(knowledge_base_set['true_label'].unique().tolist())
 # validate image paths
 validate_image_paths(knowledge_base_set["file_path"].tolist(), knowledge_base_path)
 validate_image_paths(test_df["file_path"].tolist(), test_path)
+# the oracle gate routes by the true label of the query
+if gate == "oracle" and "true_label" not in test_df.columns:
+    raise ValueError(f"--gate oracle needs a 'true_label' column in the test csv: {test_path}")
 
 # print conversation
 def print_conversation(conv):
@@ -369,10 +384,14 @@ for curr_batch in range(num_batches):
         top_paths_df.loc[len(top_paths_df)] = top_paths
         top_similarities_df.loc[len(top_similarities_df)] = top_similarities
 
-        # route the sample: disagreeing top-1 and top-2 labels go to the framework, the rest to the
-        # original RAG below
+        # route the sample: with the gate, disagreeing top-1 and top-2 labels go to the framework; with
+        # the oracle, every sample that is not High retrieval does. The rest go to the original RAG below
         if framework != "original":
-            if needs_new_framework(top_labels):
+            if gate == "oracle":
+                to_framework = oracle_needs_new_framework(top_labels, row["true_label"])
+            else:
+                to_framework = needs_new_framework(top_labels)
+            if to_framework:
                 framework_row = run_framework(framework, query_image, top_examples, framework_ctx)
                 batch_framework_rows.append(framework_row)
                 batch_predictions.append(framework_row["prediction"])
@@ -507,7 +526,9 @@ if offloaded_count:
           f"predictions are unaffected, their runtimes are not comparable to the rest.")
 
 if framework != "original":
-    print(f"routing: {framework_count} of {len(df)} samples had different top-1 and top-2 labels and ran "
+    routed_by = ("were not High retrieval (oracle gate)" if gate == "oracle"
+                 else "had different top-1 and top-2 labels")
+    print(f"routing: {framework_count} of {len(df)} samples {routed_by} and ran "
           f"framework '{framework}'; the other {len(df) - framework_count} ran the original RAG.")
     if framework_ctx["truncated_count"]:
         print(f"[WARNING] pipelines.rag: {framework_ctx['truncated_count']} framework reasoning or explanation "

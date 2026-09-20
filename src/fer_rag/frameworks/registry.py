@@ -39,6 +39,22 @@ def needs_new_framework(top_labels):
     return top_labels[0] != top_labels[1]
 
 
+def oracle_needs_new_framework(top_labels, true_label):
+    """The oracle gate: a perfect gate, for the oracle experiment. It reads the true label, so it cannot be
+    used as a real gate at inference time.
+
+    top_labels: labels of the retrieved examples, most similar first.
+    true_label: the query's true label.
+    returns: False when the top-1 and top-2 labels are both the true label (High retrieval), so the sample
+             keeps the original RAG; True otherwise (Conflicting and Low retrieval), so the sample goes to
+             the framework.
+    """
+    if len(top_labels) < 2:
+        raise ValueError(f"the oracle gate compares the top-1 and top-2 labels with the true label, but only "
+                         f"{len(top_labels)} retrieved labels were given.")
+    return not (top_labels[0] == true_label and top_labels[1] == true_label)
+
+
 FRAMEWORK_GENERATOR = "llava-hf/llava-v1.6-34b-hf"
 
 # the column prefix of the aggregator's results
