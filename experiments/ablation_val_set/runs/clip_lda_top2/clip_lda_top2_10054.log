@@ -1,0 +1,206 @@
+==============================================================
+ run name    : clip_lda_top2
+ exp group   : ablation_val_set/runs/clip_lda_top2
+ job id      : 10054
+ started     : 2026-09-20 16:57:55
+ node        : hpc-vilenchik   partition: vilenchik_part
+--------------------------------------------------------------
+ git branch  : main
+ git commit  : fc45fb6aba495d559fb42c5876b82406931e79f1
+ git state   : DIRTY - the commit above does NOT match what ran:
+               ?? experiments/ablation_val_set/runs/clip_lda_top2/clip_lda_top2_10054.log
+--------------------------------------------------------------
+ image       : /truenas/sif_images/pytorch_cuda12.6_ngc_conda_vscode.sif
+ conda env   : rag
+ results csv : /truenas/home/sdolev/FacialExpressionsDolev/experiments/ablation_val_set/runs/clip_lda_top2/clip_lda_top2_10054.csv
+ log file    : /truenas/home/sdolev/FacialExpressionsDolev/experiments/ablation_val_set/runs/clip_lda_top2/clip_lda_top2_10054.log
+==============================================================
+Sun Sep 20 16:57:55 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.95.05              Driver Version: 580.95.05      CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA RTX A5000               Off |   00000000:30:00.0 Off |                  Off |
+| 30%   28C    P8             23W /  230W |       0MiB /  24564MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  NVIDIA RTX A5000               Off |   00000000:36:00.0 N/A |                  N/A |
+|ERR!   49C    P2            N/A  /  N/A  |       0MiB /  24564MiB |     N/A      Default |
+|                                         |                        |                 ERR! |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+==============================================================
+[TIME] 2026-09-20 16:58:06 | pipeline started - this is the wall-clock date and time the run began; every [TIME] line below is measured from this moment
+Code running. CLI call:
+  start_batch: 0
+  results_path: /truenas/home/sdolev/FacialExpressionsDolev/experiments/ablation_val_set/runs/clip_lda_top2/clip_lda_top2_10054.csv
+  knowledge_base_path: /truenas/home/sdolev/FacialExpressionsDolev/rag_thresholds/train_test_sets/kb_50%.csv
+  test_path: /truenas/home/sdolev/FacialExpressionsDolev/rag_thresholds/train_test_sets/public_test_50%.csv
+  generator_id: llava-hf/llava-v1.6-34b-hf
+  clip_model_id: openai/clip-vit-large-patch14
+  dim_reduction: lda
+  prompt: single-user-message
+  top_k: 2
+  enable_thinking: False
+  framework: original
+  gate: gate
+Package versions:
+versions | torch 2.8.0+cu126 | transformers 5.15.0 | faiss 1.11.0 | sklearn 1.6.1 | numpy 1.26.4
+GPU device:
+the device being used: cuda
+GPU: NVIDIA RTX A5000
+the run produces thinking text: False
+/truenas/home/sdolev/FacialExpressionsDolev/rag_thresholds/train_test_sets/kb_50%.csv: all 25060 image paths OK
+/truenas/home/sdolev/FacialExpressionsDolev/rag_thresholds/train_test_sets/public_test_50%.csv: all 3199 image paths OK
+Loading weights:   0%|          | 0/590 [00:00<?, ?it/s]Loading weights:  64%|██████▎   | 375/590 [00:00<00:00, 3726.29it/s]Loading weights: 100%|██████████| 590/590 [00:00<00:00, 3674.12it/s]
+[transformers] The `use_fast` parameter is deprecated and will be removed in a future version. Use `backend="torchvision"` instead of `use_fast=True`, or `backend="pil"` instead of `use_fast=False`.
+CLIP model dtype: torch.float16
+is CLIP model on GPU? True
+print model.device to check of clip has such attribute: cuda:0
+print parameters device of clip: cuda:0
+FAISS index GPU: <class 'faiss.swigfaiss.GpuIndexFlatIP'>, ntotal: 25060
+FAISS GPU device ID: 0
+[TIME] 2026-09-20 17:02:46 | retrieval ready -> Time passed from the start of the run up to the end of retrieval | stage took   280.0s | elapsed since start   280.0s
+Loading weights:   0%|          | 0/939 [00:00<?, ?it/s]Loading weights:   0%|          | 2/939 [00:00<02:01,  7.74it/s]Loading weights:   0%|          | 3/939 [00:00<02:50,  5.49it/s]Loading weights:   1%|          | 5/939 [00:00<01:43,  9.05it/s]Loading weights:   1%|          | 7/939 [00:00<01:32, 10.13it/s]Loading weights:   1%|▏         | 14/939 [00:00<00:43, 21.18it/s]Loading weights:   2%|▏         | 17/939 [00:01<00:47, 19.60it/s]Loading weights:   2%|▏         | 21/939 [00:01<00:38, 23.99it/s]Loading weights:   3%|▎         | 24/939 [00:01<00:43, 21.21it/s]Loading weights:   3%|▎         | 28/939 [00:01<00:38, 23.83it/s]Loading weights:   3%|▎         | 32/939 [00:01<00:35, 25.52it/s]Loading weights:   4%|▎         | 35/939 [00:01<00:40, 22.24it/s]Loading weights:   4%|▍         | 41/939 [00:02<00:33, 26.55it/s]Loading weights:   5%|▍         | 44/939 [00:02<00:38, 23.03it/s]Loading weights:   5%|▌         | 48/939 [00:02<00:33, 26.47it/s]Loading weights:   5%|▌         | 51/939 [00:02<00:37, 23.74it/s]Loading weights:   6%|▌         | 55/939 [00:02<00:32, 26.83it/s]Loading weights:   6%|▋         | 59/939 [00:02<00:30, 29.33it/s]Loading weights:   7%|▋         | 63/939 [00:02<00:31, 28.00it/s]Loading weights:   7%|▋         | 68/939 [00:02<00:28, 30.59it/s]Loading weights:   8%|▊         | 72/939 [00:03<00:29, 28.96it/s]Loading weights:   8%|▊         | 77/939 [00:03<00:27, 31.22it/s]Loading weights:   9%|▊         | 81/939 [00:03<00:29, 29.36it/s]Loading weights:   9%|▉         | 86/939 [00:03<00:27, 31.42it/s]Loading weights:  10%|▉         | 90/939 [00:03<00:28, 29.55it/s]Loading weights:  10%|█         | 95/939 [00:03<00:26, 31.59it/s]Loading weights:  11%|█         | 99/939 [00:04<00:28, 29.40it/s]Loading weights:  11%|█         | 104/939 [00:04<00:26, 31.60it/s]Loading weights:  12%|█▏        | 108/939 [00:04<00:27, 29.84it/s]Loading weights:  12%|█▏        | 113/939 [00:04<00:25, 31.94it/s]Loading weights:  12%|█▏        | 117/939 [00:04<00:27, 29.89it/s]Loading weights:  13%|█▎        | 122/939 [00:04<00:25, 31.79it/s]Loading weights:  13%|█▎        | 126/939 [00:04<00:27, 29.88it/s]Loading weights:  14%|█▍        | 131/939 [00:05<00:25, 31.86it/s]Loading weights:  14%|█▍        | 135/939 [00:05<00:26, 29.87it/s]Loading weights:  15%|█▍        | 140/939 [00:05<00:25, 31.89it/s]Loading weights:  15%|█▌        | 144/939 [00:05<00:26, 29.93it/s]Loading weights:  16%|█▌        | 149/939 [00:05<00:24, 31.95it/s]Loading weights:  16%|█▋        | 153/939 [00:05<00:26, 29.84it/s]Loading weights:  17%|█▋        | 158/939 [00:05<00:24, 31.71it/s]Loading weights:  17%|█▋        | 162/939 [00:06<00:26, 29.66it/s]Loading weights:  18%|█▊        | 167/939 [00:06<00:24, 31.62it/s]Loading weights:  18%|█▊        | 171/939 [00:06<00:25, 29.82it/s]Loading weights:  19%|█▊        | 176/939 [00:06<00:23, 31.82it/s]Loading weights:  19%|█▉        | 180/939 [00:06<00:25, 29.87it/s]Loading weights:  20%|█▉        | 185/939 [00:06<00:23, 31.86it/s]Loading weights:  20%|██        | 189/939 [00:06<00:25, 29.71it/s]Loading weights:  21%|██        | 194/939 [00:07<00:23, 31.56it/s]Loading weights:  21%|██        | 198/939 [00:07<00:25, 29.45it/s]Loading weights:  22%|██▏       | 203/939 [00:07<00:23, 31.67it/s]Loading weights:  22%|██▏       | 207/939 [00:07<00:24, 29.79it/s]Loading weights:  23%|██▎       | 212/939 [00:07<00:22, 31.63it/s]Loading weights:  23%|██▎       | 216/939 [00:07<00:24, 29.59it/s]Loading weights:  24%|██▎       | 221/939 [00:07<00:22, 31.82it/s]Loading weights:  24%|██▍       | 225/939 [00:08<00:24, 29.73it/s]Loading weights:  24%|██▍       | 230/939 [00:08<00:22, 31.70it/s]Loading weights:  25%|██▍       | 234/939 [00:08<00:23, 29.65it/s]Loading weights:  25%|██▌       | 239/939 [00:08<00:22, 31.81it/s]Loading weights:  26%|██▌       | 243/939 [00:08<00:23, 29.82it/s]Loading weights:  26%|██▋       | 248/939 [00:08<00:21, 31.59it/s]Loading weights:  27%|██▋       | 252/939 [00:09<00:23, 29.71it/s]Loading weights:  27%|██▋       | 257/939 [00:09<00:22, 30.37it/s]Loading weights:  28%|██▊       | 261/939 [00:09<00:23, 28.68it/s]Loading weights:  28%|██▊       | 266/939 [00:09<00:21, 31.02it/s]Loading weights:  29%|██▉       | 270/939 [00:09<00:23, 28.96it/s]Loading weights:  29%|██▉       | 275/939 [00:09<00:21, 31.09it/s]Loading weights:  30%|██▉       | 279/939 [00:09<00:22, 29.14it/s]Loading weights:  30%|███       | 284/939 [00:10<00:21, 31.14it/s]Loading weights:  31%|███       | 288/939 [00:10<00:22, 29.09it/s]Loading weights:  31%|███       | 293/939 [00:10<00:20, 31.35it/s]Loading weights:  32%|███▏      | 297/939 [00:10<00:21, 29.54it/s]Loading weights:  32%|███▏      | 302/939 [00:10<00:20, 31.46it/s]Loading weights:  33%|███▎      | 306/939 [00:10<00:21, 29.48it/s]Loading weights:  33%|███▎      | 311/939 [00:10<00:19, 31.49it/s]Loading weights:  34%|███▎      | 315/939 [00:11<00:21, 29.53it/s]Loading weights:  34%|███▍      | 320/939 [00:11<00:19, 31.58it/s]Loading weights:  35%|███▍      | 324/939 [00:11<00:20, 29.48it/s]Loading weights:  35%|███▌      | 329/939 [00:11<00:19, 31.41it/s]Loading weights:  35%|███▌      | 333/939 [00:11<00:20, 29.34it/s]Loading weights:  36%|███▌      | 338/939 [00:11<00:19, 31.48it/s]Loading weights:  36%|███▋      | 342/939 [00:11<00:20, 29.63it/s]Loading weights:  37%|███▋      | 347/939 [00:12<00:18, 31.46it/s]Loading weights:  37%|███▋      | 351/939 [00:12<00:19, 29.51it/s]Loading weights:  38%|███▊      | 356/939 [00:12<00:18, 31.52it/s]Loading weights:  38%|███▊      | 360/939 [00:12<00:19, 29.75it/s]Loading weights:  39%|███▉      | 365/939 [00:12<00:18, 31.75it/s]Loading weights:  39%|███▉      | 369/939 [00:12<00:19, 29.85it/s]Loading weights:  40%|███▉      | 374/939 [00:13<00:18, 31.37it/s]Loading weights:  40%|████      | 378/939 [00:13<00:18, 29.66it/s]Loading weights:  41%|████      | 383/939 [00:13<00:17, 31.62it/s]Loading weights:  41%|████      | 387/939 [00:13<00:18, 29.65it/s]Loading weights:  42%|████▏     | 392/939 [00:13<00:17, 31.66it/s]Loading weights:  42%|████▏     | 396/939 [00:13<00:18, 29.82it/s]Loading weights:  43%|████▎     | 401/939 [00:13<00:16, 31.73it/s]Loading weights:  43%|████▎     | 405/939 [00:14<00:17, 29.79it/s]Loading weights:  44%|████▎     | 410/939 [00:14<00:16, 31.86it/s]Loading weights:  44%|████▍     | 414/939 [00:14<00:17, 29.91it/s]Loading weights:  45%|████▍     | 419/939 [00:14<00:16, 31.87it/s]Loading weights:  45%|████▌     | 423/939 [00:14<00:17, 28.98it/s]Loading weights:  46%|████▌     | 428/939 [00:14<00:16, 31.24it/s]Loading weights:  46%|████▌     | 432/939 [00:14<00:17, 29.51it/s]Loading weights:  47%|████▋     | 437/939 [00:15<00:15, 31.61it/s]Loading weights:  47%|████▋     | 441/939 [00:15<00:16, 29.71it/s]Loading weights:  47%|████▋     | 446/939 [00:15<00:15, 31.35it/s]Loading weights:  48%|████▊     | 450/939 [00:15<00:16, 29.39it/s]Loading weights:  48%|████▊     | 455/939 [00:15<00:15, 31.38it/s]Loading weights:  49%|████▉     | 459/939 [00:15<00:16, 29.55it/s]Loading weights:  49%|████▉     | 464/939 [00:15<00:15, 31.61it/s]Loading weights:  50%|████▉     | 468/939 [00:16<00:15, 29.78it/s]Loading weights:  50%|█████     | 473/939 [00:16<00:14, 31.83it/s]Loading weights:  51%|█████     | 477/939 [00:16<00:15, 29.86it/s]Loading weights:  51%|█████▏    | 482/939 [00:16<00:14, 31.78it/s]Loading weights:  52%|█████▏    | 486/939 [00:16<00:15, 29.84it/s]Loading weights:  52%|█████▏    | 491/939 [00:16<00:14, 31.81it/s]Loading weights:  53%|█████▎    | 495/939 [00:16<00:14, 29.86it/s]Loading weights:  53%|█████▎    | 500/939 [00:17<00:13, 31.87it/s]Loading weights:  54%|█████▎    | 504/939 [00:17<00:14, 29.98it/s]Loading weights:  54%|█████▍    | 509/939 [00:17<00:14, 30.46it/s]Loading weights:  55%|█████▍    | 513/939 [00:17<00:14, 29.07it/s]Loading weights:  55%|█████▌    | 518/939 [00:17<00:13, 31.06it/s]Loading weights:  56%|█████▌    | 522/939 [00:17<00:14, 29.33it/s]Loading weights:  56%|█████▌    | 527/939 [00:18<00:13, 31.42it/s]Loading weights:  57%|█████▋    | 531/939 [00:18<00:13, 29.50it/s]Loading weights:  57%|█████▋    | 536/939 [00:18<00:12, 31.45it/s]Loading weights:  58%|█████▊    | 540/939 [00:18<00:13, 29.60it/s]Loading weights:  60%|█████▉    | 561/939 [00:18<00:05, 69.85it/s]Loading weights:  75%|███████▍  | 701/939 [00:18<00:00, 389.05it/s]Loading weights:  85%|████████▍ | 797/939 [00:18<00:00, 532.97it/s]Loading weights: 100%|██████████| 939/939 [00:18<00:00, 49.83it/s] 
+[TIME] 2026-09-20 17:03:16 | generator loaded: llava-hf/llava-v1.6-34b-hf -> Time passed for loading model | stage took    30.3s | elapsed since start   310.3s
+[generators.registry.load_generator] generator classes: LlavaNextForConditionalGeneration / LlavaNextProcessor
+[generators.registry.load_generator] generator model dtype: torch.bfloat16
+[generators.registry.load_generator] generator device: cuda:0
+[generators.registry.load_generator] generator quantization: BitsAndBytesConfig {
+  "_load_in_4bit": true,
+  "_load_in_8bit": false,
+  "bnb_4bit_compute_dtype": "bfloat16",
+  "bnb_4bit_quant_storage": "uint8",
+  "bnb_4bit_quant_type": "nf4",
+  "bnb_4bit_use_double_quant": true,
+  "llm_int8_enable_fp32_cpu_offload": false,
+  "llm_int8_has_fp16_weight": false,
+  "llm_int8_skip_modules": null,
+  "llm_int8_threshold": 6.0,
+  "load_in_4bit": true,
+  "load_in_8bit": false,
+  "quant_method": "bitsandbytes"
+}
+
+[generators.registry.load_generator] checkpoint revision: 84e4488fffae48f9da316ec31288b7c03f102ec7
+[generators.registry.load_generator] vision tower layers: {'Conv2d': 1, 'Embedding': 1, 'LayerNorm': 50, 'Linear4bit': 144}
+label cols: ['top_label_1', 'top_label_2']
+all retrieval cols: ['top_label_1', 'top_label_2', 'top_path_1', 'top_path_2', 'top_cosine_1', 'top_cosine_2']
+conversation:
+
+ROLE: system
+  TEXT: You are an expert in classifying emotions from facial expressions in images.
+You are given 2 example images with their corresponding emotion labels, followed by a query image.
+Based on the examples provided, analyze the facial expression in the query image and classify the emotion. Follow the user's requested output format.
+
+ROLE: user
+  <IMAGE>
+  <IMAGE>
+  <IMAGE>
+  TEXT: You are given 2 labeled examples and one query image, in the following order:
+Image 1 label: neutral
+Image 2 label: sad
+Image 3 is the query. Based on the examples, classify the emotion shown in this image into one of the following emotions: angry, contempt, disgust, fear, happy, neutral, sad, surprise.
+Respond with only one word: the emotion label.
+conversation structure:
+[{'role': 'system', 'content': [{'type': 'text', 'text': "You are an expert in classifying emotions from facial expressions in images.\nYou are given 2 example images with their corresponding emotion labels, followed by a query image.\nBased on the examples provided, analyze the facial expression in the query image and classify the emotion. Follow the user's requested output format."}]}, {'role': 'user', 'content': [{'type': 'image'}, {'type': 'image'}, {'type': 'image'}, {'type': 'text', 'text': 'You are given 2 labeled examples and one query image, in the following order:\nImage 1 label: neutral\nImage 2 label: sad\nImage 3 is the query. Based on the examples, classify the emotion shown in this image into one of the following emotions: angry, contempt, disgust, fear, happy, neutral, sad, surprise.\nRespond with only one word: the emotion label.'}]}]
+gen_stats: {'device': 'cuda:0', 'prompt_token_len': 3694, 'generated_token_len': 3, 'total_token_len': 3697, 'thinking_on': False, 'max_new_tokens': 20, 'finish_reason': 'stop', 'cache_mode': 'gpu', 'generation_args': {'do_sample': False, 'temperature': 1.0, 'num_beams': 1}}
+input tensors the model receives: {'input_ids': (1, 3694), 'attention_mask': (1, 3694), 'pixel_values': (3, 3, 3, 336, 336), 'image_sizes': (3, 2)}
+prompt the model actually sees:
+<|im_start|>system
+You are an expert in classifying emotions from facial expressions in images.
+You are given 2 example images with their corresponding emotion labels, followed by a query image.
+Based on the examples provided, analyze the facial expression in the query image and classify the emotion. Follow the user's requested output format.<|im_end|>
+<|im_start|>user
+<image>x1176
+<image>x1176
+<image>x1176
+You are given 2 labeled examples and one query image, in the following order:
+Image 1 label: neutral
+Image 2 label: sad
+Image 3 is the query. Based on the examples, classify the emotion shown in this image into one of the following emotions: angry, contempt, disgust, fear, happy, neutral, sad, surprise.
+Respond with only one word: the emotion label.<|im_end|>
+<|im_start|>assistant
+
+raw generation, special tokens kept: 'Sad<|im_end|>'
+prediction: 'sad'
+thinking: None
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 17:21:35 | batch 1/32 done, (100 samples) -> Time for processing the batch | stage took  1098.5s | elapsed since start  1408.8s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 17:40:06 | batch 2/32 done, (100 samples) -> Time for processing the batch | stage took  1110.9s | elapsed since start  2519.6s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 17:58:18 | batch 3/32 done, (100 samples) -> Time for processing the batch | stage took  1092.8s | elapsed since start  3612.4s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 18:17:26 | batch 4/32 done, (100 samples) -> Time for processing the batch | stage took  1147.7s | elapsed since start  4760.1s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 18:36:47 | batch 5/32 done, (100 samples) -> Time for processing the batch | stage took  1161.0s | elapsed since start  5921.1s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 18:55:46 | batch 6/32 done, (100 samples) -> Time for processing the batch | stage took  1139.0s | elapsed since start  7060.0s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 19:13:54 | batch 7/32 done, (100 samples) -> Time for processing the batch | stage took  1087.4s | elapsed since start  8147.5s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 19:33:11 | batch 8/32 done, (100 samples) -> Time for processing the batch | stage took  1157.3s | elapsed since start  9304.8s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 19:52:14 | batch 9/32 done, (100 samples) -> Time for processing the batch | stage took  1143.3s | elapsed since start 10448.1s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 20:10:18 | batch 10/32 done, (100 samples) -> Time for processing the batch | stage took  1084.1s | elapsed since start 11532.2s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 20:29:06 | batch 11/32 done, (100 samples) -> Time for processing the batch | stage took  1127.9s | elapsed since start 12660.2s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 20:48:20 | batch 12/32 done, (100 samples) -> Time for processing the batch | stage took  1153.8s | elapsed since start 13814.0s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 21:06:38 | batch 13/32 done, (100 samples) -> Time for processing the batch | stage took  1098.3s | elapsed since start 14912.3s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 21:25:18 | batch 14/32 done, (100 samples) -> Time for processing the batch | stage took  1119.7s | elapsed since start 16032.0s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 21:44:13 | batch 15/32 done, (100 samples) -> Time for processing the batch | stage took  1134.9s | elapsed since start 17166.9s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 22:03:04 | batch 16/32 done, (100 samples) -> Time for processing the batch | stage took  1131.4s | elapsed since start 18298.3s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 22:22:22 | batch 17/32 done, (100 samples) -> Time for processing the batch | stage took  1157.7s | elapsed since start 19456.0s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 22:41:21 | batch 18/32 done, (100 samples) -> Time for processing the batch | stage took  1139.1s | elapsed since start 20595.2s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 22:59:25 | batch 19/32 done, (100 samples) -> Time for processing the batch | stage took  1084.0s | elapsed since start 21679.2s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 23:17:22 | batch 20/32 done, (100 samples) -> Time for processing the batch | stage took  1076.5s | elapsed since start 22755.7s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 23:34:59 | batch 21/32 done, (100 samples) -> Time for processing the batch | stage took  1057.6s | elapsed since start 23813.3s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 23:52:37 | batch 22/32 done, (100 samples) -> Time for processing the batch | stage took  1057.2s | elapsed since start 24870.4s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-21 00:11:12 | batch 23/32 done, (100 samples) -> Time for processing the batch | stage took  1115.9s | elapsed since start 25986.4s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-21 00:29:12 | batch 24/32 done, (100 samples) -> Time for processing the batch | stage took  1079.3s | elapsed since start 27065.7s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-21 00:48:57 | batch 25/32 done, (100 samples) -> Time for processing the batch | stage took  1185.5s | elapsed since start 28251.2s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-21 01:07:18 | batch 26/32 done, (100 samples) -> Time for processing the batch | stage took  1100.9s | elapsed since start 29352.1s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-21 01:25:20 | batch 27/32 done, (100 samples) -> Time for processing the batch | stage took  1082.0s | elapsed since start 30434.1s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-21 01:43:52 | batch 28/32 done, (100 samples) -> Time for processing the batch | stage took  1111.5s | elapsed since start 31545.6s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-21 02:02:16 | batch 29/32 done, (100 samples) -> Time for processing the batch | stage took  1104.4s | elapsed since start 32650.1s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-21 02:21:25 | batch 30/32 done, (100 samples) -> Time for processing the batch | stage took  1148.6s | elapsed since start 33798.7s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-21 02:40:12 | batch 31/32 done, (100 samples) -> Time for processing the batch | stage took  1127.0s | elapsed since start 34925.7s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-21 02:59:24 | batch 32/32 done, (99 samples) -> Time for processing the batch | stage took  1152.0s | elapsed since start 36077.7s
+[TIME] 2026-09-21 02:59:24 | pipeline ended -> total runtime 601.3 min
+==============================================================
+ finished    : 2026-09-21 02:59:26
+ results     : /truenas/home/sdolev/FacialExpressionsDolev/experiments/ablation_val_set/runs/clip_lda_top2/clip_lda_top2_10054.csv
+==============================================================

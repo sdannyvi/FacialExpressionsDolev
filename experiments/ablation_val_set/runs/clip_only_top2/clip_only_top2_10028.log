@@ -210,3 +210,18 @@ peak GPU memory this batch: 19.61 GB
 [TIME] 2026-09-20 16:31:39 | batch 26/32 done, (100 samples) -> Time for processing the batch | stage took  1087.7s | elapsed since start 29093.6s
 peak GPU memory this batch: 19.61 GB
 [TIME] 2026-09-20 16:49:46 | batch 27/32 done, (100 samples) -> Time for processing the batch | stage took  1087.2s | elapsed since start 30180.8s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 17:08:10 | batch 28/32 done, (100 samples) -> Time for processing the batch | stage took  1103.9s | elapsed since start 31284.7s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 17:25:55 | batch 29/32 done, (100 samples) -> Time for processing the batch | stage took  1065.1s | elapsed since start 32349.8s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 17:43:41 | batch 30/32 done, (100 samples) -> Time for processing the batch | stage took  1066.2s | elapsed since start 33415.9s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 18:02:31 | batch 31/32 done, (100 samples) -> Time for processing the batch | stage took  1129.8s | elapsed since start 34545.8s
+peak GPU memory this batch: 19.61 GB
+[TIME] 2026-09-20 18:20:51 | batch 32/32 done, (99 samples) -> Time for processing the batch | stage took  1100.0s | elapsed since start 35645.7s
+[TIME] 2026-09-20 18:20:51 | pipeline ended -> total runtime 594.1 min
+==============================================================
+ finished    : 2026-09-20 18:20:53
+ results     : /truenas/home/sdolev/FacialExpressionsDolev/experiments/ablation_val_set/runs/clip_only_top2/clip_only_top2_10028.csv
+==============================================================

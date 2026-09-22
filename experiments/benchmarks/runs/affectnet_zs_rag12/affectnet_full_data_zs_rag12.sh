@@ -54,26 +54,30 @@ PIPELINE="rag"
 # Arguments for that pipeline. Use absolute paths ($PROJECT/...).
 # Do NOT pass --results_path here; it is derived from the job name.
 PIPELINE_ARGS=(
-  # only the gated rows of the AffectNet validation set, which is the test set (split_merge_gated.py
-  # split): every sample here has different top-1 and top-2 labels, so the gate sends all of them to
-  # the framework. The remaining test samples keep their original RAG predictions and are merged back
-  # afterwards
-  --test_path    "$PROJECT/experiments/benchmarks/gated_test_sets/affectnet_gated_test.csv"
+  # the FULL AffectNet validation set, which is the test set: rag.py routes every sample itself, so
+  # there is no split/merge step. Samples whose top-1 and top-2 labels agree run the original RAG,
+  # the rest run the framework
+  --test_path    "$PROJECT/data/affectnet/train_test_set/validation_set.csv"
   # frameworks run on llava-v1.6-34b only (checked by validate_framework_request before load)
   --generator_id "llava-hf/llava-v1.6-34b-hf"
 
   # --- rag.py only: uncomment when PIPELINE="rag" ---
-  # the full AffectNet train set as the knowledge base - the same one the original RAG run used
+  # the full AffectNet train set as the knowledge base
   --knowledge_base_path "$PROJECT/data/affectnet/train_test_set/train_set.csv"
+  # retrieval: CLIP large embeddings reduced by LDA. Both are the defaults; passed explicitly so the
+  # log records the retriever this run used - the LDA is re-fitted from the knowledge base here
+  --clip_model_id "openai/clip-vit-large-patch14"
+  --dim_reduction lda
   # the framework from src/fer_rag/frameworks/registry.py
   --framework    rules_direct_zs_rag12
+  # the inference-time gate (not the oracle): different top-1 and top-2 labels go to the framework
+  --gate          gate
   # frameworks need --top_k 2 (the default); passed explicitly so the log records it
   --top_k         2
   # --enable_thinking is a bare on/off flag: present = thinking on, absent = off.
   # llava-v1.6-34b has NO thinking key in the registry, and frameworks reject
   # --enable_thinking before load. The results csv therefore has no thinking column.
   # --enable_thinking
-  # --dim_reduction lda
   # --prompt        single-user-message
   # --start_batch   0
 )

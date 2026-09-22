@@ -21,12 +21,12 @@ same by both, so its result is taken from the runs that already exist instead of
 Both gates are imported from fer_rag, so the split can never disagree with what the pipeline routes.
 
 Run as a module from the project root, so that config and fer_rag both import:
-    PYTHONPATH=src python -m experiments.oracle.runs.split_merge_oracle split \\
+    PYTHONPATH=src python -m experiments.oracle.split_merge_oracle split \\
         --rag_results <original rag results.csv> --test_path <test.csv> \\
         --output_path experiments/oracle/subst_to_test/<dataset>_val_both_wrong_ungated.csv
     (without --output_path the split csv is written to subst_to_test/ferplus_val_both_wrong_ungated.csv)
-    PYTHONPATH=src python -m experiments.oracle.runs.split_merge_oracle merge \\
-        --oracle_results runs/<framework>/<oracle results.csv> \\
+    PYTHONPATH=src python -m experiments.oracle.split_merge_oracle merge \\
+        --oracle_results experiments/oracle/runs/<framework>/<oracle results.csv> \\
         --gated_results <gated framework results.csv> --rag_results <original rag results.csv> \\
         --output_path <oracle full-test-set results.csv>
 """
@@ -39,7 +39,7 @@ import pandas as pd
 from fer_rag.frameworks.registry import needs_new_framework, oracle_needs_new_framework
 
 # where every split csv of this experiment is stored; the default --output_path is in it
-SUBSET_TO_TEST_DIR = Path(__file__).resolve().parent.parent / "subst_to_test"
+SUBSET_TO_TEST_DIR = Path(__file__).resolve().parent / "subst_to_test"
 
 
 def route_samples(rag_df):
@@ -159,6 +159,11 @@ def merge_oracle_results(oracle_results_path, gated_results_path, rag_results_pa
     # back to the original RAG results' row order
     order = {file_path: position for position, file_path in enumerate(rag_df["file_path"])}
     merged = merged.sort_values("file_path", key=lambda paths: paths.map(order)).reset_index(drop=True)
+
+    # no sample may end up twice in the merged results, e.g. if two of the three sources held the same row
+    duplicated = merged["file_path"].duplicated()
+    if duplicated.any():
+        raise ValueError(f"{int(duplicated.sum())} file_path rows appear more than once in the merged results.")
 
     # ===== TEMPORARY VALIDATION - START (delete this block once a real merge has passed it) =====
     # the reordering: the merged rows must be the original RAG results' samples, each exactly once, in the
