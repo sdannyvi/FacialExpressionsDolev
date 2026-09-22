@@ -189,3 +189,33 @@ peak GPU memory this batch: 20.45 GB
 [TIME] 2026-09-22 03:33:36 | batch 4/17 done, (100 samples) -> Time for processing the batch | stage took  1168.2s | elapsed since start  5020.6s
 peak GPU memory this batch: 20.45 GB
 [TIME] 2026-09-22 03:53:57 | batch 5/17 done, (100 samples) -> Time for processing the batch | stage took  1221.0s | elapsed since start  6241.6s
+peak GPU memory this batch: 20.45 GB
+[TIME] 2026-09-22 04:15:56 | batch 6/17 done, (100 samples) -> Time for processing the batch | stage took  1319.0s | elapsed since start  7560.7s
+peak GPU memory this batch: 20.45 GB
+[TIME] 2026-09-22 04:36:31 | batch 7/17 done, (100 samples) -> Time for processing the batch | stage took  1235.1s | elapsed since start  8795.8s
+peak GPU memory this batch: 20.45 GB
+[TIME] 2026-09-22 04:56:22 | batch 8/17 done, (100 samples) -> Time for processing the batch | stage took  1190.5s | elapsed since start  9986.3s
+peak GPU memory this batch: 20.45 GB
+[TIME] 2026-09-22 05:16:17 | batch 9/17 done, (100 samples) -> Time for processing the batch | stage took  1195.2s | elapsed since start 11181.4s
+peak GPU memory this batch: 20.45 GB
+[TIME] 2026-09-22 05:38:09 | batch 10/17 done, (100 samples) -> Time for processing the batch | stage took  1312.7s | elapsed since start 12494.1s
+peak GPU memory this batch: 20.45 GB
+[TIME] 2026-09-22 05:58:38 | batch 11/17 done, (100 samples) -> Time for processing the batch | stage took  1229.1s | elapsed since start 13723.2s
+peak GPU memory this batch: 20.45 GB
+[TIME] 2026-09-22 06:18:31 | batch 12/17 done, (100 samples) -> Time for processing the batch | stage took  1192.1s | elapsed since start 14915.3s
+peak GPU memory this batch: 20.45 GB
+[TIME] 2026-09-22 06:40:03 | batch 13/17 done, (100 samples) -> Time for processing the batch | stage took  1292.7s | elapsed since start 16208.0s
+peak GPU memory this batch: 20.45 GB
+[TIME] 2026-09-22 07:00:49 | batch 14/17 done, (100 samples) -> Time for processing the batch | stage took  1245.7s | elapsed since start 17453.7s
+peak GPU memory this batch: 20.45 GB
+[TIME] 2026-09-22 07:21:00 | batch 15/17 done, (100 samples) -> Time for processing the batch | stage took  1211.0s | elapsed since start 18664.6s
+peak GPU memory this batch: 20.45 GB
+[TIME] 2026-09-22 07:40:44 | batch 16/17 done, (100 samples) -> Time for processing the batch | stage took  1184.0s | elapsed since start 19848.6s
+peak GPU memory this batch: 20.45 GB
+[TIME] 2026-09-22 07:57:49 | batch 17/17 done, (80 samples) -> Time for processing the batch | stage took  1025.6s | elapsed since start 20874.2s
+routing: 80 of 1680 samples had different top-1 and top-2 labels and ran framework 'rules_direct_zs_rag12'; the other 1600 ran the original RAG.
+[TIME] 2026-09-22 07:57:49 | pipeline ended -> total runtime 347.9 min
+==============================================================
+ finished    : 2026-09-22 07:57:51
+ results     : /truenas/home/sdolev/FacialExpressionsDolev/experiments/benchmarks/runs/radboud_zs_rag12/radboud_zs_rag12_10085.csv
+==============================================================
